@@ -1,0 +1,200 @@
+@{
+    var formId = ViewBag.FormId as int? ?? 0;
+    var documentId = ViewBag.DocumentId as int?;
+}
+
+<!-- Modal برای پیوست اسناد -->
+<div class="modal fade" id="attachModal" tabindex="-1" aria-labelledby="attachModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="attachModalLabel">
+                    <i class="bi bi-paperclip me-2"></i>پیوست کردن سند
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="attachForm" enctype="multipart/form-data">
+                    <input type="hidden" name="formId" value="@formId" />
+                    <input type="hidden" name="documentId" value="@(documentId?.ToString() ?? "")" />
+                    
+                    <div class="mb-3">
+                        <label for="attachFile" class="form-label">انتخاب فایل</label>
+                        <input type="file" class="form-control" id="attachFile" name="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.zip,.rar">
+                        <small class="form-text text-muted">حداکثر حجم فایل: 10 مگابایت</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="attachDescription" class="form-label">توضیحات</label>
+                        <textarea class="form-control" id="attachDescription" name="description" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="attachIsReference" name="isReference">
+                            <label class="form-check-label" for="attachIsReference">
+                                این فایل به عنوان عطف ثبت شود
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="attachProgress" class="progress d-none mb-3">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    
+                    <div id="attachFilesList" class="mt-3">
+                        <h6>فایل‌های پیوست شده:</h6>
+                        <div id="attachedFilesContainer" class="list-group">
+                            <!-- فایل‌های پیوست شده اینجا نمایش داده می‌شوند -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" id="btn-upload-attach">
+                    <i class="bi bi-upload me-1"></i>آپلود
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        var formId = '@formId';
+        var documentId = '@(documentId?.ToString() ?? "")';
+        
+        // Load existing attachments
+        if (documentId) {
+            loadAttachments();
+        }
+        
+        $('#btn-upload-attach').on('click', function() {
+            uploadAttachment();
+        });
+        
+        function uploadAttachment() {
+            var fileInput = $('#attachFile')[0];
+            if (!fileInput.files || fileInput.files.length === 0) {
+                toastr.warning('لطفا فایلی انتخاب کنید');
+                return;
+            }
+            
+            var formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('description', $('#attachDescription').val());
+            formData.append('isReference', $('#attachIsReference').is(':checked'));
+            
+            $('#attachProgress').removeClass('d-none');
+            $('#btn-upload-attach').prop('disabled', true);
+            
+            $.ajax({
+                url: `/api/documents/${documentId || 'new'}/attachments`,
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function() {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', function(e) {
+                        if (e.lengthComputable) {
+                            var percentComplete = (e.loaded / e.total) * 100;
+                            $('.progress-bar').css('width', percentComplete + '%');
+                        }
+                    }, false);
+                    return xhr;
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success('فایل با موفقیت پیوست شد');
+                        $('#attachFile').val('');
+                        $('#attachDescription').val('');
+                        $('#attachIsReference').prop('checked', false);
+                        loadAttachments();
+                    } else {
+                        toastr.error(response.error || 'خطا در آپلود فایل');
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error('خطا در ارتباط با سرور');
+                },
+                complete: function() {
+                    $('#attachProgress').addClass('d-none');
+                    $('.progress-bar').css('width', '0%');
+                    $('#btn-upload-attach').prop('disabled', false);
+                }
+            });
+        }
+        
+        function loadAttachments() {
+            if (!documentId) return;
+            
+            $.ajax({
+                url: `/api/documents/${documentId}/attachments`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.data) {
+                        var container = $('#attachedFilesContainer');
+                        container.empty();
+                        
+                        response.data.forEach(function(attachment) {
+                            var item = $(`
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-file-earmark me-2"></i>
+                                        <strong>${attachment.fileName}</strong>
+                                        <small class="text-muted ms-2">(${formatFileSize(attachment.fileSize)})</small>
+                                        ${attachment.description ? '<br><small class="text-muted">' + attachment.description + '</small>' : ''}
+                                    </div>
+                                    <div>
+                                        <a href="/api/documents/attachments/${attachment.id}/download" class="btn btn-sm btn-outline-primary" target="_blank">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteAttachment('${attachment.id}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `);
+                            container.append(item);
+                        });
+                    }
+                },
+                error: function() {
+                    toastr.error('خطا در بارگذاری فایل‌های پیوست شده');
+                }
+            });
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            var k = 1024;
+            var sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            var i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+        
+        window.deleteAttachment = function(attachmentId) {
+            if (!confirm('آیا از حذف این فایل اطمینان دارید؟')) return;
+            
+            $.ajax({
+                url: `/api/documents/attachments/${attachmentId}`,
+                method: 'DELETE',
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success('فایل با موفقیت حذف شد');
+                        loadAttachments();
+                    } else {
+                        toastr.error(response.error || 'خطا در حذف فایل');
+                    }
+                },
+                error: function() {
+                    toastr.error('خطا در ارتباط با سرور');
+                }
+            });
+        };
+    });
+</script>
+
+

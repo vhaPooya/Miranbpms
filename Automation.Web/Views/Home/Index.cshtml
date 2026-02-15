@@ -1,0 +1,325 @@
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<main class="container-fluid px-4 py-3">
+
+<section id="sec-home" class="app-section active">
+    <div class="container-fluid">
+        <!-- Stats Cards Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-start border-4 border-primary h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">کارتابل ورودی</h6>
+                                <h3 class="mb-0">24</h3>
+                                <small class="text-danger">+3 امروز</small>
+                            </div>
+                            <div class="icon-circle bg-primary text-white">
+                                <i class="fas fa-inbox fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-start border-4 border-success h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">کارتابل ارجاعی</h6>
+                                <h3 class="mb-0">12</h3>
+                                <small class="text-success">+2 امروز</small>
+                            </div>
+                            <div class="icon-circle bg-success text-white">
+                                <i class="fas fa-share-from-square fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-start border-4 border-warning h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">اسناد جدید</h6>
+                                <h3 class="mb-0">8</h3>
+                                <small class="text-warning">+1 امروز</small>
+                            </div>
+                            <div class="icon-circle bg-warning text-white">
+                                <i class="fas fa-file-alt fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-start border-4 border-info h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">در انتظار تایید</h6>
+                                <h3 class="mb-0">5</h3>
+                                <small class="text-info">0 امروز</small>
+                            </div>
+                            <div class="icon-circle bg-info text-white">
+                                <i class="fas fa-clock fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Row -->
+        <div class="row g-3">
+            <!-- Recent Documents -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">اسناد اخیر</h5>
+                        <button class="btn btn-sm btn-outline-primary">مشاهده همه</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>شماره سند</th>
+                                        <th>موضوع</th>
+                                        <th>فرستنده</th>
+                                        <th>تاریخ</th>
+                                        <th>وضعیت</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>#DOC-2024-001</td>
+                                        <td>درخواست مرخصی</td>
+                                        <td>محمد رضایی</td>
+                                        <td>1402/10/05</td>
+                                        <td><span class="badge bg-warning">در انتظار</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>#DOC-2024-002</td>
+                                        <td>گزارش مالی ماهانه</td>
+                                        <td>فاطمه محمدی</td>
+                                        <td>1402/10/04</td>
+                                        <td><span class="badge bg-success">تایید شده</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>#DOC-2024-003</td>
+                                        <td>پیشنهادات بهبود</td>
+                                        <td>علی احمدی</td>
+                                        <td>1402/10/03</td>
+                                        <td><span class="badge bg-info">در حال بررسی</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>#DOC-2024-004</td>
+                                        <td>درخواست خرید تجهیزات</td>
+                                        <td>زهرا خلیلی</td>
+                                        <td>1402/10/02</td>
+                                        <td><span class="badge bg-danger">رد شده</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">عملیات سریع</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <button class="btn btn-outline-primary w-100 py-3" onclick="switchSection('newdocument', this)">
+                                    <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                    <div>مدرک جدید</div>
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-success w-100 py-3" onclick="switchSection('varedeh', this)">
+                                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                                    <div>کارتابل ورودی</div>
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-warning w-100 py-3" onclick="switchSection('erjaee', this)">
+                                    <i class="fas fa-share-from-square fa-2x mb-2"></i>
+                                    <div>کارتابل ارجاعی</div>
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-info w-100 py-3" onclick="switchSection('forms', this)">
+                                    <i class="fas fa-table-list fa-2x mb-2"></i>
+                                    <div>فرمساز</div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Announcements -->
+                <div class="card mt-3">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">اطلاعیه‌ها</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">بروزرسانی سیستم</h6>
+                                    <small>2 روز پیش</small>
+                                </div>
+                                <p class="mb-1">نسخه 2.5.0 سیستم در دسترس است.</p>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">آموزش جدید</h6>
+                                    <small>3 روز پیش</small>
+                                </div>
+                                <p class="mb-1">دوره آموزشی فرمساز منتشر شد.</p>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">نگهداری برنامه‌ریزی شده</h6>
+                                    <small>هفته گذشته</small>
+                                </div>
+                                <p class="mb-1">نگهداری شنبه ۱۰ تا ۱۲ صبح.</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    .icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .card.border-start {
+        transition: transform 0.2s;
+    }
+    .card.border-start:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    </style>
+</section>
+
+    <!-- Inbox Section - Loaded via AJAX -->
+    <section id="sec-varedeh" class="app-section">
+        <div id="inbox-container">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">در حال بارگذاری...</span>
+                </div>
+                <p class="mt-3 text-muted">در حال بارگذاری کارتابل...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Referred Section - Loaded via AJAX -->
+    <section id="sec-erjaee" class="app-section">
+        <div id="referred-container">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">در حال بارگذاری...</span>
+                </div>
+                <p class="mt-3 text-muted">در حال بارگذاری کارتابل ارجاعی...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search Section - Loaded via AJAX -->
+    <section id="sec-search" class="app-section">
+        <div id="search-container">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">در حال بارگذاری...</span>
+                </div>
+                <p class="mt-3 text-muted">در حال بارگذاری جستجو...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- NewDocument Section - Loaded via AJAX -->
+    <section id="sec-newdocument" class="app-section">
+        <div id="newdocument-container">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">در حال بارگذاری...</span>
+                </div>
+                <p class="mt-3 text-muted">در حال بارگذاری سند جدید...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Secretariat Section - Loaded via AJAX -->
+    <section id="sec-dabirkhaneh" class="app-section">
+        <div id="secretariat-container">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">در حال بارگذاری...</span>
+                </div>
+                <p class="mt-3 text-muted">در حال بارگذاری دبیرخانه...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Forms Section - Loaded via AJAX -->
+    <section id="sec-forms" class="app-section">
+        <div id="forms-container">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">در حال بارگذاری...</span>
+                </div>
+                <p class="mt-3 text-muted">در حال بارگذاری فرم‌ها...</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="sec-process" class="app-section">
+        <div class="text-center py-5 text-muted">
+            <h3>فرآیندساز</h3>
+            <p class="mt-3">این بخش فعلا غیرفعال است و بعدا دوباره طراحی می‌شود.</p>
+        </div>
+    </section>
+
+    <section id="sec-report" class="app-section">
+        <div class="text-center py-5 text-muted">
+            <h3>گزارش ساز</h3>
+            <p class="mt-3">این بخش به زودی اضافه خواهد شد</p>
+        </div>
+    </section>
+
+    <!-- Settings Section - Loaded via AJAX -->
+    <section id="sec-setting" class="app-section">
+        <div id="settings-container">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">در حال بارگذاری...</span>
+                </div>
+                <p class="mt-3 text-muted">در حال بارگذاری تنظیمات...</p>
+            </div>
+        </div>
+    </section>
+
+</main>

@@ -1,0 +1,250 @@
+@{
+    Layout = null; // بدون Layout چون داخل section اصلی لود می‌شود
+}
+
+<div class="row g-4">
+    <!-- Sidebar -->
+    <div class="col-auto">
+        <div class="card border-0 custom-shadow rounded-4 settings-sidebar">
+            <div class="card-body p-0">
+                <div class="settings-menu">
+                    <!-- 1- تنظیمات عمومی سیستم -->
+                    <div class="settings-menu-item">
+                        <div class="settings-menu-header active" data-target="general-settings" onclick="loadSettingsContent('general-settings')">
+                            <i class="fa-solid fa-gear menu-icon"></i>
+                            <span class="menu-text">تنظیمات عمومی سیستم</span>
+                        </div>
+                    </div>
+
+                    <!-- 2- منابع انسانی و سازمانها -->
+                    <div class="settings-menu-item">
+                        <div class="settings-menu-header collapsible" onclick="toggleSubmenu(this)">
+                            <i class="fa-solid fa-building-user menu-icon"></i>
+                            <span class="menu-text">منابع انسانی و سازمانها</span>
+                            <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="settings-submenu">
+                            <div class="settings-submenu-item" data-target="users" onclick="loadSettingsContent('users')">
+                                <i class="fa-solid fa-users sub-icon"></i>
+                                <span>کاربران</span>
+                            </div>
+                            <div class="settings-submenu-item" data-target="positions" onclick="loadSettingsContent('positions')">
+                                <i class="fa-solid fa-user-tie sub-icon"></i>
+                                <span>پست های سازمانی</span>
+                            </div>
+                            <div class="settings-submenu-item" data-target="departments" onclick="loadSettingsContent('departments')">
+                                <i class="fa-solid fa-sitemap sub-icon"></i>
+                                <span>واحدهای سازمانی</span>
+                            </div>
+                            <div class="settings-submenu-item" data-target="user-groups" onclick="loadSettingsContent('user-groups')">
+                                <i class="fa-solid fa-users-rectangle sub-icon"></i>
+                                <span>گروه های کاربری</span>
+                            </div>
+                            <div class="settings-submenu-item" data-target="hr-roles" onclick="loadSettingsContent('hr-roles')">
+                                <i class="fa-solid fa-shield-halved sub-icon"></i>
+                                <span>نقش ها</span>
+                            </div>
+                            <div class="settings-submenu-item" data-target="organizations" onclick="loadSettingsContent('organizations')">
+                                <i class="fa-solid fa-city sub-icon"></i>
+                                <span>سازمانها</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3- مجوزهای دسترسی -->
+                    <div class="settings-menu-item">
+                        <div class="settings-menu-header collapsible" onclick="toggleSubmenu(this)">
+                            <i class="fa-solid fa-shield-halved menu-icon"></i>
+                            <span class="menu-text">مجوزهای دسترسی</span>
+                            <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="settings-submenu">
+                            <div class="settings-submenu-item" data-target="general-permissions" onclick="loadSettingsContent('general-permissions')">
+                                <i class="fa-solid fa-key sub-icon"></i>
+                                <span>مجوزهای عمومی</span>
+                            </div>
+                            <div class="settings-submenu-item" data-target="secretariat-permissions" onclick="loadSettingsContent('secretariat-permissions')">
+                                <i class="fa-solid fa-stamp sub-icon"></i>
+                                <span>مجوزهای دبیرخانه</span>
+                            </div>
+                            <div class="settings-submenu-item" data-target="formbuilder-permissions" onclick="loadSettingsContent('formbuilder-permissions')">
+                                <i class="fa-solid fa-file-lines sub-icon"></i>
+                                <span>مجوزهای فرمساز</span>
+                            </div>
+                            <div class="settings-submenu-item" data-target="report-permissions" onclick="loadSettingsContent('report-permissions')">
+                                <i class="fa-solid fa-chart-bar sub-icon"></i>
+                                <span>مجوزهای گزارش ساز</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4- پیکربندی سرویسها -->
+                    <div class="settings-menu-item">
+                        <div class="settings-menu-header collapsible" onclick="toggleSubmenu(this)">
+                            <i class="fa-solid fa-server menu-icon"></i>
+                            <span class="menu-text">پیکربندی سرویسها</span>
+                            <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="settings-submenu">
+                            <div class="settings-submenu-item" data-target="email-settings" onclick="loadSettingsContent('email-settings')">
+                                <i class="fa-solid fa-envelope sub-icon"></i>
+                                <span>صندوق ارسال و دریافت ایمیل</span>
+                            </div>
+                            <div class="settings-submenu-item" data-target="fax-settings" onclick="loadSettingsContent('fax-settings')">
+                                <i class="fa-solid fa-fax sub-icon"></i>
+                                <span>صندوق ارسال و دریافت فکس</span>
+                            </div>
+                            <div class="settings-submenu-item" data-target="integrations" onclick="loadSettingsContent('integrations')">
+                                <i class="fa-solid fa-plug sub-icon"></i>
+                                <span>ارتباط با سایر سامانه ها</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5- تنظیمات ویژه -->
+                    <div class="settings-menu-item">
+                        <div class="settings-menu-header collapsible" onclick="toggleSubmenu(this)">
+                            <i class="fa-solid fa-sliders menu-icon"></i>
+                            <span class="menu-text">تنظیمات ویژه</span>
+                            <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="settings-submenu">
+                            <div class="settings-submenu-item" data-target="increase-access" onclick="loadSettingsContent('increase-access')">
+                                <i class="fa-solid fa-arrow-up sub-icon"></i>
+                                <span>افزایش سطح دسترسی به سمتها</span>
+                            </div>
+                            <div class="settings-submenu-item" data-target="decrease-access" onclick="loadSettingsContent('decrease-access')">
+                                <i class="fa-solid fa-arrow-down sub-icon"></i>
+                                <span>کاهش سطح دسترسی به سمتها</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6- سایر تنظیمات -->
+                    <div class="settings-menu-item">
+                        <div class="settings-menu-header collapsible" onclick="toggleSubmenu(this)">
+                            <i class="fa-solid fa-ellipsis menu-icon"></i>
+                            <span class="menu-text">سایر تنظیمات</span>
+                            <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="settings-submenu">
+                            <div class="settings-submenu-item" data-target="login-settings" onclick="loadSettingsContent('login-settings')">
+                                <i class="fa-solid fa-right-to-bracket sub-icon"></i>
+                                <span>تنظیمات صفحه ورود</span>
+                            </div>
+                            <div class="settings-submenu-item" data-target="lock-info" onclick="loadSettingsContent('lock-info')">
+                                <i class="fa-solid fa-lock sub-icon"></i>
+                                <span>مشاهده اطلاعات قفل</span>
+                            </div>
+                            <div class="settings-submenu-item" data-target="software-info" onclick="loadSettingsContent('software-info')">
+                                <i class="fa-solid fa-circle-info sub-icon"></i>
+                                <span>مشاهده اطلاعات نرم افزار</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="col">
+        <div class="card border-0 custom-shadow rounded-4 h-100">
+            <div class="card-body p-4" id="settings-content-area">
+                <!-- Loading indicator -->
+                <div id="settings-loading" class="text-center py-5" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">در حال بارگذاری...</span>
+                    </div>
+                    <p class="mt-3 text-muted">در حال بارگذاری...</p>
+                </div>
+                <!-- Content will be loaded here via AJAX -->
+                <div id="settings-content"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toggle submenu collapse/expand
+    function toggleSubmenu(header) {
+        const menuItem = header.closest('.settings-menu-item');
+        if (!menuItem) return;
+
+        const submenu = menuItem.querySelector('.settings-submenu');
+        const toggleIcon = header.querySelector('.toggle-icon');
+
+        if (submenu) {
+            menuItem.classList.toggle('expanded');
+            submenu.classList.toggle('show');
+            if (toggleIcon) toggleIcon.classList.toggle('rotated');
+        }
+    }
+
+    // Load settings content via AJAX
+    function loadSettingsContent(target) {
+        const contentArea = document.getElementById('settings-content');
+        const loading = document.getElementById('settings-loading');
+
+        // Update active state in sidebar
+        document.querySelectorAll('.settings-submenu-item, .settings-menu-header[data-target]').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        const clickedItem = document.querySelector(`[data-target="${target}"]`);
+        if (clickedItem) {
+            clickedItem.classList.add('active');
+
+            // Expand parent submenu if needed
+            const parentMenuItem = clickedItem.closest('.settings-menu-item');
+            if (parentMenuItem) {
+                const submenu = parentMenuItem.querySelector('.settings-submenu');
+                const toggleIcon = parentMenuItem.querySelector('.toggle-icon');
+                if (submenu && !submenu.classList.contains('show')) {
+                    parentMenuItem.classList.add('expanded');
+                    submenu.classList.add('show');
+                    if (toggleIcon) toggleIcon.classList.add('rotated');
+                }
+            }
+        }
+
+        // Show loading
+        loading.style.display = 'block';
+        contentArea.innerHTML = '';
+
+        // Load content via AJAX
+        fetch(`/Settings/Partial/${target}`)
+            .then(response => {
+                if (!response.ok) throw new Error('خطا در بارگذاری');
+                return response.text();
+            })
+            .then(html => {
+                loading.style.display = 'none';
+                contentArea.innerHTML = html;
+
+                // Execute any inline scripts in the loaded content
+                contentArea.querySelectorAll('script').forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => {
+                        newScript.setAttribute(attr.name, attr.value);
+                    });
+                    newScript.textContent = oldScript.textContent;
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                contentArea.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                        خطا در بارگذاری محتوا: ${error.message}
+                    </div>
+                `;
+            });
+    }
+
+    // Initialize immediately (loaded via AJAX, DOMContentLoaded already fired)
+    (function() {
+        loadSettingsContent('general-settings');
+    })();
+</script>

@@ -1,0 +1,608 @@
+@* Partial View: مدیریت کاربران *@
+
+<div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+    <h5 class="fw-bold mb-0">
+        <i class="fa-solid fa-users me-2 text-primary"></i>
+        کاربران
+    </h5>
+    <button class="btn btn-primary" onclick="openUserModal()">
+        <i class="fa-solid fa-user-plus me-2"></i>
+        افزودن کاربر جدید
+    </button>
+</div>
+
+<!-- Filters -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm" id="filter-username" placeholder="نام کاربری...">
+    </div>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm" id="filter-fullname" placeholder="نام و نام خانوادگی...">
+    </div>
+    <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm" id="filter-nationalid" placeholder="کد ملی..." dir="ltr">
+    </div>
+    <div class="col-md-2">
+        <select class="form-select form-select-sm" id="filter-status">
+            <option value="">همه وضعیت‌ها</option>
+            <option value="active">فعال</option>
+            <option value="inactive">غیرفعال</option>
+        </select>
+    </div>
+    <div class="col-md-1">
+        <button class="btn btn-outline-primary btn-sm w-100" onclick="searchUsers()">
+            <i class="fa-solid fa-search"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="table-responsive">
+    <table class="table table-hover users-table">
+        <thead class="table-light">
+            <tr>
+                <th width="50">#</th>
+                <th width="60">تصویر</th>
+                <th>نام کاربری</th>
+                <th>نام و نام خانوادگی</th>
+                <th>کد ملی</th>
+                <th>شماره پرسنلی</th>
+                <th>وضعیت</th>
+                <th>آنلاین</th>
+                <th width="100">عملیات</th>
+            </tr>
+        </thead>
+        <tbody id="users-tbody">
+            <tr>
+                <td colspan="9" class="text-center py-4 text-muted">
+                    <i class="fa-solid fa-spinner fa-spin me-2"></i>
+                    در حال بارگذاری...
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+<div class="d-flex justify-content-between align-items-center mt-2">
+    <span class="text-muted small" id="users-pagination-info">نمایش 0 تا 0 از 0 کاربر</span>
+    <nav>
+        <ul class="pagination pagination-sm mb-0" id="users-pagination"></ul>
+    </nav>
+</div>
+
+<!-- User Modal -->
+<div class="modal" id="settingsUserModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title" id="settingsUserModalTitle">
+                    <i class="fa-solid fa-user-plus me-2"></i>
+                    افزودن کاربر جدید
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3" style="max-height:70vh; overflow-y:auto;">
+                <form id="settingsUserForm" novalidate>
+                    <!-- Avatar -->
+                    <div class="text-center mb-3">
+                        <img src="/images/users/default-male.png" id="settings-avatar-preview"
+                             class="rounded-circle border border-2 border-primary"
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                        <div class="mt-2">
+                            <label for="settings-user-avatar" class="btn btn-outline-primary btn-sm">
+                                <i class="fa-solid fa-camera me-1"></i>انتخاب تصویر
+                            </label>
+                            <input type="file" class="d-none" id="settings-user-avatar" accept="image/*">
+                        </div>
+                    </div>
+
+                    <!-- Personal Info -->
+                    <h6 class="text-primary border-bottom pb-2 mb-3">
+                        <i class="fa-solid fa-id-card me-2"></i>اطلاعات شخصی
+                    </h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-2">
+                            <label class="form-label small">عنوان</label>
+                            <select class="form-select form-select-sm" id="settings-user-title">
+                                <option value="">انتخاب</option>
+                                <option value="آقای">آقای</option>
+                                <option value="خانم">خانم</option>
+                                <option value="دکتر">دکتر</option>
+                                <option value="مهندس">مهندس</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small">نام <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="settings-user-firstname" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small">نام خانوادگی <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="settings-user-lastname" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">نام پدر</label>
+                            <input type="text" class="form-control form-control-sm" id="settings-user-fathername">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">کد ملی</label>
+                            <input type="text" class="form-control form-control-sm" id="settings-user-nationalid" maxlength="10" dir="ltr">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">شماره پرسنلی</label>
+                            <input type="text" class="form-control form-control-sm" id="settings-user-personnelno" dir="ltr">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">جنسیت</label>
+                            <select class="form-select form-select-sm" id="settings-user-gender">
+                                <option value="">انتخاب</option>
+                                <option value="male">مرد</option>
+                                <option value="female">زن</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">وضعیت تاهل</label>
+                            <select class="form-select form-select-sm" id="settings-user-maritalstatus">
+                                <option value="">انتخاب</option>
+                                <option value="single">مجرد</option>
+                                <option value="married">متاهل</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">موبایل</label>
+                            <input type="text" class="form-control form-control-sm" id="settings-user-mobile" dir="ltr" maxlength="11">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">تلفن ثابت</label>
+                            <input type="text" class="form-control form-control-sm" id="settings-user-phone" dir="ltr">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">ایمیل</label>
+                            <input type="email" class="form-control form-control-sm" id="settings-user-email" dir="ltr">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">آدرس</label>
+                            <input type="text" class="form-control form-control-sm" id="settings-user-address">
+                        </div>
+                    </div>
+
+                    <!-- Account Info -->
+                    <h6 class="text-primary border-bottom pb-2 mb-3">
+                        <i class="fa-solid fa-user-lock me-2"></i>اطلاعات حساب
+                    </h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small">نام کاربری <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="settings-user-username" dir="ltr" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">رمز عبور <span id="pwd-required-label" class="text-danger">*</span></label>
+                            <input type="password" class="form-control form-control-sm" id="settings-user-password" dir="ltr">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">تکرار رمز</label>
+                            <input type="password" class="form-control form-control-sm" id="settings-user-password-confirm" dir="ltr">
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="settings-user-isactive" checked>
+                                <label class="form-check-label small" for="settings-user-isactive">کاربر فعال</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Signatures -->
+                    <h6 class="text-primary border-bottom pb-2 mb-3">
+                        <i class="fa-solid fa-pen-fancy me-2"></i>امضاها
+                    </h6>
+                    <div class="mb-2" id="signatures-list">
+                        <div class="text-muted small">امضایی تعریف نشده</div>
+                    </div>
+                    <div class="border rounded p-2 bg-light">
+                        <div class="small text-muted mb-2"><i class="fa-solid fa-plus me-1"></i>اضافه امضای جدید</div>
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label small">عنوان امضا</label>
+                                <input type="text" class="form-control form-control-sm" id="new-sig-title">
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small">فایل امضا</label>
+                                <input type="file" class="form-control form-control-sm" id="new-sig-file" accept="image/*">
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="checkbox" id="new-sig-default">
+                                    <label class="form-check-label small" for="new-sig-default">پیش‌فرض</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-outline-primary btn-sm w-100" onclick="addNewSignature()">
+                                    <i class="fa-solid fa-plus me-1"></i>اضافه
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveUser()">
+                    <i class="fa-solid fa-save me-1"></i>ذخیره
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== State =====
+    var settingsUserModal;
+    var currentEditUserId = null;
+    var usersCurrentPage = 1;
+    var usersPageSize = 10;
+    var usersTotal = 0;
+    var currentAvatarPath = '/images/users/default-male.png';
+    var userSignatures = [];
+
+    // ===== Init =====
+    (function() {
+        var modalEl = document.getElementById('settingsUserModal');
+        if (modalEl) settingsUserModal = new bootstrap.Modal(modalEl);
+
+        // Avatar file preview on select
+        var avatarInput = document.getElementById('settings-user-avatar');
+        if (avatarInput) {
+            avatarInput.addEventListener('change', function(e) {
+                var file = e.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(ev) {
+                        document.getElementById('settings-avatar-preview').src = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Gender change → update default avatar
+        var genderSelect = document.getElementById('settings-user-gender');
+        if (genderSelect) {
+            genderSelect.addEventListener('change', function() {
+                var preview = document.getElementById('settings-avatar-preview');
+                var avatarFile = document.getElementById('settings-user-avatar');
+                if (!avatarFile.files.length && (currentAvatarPath === '/images/users/default-male.png' || currentAvatarPath === '/images/users/default-female.png')) {
+                    var newDefault = this.value === 'female' ? '/images/users/default-female.png' : '/images/users/default-male.png';
+                    currentAvatarPath = newDefault;
+                    preview.src = newDefault;
+                }
+            });
+        }
+
+        loadUsers();
+    })();
+
+    // ===== Utility =====
+    function esc(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // ===== Load Users =====
+    async function loadUsers(page) {
+        page = page || 1;
+        usersCurrentPage = page;
+        var tbody = document.getElementById('users-tbody');
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...</td></tr>';
+
+        try {
+            var username = document.getElementById('filter-username').value.trim();
+            var fullname = document.getElementById('filter-fullname').value.trim();
+            var nationalid = document.getElementById('filter-nationalid').value.trim();
+            var status = document.getElementById('filter-status').value;
+
+            var search = username || fullname || '';
+            var url = '/api/settings/users?page=' + page + '&pageSize=' + usersPageSize;
+            if (search) url += '&search=' + encodeURIComponent(search);
+            if (nationalid) url += '&nationalId=' + encodeURIComponent(nationalid);
+            if (status) url += '&status=' + encodeURIComponent(status);
+
+            var response = await fetch(url);
+            var result = await response.json();
+
+            if (result.success) {
+                usersTotal = result.totalCount;
+                renderUsersTable(result.data, result.totalCount);
+                renderUsersPagination(result.totalCount);
+            } else {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-danger">خطا در بارگذاری</td></tr>';
+            }
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-danger">خطا در اتصال به سرور</td></tr>';
+        }
+    }
+
+    function renderUsersTable(users, totalCount) {
+        var tbody = document.getElementById('users-tbody');
+
+        if (!users || users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">کاربری یافت نشد</td></tr>';
+            document.getElementById('users-pagination-info').textContent = 'نمایش 0 تا 0 از 0 کاربر';
+            return;
+        }
+
+        tbody.innerHTML = users.map(function(user, index) {
+            var defaultAvatar = (user.gender === 'female') ? '/images/users/default-female.png' : '/images/users/default-male.png';
+            return '<tr>' +
+                '<td>' + ((usersCurrentPage - 1) * usersPageSize + index + 1) + '</td>' +
+                '<td><img src="' + esc(user.avatarPath || defaultAvatar) + '" class="rounded-circle" width="35" height="35" style="object-fit:cover;"></td>' +
+                '<td><strong>' + esc(user.username) + '</strong></td>' +
+                '<td>' + esc(user.firstName) + ' ' + esc(user.lastName) + '</td>' +
+                '<td dir="ltr">' + esc(user.nationalId || '-') + '</td>' +
+                '<td>' + esc(user.personnelNumber || '-') + '</td>' +
+                '<td>' + (user.isActive ? '<span class="badge bg-success">فعال</span>' : '<span class="badge bg-danger">غیرفعال</span>') + '</td>' +
+                '<td>' + (user.isOnline ? '<i class="fa-solid fa-circle text-success"></i>' : '<i class="fa-solid fa-circle text-secondary"></i>') + '</td>' +
+                '<td>' +
+                    '<button class="btn btn-sm btn-outline-primary me-1" onclick="openUserModal(\'' + user.id + '\')" title="ویرایش"><i class="fa-solid fa-edit"></i></button>' +
+                    '<button class="btn btn-sm btn-outline-danger" onclick="deleteUser(\'' + user.id + '\')" title="حذف"><i class="fa-solid fa-trash"></i></button>' +
+                '</td>' +
+            '</tr>';
+        }).join('');
+
+        var start = (usersCurrentPage - 1) * usersPageSize + 1;
+        var end = Math.min(usersCurrentPage * usersPageSize, totalCount);
+        document.getElementById('users-pagination-info').textContent = 'نمایش ' + start + ' تا ' + end + ' از ' + totalCount + ' کاربر';
+    }
+
+    function renderUsersPagination(totalCount) {
+        var container = document.getElementById('users-pagination');
+        var totalPages = Math.ceil(totalCount / usersPageSize);
+        if (totalPages <= 1) { container.innerHTML = ''; return; }
+
+        var html = '';
+        if (usersCurrentPage > 1)
+            html += '<li class="page-item"><a class="page-link" onclick="loadUsers(' + (usersCurrentPage - 1) + ')">‹</a></li>';
+
+        var startPage = Math.max(1, usersCurrentPage - 2);
+        var endPage = Math.min(totalPages, usersCurrentPage + 2);
+
+        if (startPage > 1) html += '<li class="page-item"><a class="page-link" onclick="loadUsers(1)">1</a></li>';
+        if (startPage > 2) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+
+        for (var i = startPage; i <= endPage; i++) {
+            html += '<li class="page-item ' + (i === usersCurrentPage ? 'active' : '') + '">' +
+                '<a class="page-link" onclick="loadUsers(' + i + ')">' + i + '</a></li>';
+        }
+
+        if (endPage < totalPages - 1) html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+        if (endPage < totalPages) html += '<li class="page-item"><a class="page-link" onclick="loadUsers(' + totalPages + ')">' + totalPages + '</a></li>';
+
+        if (usersCurrentPage < totalPages)
+            html += '<li class="page-item"><a class="page-link" onclick="loadUsers(' + (usersCurrentPage + 1) + ')">›</a></li>';
+
+        container.innerHTML = html;
+    }
+
+    function searchUsers() {
+        loadUsers(1);
+    }
+
+    // ===== Modal =====
+    async function openUserModal(userId) {
+        userId = userId || null;
+        currentEditUserId = userId;
+        userSignatures = [];
+        currentAvatarPath = '/images/users/default-male.png';
+        document.getElementById('settingsUserForm').reset();
+        document.getElementById('settings-avatar-preview').src = '/images/users/default-male.png';
+        document.getElementById('settings-user-avatar').value = '';
+        document.getElementById('new-sig-title').value = '';
+        document.getElementById('new-sig-file').value = '';
+        document.getElementById('new-sig-default').checked = false;
+
+        if (userId) {
+            document.getElementById('settingsUserModalTitle').innerHTML = '<i class="fa-solid fa-user-edit me-2"></i>ویرایش کاربر';
+            document.getElementById('pwd-required-label').style.display = 'none';
+
+            try {
+                var res = await fetch('/api/settings/users/' + userId);
+                var result = await res.json();
+                if (result.success) {
+                    var u = result.data;
+                    document.getElementById('settings-user-title').value = u.title || '';
+                    document.getElementById('settings-user-firstname').value = u.firstName || '';
+                    document.getElementById('settings-user-lastname').value = u.lastName || '';
+                    document.getElementById('settings-user-fathername').value = u.fatherName || '';
+                    document.getElementById('settings-user-nationalid').value = u.nationalId || '';
+                    document.getElementById('settings-user-personnelno').value = u.personnelNumber || '';
+                    document.getElementById('settings-user-gender').value = u.gender || '';
+                    document.getElementById('settings-user-maritalstatus').value = u.maritalStatus || '';
+                    document.getElementById('settings-user-mobile').value = u.mobile || '';
+                    document.getElementById('settings-user-phone').value = u.phone || '';
+                    document.getElementById('settings-user-email').value = u.email || '';
+                    document.getElementById('settings-user-address').value = u.address || '';
+                    document.getElementById('settings-user-username').value = u.username || '';
+                    document.getElementById('settings-user-isactive').checked = u.isActive !== false;
+
+                    if (u.avatarPath) {
+                        currentAvatarPath = u.avatarPath;
+                        document.getElementById('settings-avatar-preview').src = u.avatarPath;
+                    } else {
+                        var genderDefault = (u.gender === 'female') ? '/images/users/default-female.png' : '/images/users/default-male.png';
+                        currentAvatarPath = genderDefault;
+                        document.getElementById('settings-avatar-preview').src = genderDefault;
+                    }
+
+                    if (u.signatures && u.signatures.length > 0) {
+                        userSignatures = u.signatures.map(function(s) {
+                            return { id: s.id, signatureTitle: s.signatureTitle, signaturePath: s.signaturePath, isDefault: s.isDefault, isUsed: !!s.isUsed };
+                        });
+                    }
+                }
+            } catch (e) { /* silent */ }
+        } else {
+            document.getElementById('settingsUserModalTitle').innerHTML = '<i class="fa-solid fa-user-plus me-2"></i>افزودن کاربر جدید';
+            document.getElementById('pwd-required-label').style.display = 'inline';
+        }
+
+        renderSignatures();
+        settingsUserModal.show();
+    }
+
+    // ===== Save =====
+    async function saveUser() {
+        var username = document.getElementById('settings-user-username').value.trim();
+        var firstname = document.getElementById('settings-user-firstname').value.trim();
+        var lastname = document.getElementById('settings-user-lastname').value.trim();
+
+        if (!username || !firstname || !lastname) {
+            alert('فیلدهای نام، نام خانوادگی و نام کاربری الزامی هستند');
+            return;
+        }
+
+        var password = document.getElementById('settings-user-password').value;
+        var passwordConfirm = document.getElementById('settings-user-password-confirm').value;
+
+        if (!currentEditUserId && !password) {
+            alert('رمز عبور هنگام ایجاد کاربر جدید الزامی است');
+            return;
+        }
+
+        if (password && password !== passwordConfirm) {
+            alert('رمز عبور و تکرار آن یکسان نیستند');
+            return;
+        }
+
+        // Avatar upload if new file selected
+        var avatarPath = currentAvatarPath;
+        var avatarFile = document.getElementById('settings-user-avatar').files[0];
+        if (avatarFile) {
+            var fd = new FormData();
+            fd.append('file', avatarFile);
+            try {
+                var res = await fetch('/api/settings/users/upload-avatar', { method: 'POST', body: fd });
+                var result = await res.json();
+                if (result.success) avatarPath = result.path;
+                else { alert(result.error || 'خطا در آپلود تصویر'); return; }
+            } catch (e) { alert('خطا در آپلود تصویر'); return; }
+        }
+
+        var payload = {
+            title: document.getElementById('settings-user-title').value || null,
+            username: username,
+            firstName: firstname,
+            lastName: lastname,
+            fatherName: document.getElementById('settings-user-fathername').value.trim() || null,
+            nationalId: document.getElementById('settings-user-nationalid').value.trim() || null,
+            gender: document.getElementById('settings-user-gender').value || null,
+            maritalStatus: document.getElementById('settings-user-maritalstatus').value || null,
+            personnelNumber: document.getElementById('settings-user-personnelno').value.trim() || null,
+            email: document.getElementById('settings-user-email').value.trim() || null,
+            mobile: document.getElementById('settings-user-mobile').value.trim() || null,
+            phone: document.getElementById('settings-user-phone').value.trim() || null,
+            address: document.getElementById('settings-user-address').value.trim() || null,
+            avatarPath: avatarPath,
+            isActive: document.getElementById('settings-user-isactive').checked,
+            signatures: userSignatures.map(function(s) {
+                return { id: s.id || null, signatureTitle: s.signatureTitle, signaturePath: s.signaturePath, isDefault: s.isDefault };
+            })
+        };
+
+        if (password) payload.password = password;
+
+        try {
+            var url = currentEditUserId ? '/api/settings/users/' + currentEditUserId : '/api/settings/users';
+            var method = currentEditUserId ? 'PUT' : 'POST';
+            var res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            var result = await res.json();
+
+            if (res.ok && result.success) {
+                settingsUserModal.hide();
+                loadUsers(usersCurrentPage);
+            } else {
+                alert(result.error || 'خطا در ذخیره');
+            }
+        } catch (e) { alert('خطا در اتصال به سرور'); }
+    }
+
+    // ===== Delete =====
+    async function deleteUser(userId) {
+        if (!confirm('آیا از حذف این کاربر اطمینان دارید؟')) return;
+        try {
+            var res = await fetch('/api/settings/users/' + userId, { method: 'DELETE' });
+            var result = await res.json();
+            if (res.ok && result.success) {
+                loadUsers(usersCurrentPage);
+            } else {
+                alert(result.error || 'خطا در حذف');
+            }
+        } catch (e) { alert('خطا در اتصال به سرور'); }
+    }
+
+    // ===== Signatures =====
+    function renderSignatures() {
+        var container = document.getElementById('signatures-list');
+        if (userSignatures.length === 0) {
+            container.innerHTML = '<div class="text-muted small mb-2">امضایی تعریف نشده</div>';
+            return;
+        }
+        container.innerHTML = userSignatures.map(function(sig, idx) {
+            return '<div class="d-flex align-items-center gap-2 bg-white border rounded p-2 mb-1">' +
+                '<img src="' + esc(sig.signaturePath) + '" style="height:40px;max-width:120px;object-fit:contain;" class="border rounded">' +
+                '<span class="small flex-grow-1">' + esc(sig.signatureTitle || 'بدون عنوان') + '</span>' +
+                (sig.isDefault
+                    ? '<span class="badge bg-primary small">پیش‌فرض</span>'
+                    : '<button type="button" class="btn btn-sm btn-outline-secondary p-0 px-1" onclick="setSignatureDefault(' + idx + ')" style="font-size:0.72rem;">پیش‌فرض</button>') +
+                (sig.isUsed
+                    ? '<span class="badge bg-warning text-dark small">در استفاده</span>'
+                    : '<button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removeSignature(' + idx + ')"><i class="fa-solid fa-trash"></i></button>') +
+            '</div>';
+        }).join('');
+    }
+
+    function setSignatureDefault(idx) {
+        userSignatures.forEach(function(s) { s.isDefault = false; });
+        userSignatures[idx].isDefault = true;
+        renderSignatures();
+    }
+
+    function removeSignature(idx) {
+        if (userSignatures[idx].isUsed) return;
+        userSignatures.splice(idx, 1);
+        renderSignatures();
+    }
+
+    async function addNewSignature() {
+        var file = document.getElementById('new-sig-file').files[0];
+        var title = document.getElementById('new-sig-title').value.trim();
+        var isDefault = document.getElementById('new-sig-default').checked;
+
+        if (!file) { alert('فایل امضا انتخاب کنید'); return; }
+
+        var fd = new FormData();
+        fd.append('file', file);
+        try {
+            var res = await fetch('/api/settings/users/upload-signature', { method: 'POST', body: fd });
+            var result = await res.json();
+            if (result.success) {
+                if (isDefault) userSignatures.forEach(function(s) { s.isDefault = false; });
+                userSignatures.push({
+                    id: null,
+                    signatureTitle: title || ('امضای ' + (userSignatures.length + 1)),
+                    signaturePath: result.path,
+                    isDefault: isDefault,
+                    isUsed: false
+                });
+                renderSignatures();
+                document.getElementById('new-sig-file').value = '';
+                document.getElementById('new-sig-title').value = '';
+                document.getElementById('new-sig-default').checked = false;
+            } else {
+                alert(result.error || 'خطا در آپلود');
+            }
+        } catch (e) { alert('خطا در اتصال به سرور'); }
+    }
+</script>

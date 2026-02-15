@@ -1,0 +1,268 @@
+<!-- Modal ضمائم -->
+<div class="modal-overlay" id="attachmentsModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 10001; display: none; align-items: center; justify-content: center;">
+    <div class="modal-box" style="background: rgba(15, 23, 42, 0.95); border: 1px solid var(--border-light); width: 90%; max-width: 1000px; max-height: 90vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); overflow: hidden;">
+        <div class="modal-header" style="font-weight: 700; font-size: 1.2rem; border-bottom: 1px solid var(--border-light); padding-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+            <span>ضمائم</span>
+            <i class="fa-solid fa-xmark close-modal" style="cursor: pointer; color: var(--text-gray); font-size: 1.2rem;" onclick="closeAttachmentsModal()"></i>
+        </div>
+        
+        <div class="modal-body" style="flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 25px;">
+            <!-- بخش پیوست -->
+            <div class="attachment-section" style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="section-title" style="font-weight: 700; font-size: 1rem; color: var(--text-white); padding-bottom: 10px; border-bottom: 1px solid var(--border-light);">پیوست مدارک</div>
+                
+                <!-- بخش بالای پیوست - دکمه‌ها -->
+                <div class="attachment-buttons" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn-attachment-action" onclick="uploadFile('attachment')" style="background: rgba(59, 130, 246, 0.2); border: 1px solid var(--accent-blue); color: #60a5fa; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; transition: 0.3s;">
+                        <i class="fa-solid fa-upload"></i> آپلود از سیستم
+                    </button>
+                    <button class="btn-attachment-action" onclick="scanFile('attachment')" style="background: rgba(59, 130, 246, 0.2); border: 1px solid var(--accent-blue); color: #60a5fa; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; transition: 0.3s;">
+                        <i class="fa-solid fa-scanner"></i> اسکن مدرک
+                    </button>
+                    <button class="btn-attachment-action" onclick="searchDocument('attachment')" style="background: rgba(59, 130, 246, 0.2); border: 1px solid var(--accent-blue); color: #60a5fa; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; transition: 0.3s;">
+                        <i class="fa-solid fa-magnifying-glass"></i> جستجو در سامانه
+                    </button>
+                </div>
+                
+                <!-- بخش پایین پیوست - لیست رکوردها -->
+                <div class="attachment-list" id="attachmentList" style="display: flex; flex-direction: column; gap: 10px; min-height: 100px; max-height: 250px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; border: 1px solid var(--border-light);">
+                    <div style="text-align: center; color: var(--text-gray); font-size: 0.85rem; padding: 20px;">هیچ فایلی انتخاب نشده است</div>
+                </div>
+            </div>
+
+            <!-- بخش پیرو -->
+            <div class="follow-up-section" style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="section-title" style="font-weight: 700; font-size: 1rem; color: var(--text-white); padding-bottom: 10px; border-bottom: 1px solid var(--border-light);">پیرو</div>
+                
+                <!-- بخش بالای پیرو - دکمه‌ها -->
+                <div class="follow-up-buttons" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn-follow-up-action" onclick="uploadFile('follow-up')" style="background: rgba(139, 92, 246, 0.2); border: 1px solid var(--accent-purple); color: #a78bfa; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; transition: 0.3s;">
+                        <i class="fa-solid fa-upload"></i> آپلود از سیستم
+                    </button>
+                    <button class="btn-follow-up-action" onclick="scanFile('follow-up')" style="background: rgba(139, 92, 246, 0.2); border: 1px solid var(--accent-purple); color: #a78bfa; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; transition: 0.3s;">
+                        <i class="fa-solid fa-scanner"></i> اسکن مدرک
+                    </button>
+                    <button class="btn-follow-up-action" onclick="searchDocument('follow-up')" style="background: rgba(139, 92, 246, 0.2); border: 1px solid var(--accent-purple); color: #a78bfa; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; transition: 0.3s;">
+                        <i class="fa-solid fa-magnifying-glass"></i> جستجو در سامانه
+                    </button>
+                </div>
+                
+                <!-- بخش پایین پیرو - لیست رکوردها -->
+                <div class="follow-up-list" id="followUpList" style="display: flex; flex-direction: column; gap: 10px; min-height: 100px; max-height: 250px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; border: 1px solid var(--border-light);">
+                    <div style="text-align: center; color: var(--text-gray); font-size: 0.85rem; padding: 20px;">هیچ فایلی انتخاب نشده است</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid var(--border-light); flex-shrink: 0;">
+            <button class="btn-large btn-cancel" onclick="closeAttachmentsModal()" style="padding: 10px 20px; font-size: 0.9rem;">انصراف</button>
+            <button class="btn-large btn-save-send" onclick="confirmAttachments()" style="padding: 10px 20px; font-size: 0.9rem;">تایید</button>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="fileUploadInput" style="display: none;" multiple onchange="handleFileSelect(event)">
+
+<style>
+    .btn-attachment-action:hover, .btn-follow-up-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .attachment-item, .follow-up-item {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr 2fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 10px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+    }
+    .attachment-item input, .follow-up-item input {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid var(--border-light);
+        border-radius: 6px;
+        padding: 6px 10px;
+        color: white;
+        font-size: 0.8rem;
+        height: 32px;
+    }
+    .attachment-item input:read-only {
+        background: rgba(0,0,0,0.2);
+        color: var(--text-gray);
+    }
+    .btn-delete-item {
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid #ef4444;
+        color: #fca5a5;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: 0.3s;
+    }
+    .btn-delete-item:hover {
+        background: #ef4444;
+        color: white;
+    }
+</style>
+
+<script>
+    let currentAttachmentType = 'attachment'; // 'attachment' or 'follow-up'
+    let tempAttachments = [];
+    let tempFollowUps = [];
+
+    function openAttachmentsModal() {
+        // کپی کردن آرایه‌های فعلی
+        tempAttachments = [...(window.attachments || [])];
+        tempFollowUps = [...(window.followUps || [])];
+        renderAttachmentLists();
+        document.getElementById('attachmentsModal').style.display = 'flex';
+    }
+
+    function closeAttachmentsModal() {
+        document.getElementById('attachmentsModal').style.display = 'none';
+    }
+
+    function uploadFile(type) {
+        currentAttachmentType = type;
+        document.getElementById('fileUploadInput').click();
+    }
+
+    function handleFileSelect(event) {
+        const files = Array.from(event.target.files);
+        files.forEach(file => {
+            const item = {
+                id: Date.now() + Math.random(),
+                fileName: file.name,
+                displayName: file.name,
+                description: '',
+                file: file,
+                type: currentAttachmentType
+            };
+            
+            if (currentAttachmentType === 'attachment') {
+                tempAttachments.push(item);
+            } else {
+                tempFollowUps.push(item);
+            }
+        });
+        renderAttachmentLists();
+        event.target.value = ''; // Reset input
+    }
+
+    function scanFile(type) {
+        currentAttachmentType = type;
+        alert('قابلیت اسکن در حال توسعه است');
+    }
+
+    function searchDocument(type) {
+        currentAttachmentType = type;
+        if (typeof window.openSearchModal === 'function') {
+            window.openSearchModal(type);
+        }
+    }
+
+    function renderAttachmentLists() {
+        renderList('attachmentList', tempAttachments);
+        renderList('followUpList', tempFollowUps);
+    }
+
+    function renderList(listId, items) {
+        const list = document.getElementById(listId);
+        if (items.length === 0) {
+            list.innerHTML = '<div style="text-align: center; color: var(--text-gray); font-size: 0.85rem; padding: 20px;">هیچ فایلی انتخاب نشده است</div>';
+            return;
+        }
+        
+        list.innerHTML = items.map(item => `
+            <div class="${listId === 'attachmentList' ? 'attachment-item' : 'follow-up-item'}">
+                <input type="text" value="${item.fileName}" readonly style="font-size: 0.8rem;">
+                <input type="text" placeholder="نام جدید..." value="${item.displayName || ''}" onchange="updateDisplayName('${item.id}', this.value, '${listId}')" style="font-size: 0.8rem;">
+                <input type="text" placeholder="توضیحات..." value="${item.description || ''}" onchange="updateDescription('${item.id}', this.value, '${listId}')" style="font-size: 0.8rem;">
+                <button class="btn-delete-item" onclick="removeItem('${item.id}', '${listId}')">
+                    <i class="fa-solid fa-trash"></i> حذف
+                </button>
+            </div>
+        `).join('');
+    }
+
+    function updateDisplayName(id, value, listId) {
+        const list = listId === 'attachmentList' ? tempAttachments : tempFollowUps;
+        const item = list.find(i => i.id == id);
+        if (item) {
+            item.displayName = value;
+        }
+    }
+
+    function updateDescription(id, value, listId) {
+        const list = listId === 'attachmentList' ? tempAttachments : tempFollowUps;
+        const item = list.find(i => i.id == id);
+        if (item) {
+            item.description = value;
+        }
+    }
+
+    function removeItem(id, listId) {
+        if (listId === 'attachmentList') {
+            tempAttachments = tempAttachments.filter(i => i.id != id);
+        } else {
+            tempFollowUps = tempFollowUps.filter(i => i.id != id);
+        }
+        renderAttachmentLists();
+    }
+
+    function confirmAttachments() {
+        // به‌روزرسانی آرایه‌های اصلی
+        if (typeof window.attachments !== 'undefined') {
+            window.attachments = tempAttachments.map(item => ({
+                ...item,
+                type: 'attachment'
+            }));
+        }
+        if (typeof window.followUps !== 'undefined') {
+            window.followUps = tempFollowUps.map(item => ({
+                ...item,
+                type: 'follow-up'
+            }));
+        }
+        
+        // به‌روزرسانی پیش‌نمایش
+        if (typeof window.updateAttachmentsPreview === 'function') {
+            window.updateAttachmentsPreview();
+        }
+        
+        closeAttachmentsModal();
+    }
+
+    // تابع برای اضافه کردن مدارک از جستجو
+    window.addDocumentsFromSearch = function(documents, type) {
+        documents.forEach(doc => {
+            const item = {
+                id: Date.now() + Math.random(),
+                fileName: doc.documentNumber || doc.subject || 'مدرک',
+                displayName: doc.subject || doc.documentNumber || 'مدرک',
+                description: doc.subject || '',
+                documentId: doc.id,
+                type: type
+            };
+            
+            if (type === 'attachment') {
+                tempAttachments.push(item);
+            } else {
+                tempFollowUps.push(item);
+            }
+        });
+        renderAttachmentLists();
+    };
+
+    document.getElementById('attachmentsModal').addEventListener('click', (e) => {
+        if (e.target.id === 'attachmentsModal') {
+            closeAttachmentsModal();
+        }
+    });
+
+    // Expose function globally
+    window.openAttachmentsModalInternal = openAttachmentsModal;
+</script>
+

@@ -1,0 +1,165 @@
+@* Partial View: لیست فرم‌ها *@
+@{
+    Layout = null;
+}
+
+<div class="container-fluid py-3">
+    <div class="row mb-3">
+        <div class="col-12 d-flex align-items-center justify-content-between">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-layer-group me-2"></i>
+                لیست فرم‌ها
+            </h5>
+            <a href="/FormBuilder/Index" class="btn btn-primary btn-sm" target="_blank">
+                <i class="fa-solid fa-plus me-1"></i>
+                فرم جدید
+            </a>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-search text-muted"></i></span>
+                <input type="text" class="form-control" id="formlist-search" placeholder="جستجو..." onkeyup="searchFormList(this.value)">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select form-select-sm" id="formlist-status" onchange="loadFormList()">
+                <option value="">همه وضعیت‌ها</option>
+                <option value="published">منتشر شده</option>
+                <option value="draft">پیش‌نویس</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Forms Table -->
+    <div class="table-responsive">
+        <table class="table table-hover table-sm">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 80px;">کد</th>
+                    <th>نام فرم</th>
+                    <th style="width: 100px;">دسته‌بندی</th>
+                    <th style="width: 80px;">وضعیت</th>
+                    <th style="width: 120px;">عملیات</th>
+                </tr>
+            </thead>
+            <tbody id="formlist-tbody">
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">
+                        <i class="fa-solid fa-spinner fa-spin me-2"></i>
+                        در حال بارگذاری...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-center mt-3">
+        <a href="/FormBuilder/List" class="btn btn-outline-primary btn-sm" target="_blank">
+            <i class="fa-solid fa-arrow-left me-1"></i>
+            مشاهده همه فرم‌ها
+        </a>
+    </div>
+</div>
+<script>
+    let formListSearchTimeout = null;
+
+    // Initialize immediately (loaded via AJAX, DOMContentLoaded already fired)
+    (function() {
+        loadFormList();
+    })();
+
+    // Load form list
+    async function loadFormList(search = '') {
+        const tbody = document.getElementById('formlist-tbody');
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...</td></tr>';
+
+        try {
+            const status = document.getElementById('formlist-status').value;
+            let url = '/api/formbuilder/forms?limit=50';
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+            if (status === 'published') url += '&isPublished=true';
+            else if (status === 'draft') url += '&isPublished=false';
+
+            const response = await fetch(url);
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                renderFormList(result.data);
+            } else if (Array.isArray(result)) {
+                renderFormList(result);
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger">خطا در بارگذاری</td></tr>';
+            }
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger">خطا در اتصال به سرور</td></tr>';
+        }
+    }
+
+    // Search with debounce
+    function searchFormList(query) {
+        clearTimeout(formListSearchTimeout);
+        formListSearchTimeout = setTimeout(() => {
+            loadFormList(query);
+        }, 300);
+    }
+
+    // Render form list
+    function renderFormList(forms) {
+        const tbody = document.getElementById('formlist-tbody');
+
+        if (!forms || forms.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">
+                        <i class="fa-solid fa-inbox display-6 d-block mb-2"></i>
+                        <p>هنوز فرمی ایجاد نشده است</p>
+                        <a href="/FormBuilder/Index" class="btn btn-primary btn-sm" target="_blank">
+                            <i class="fa-solid fa-plus me-1"></i>
+                            ایجاد فرم جدید
+                        </a>
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        tbody.innerHTML = forms.map(form => {
+            const formId = form.id || form.Id;
+            const formCode = form.formCode || form.FormCode || '';
+            const nameFa = form.nameFa || form.NameFa || '';
+            const nameEn = form.nameEn || form.NameEn || '';
+            const categoryName = form.categoryName || (form.category ? form.category.nameFa || form.category.NameFa : '') || '';
+            const isPublished = form.isPublished ?? form.IsPublished ?? false;
+
+            return `
+                <tr>
+                    <td><code class="small">${formCode}</code></td>
+                    <td>
+                        <strong class="small">${nameFa}</strong>
+                        ${nameEn ? `<br><small class="text-muted">${nameEn}</small>` : ''}
+                    </td>
+                    <td>
+                        ${categoryName ? `<span class="badge bg-secondary small">${categoryName}</span>` : '-'}
+                    </td>
+                    <td>
+                        ${isPublished
+                            ? '<span class="badge bg-success small">منتشر شده</span>'
+                            : '<span class="badge bg-warning small">پیش‌نویس</span>'}
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="/FormBuilder/Index?id=${formId}" class="btn btn-outline-primary btn-sm" title="ویرایش" target="_blank">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <a href="/api/formbuilder/forms/${formId}/preview" class="btn btn-outline-secondary btn-sm" title="پیش‌نمایش" target="_blank">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>`;
+        }).join('');
+    }
+</script>

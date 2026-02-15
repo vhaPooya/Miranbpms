@@ -1,0 +1,722 @@
+@* Partial View: مجوزهای سیستم *@
+@{
+    var activeCategory = ViewBag.ActiveCategory as string ?? "general";
+    var catTitle = activeCategory switch {
+        "secretariat"  => "مجوزهای دبیرخانه",
+        "formbuilder"  => "مجوزهای فرمساز",
+        "report"       => "مجوزهای گزارش ساز",
+        _              => "مجوزهای عمومی"
+    };
+    var catIcon = activeCategory switch {
+        "secretariat"  => "fa-solid fa-stamp",
+        "formbuilder"  => "fa-solid fa-file-lines",
+        "report"       => "fa-solid fa-chart-bar",
+        _              => "fa-solid fa-key"
+    };
+    var isFormbuilder = activeCategory == "formbuilder";
+}
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+    <h5 class="fw-bold mb-0">
+        <i class="@catIcon me-2 text-primary"></i>
+        @catTitle
+    </h5>
+</div>
+
+<!-- Count badge -->
+<div class="d-flex justify-content-end mb-2">
+    <span class="badge bg-secondary" id="perm-count"></span>
+</div>
+
+@if (isFormbuilder)
+{
+    <!-- Formbuilder: Tree View Layout -->
+    <div class="row g-3">
+        <!-- Tree Panel -->
+        <div class="col-md-4">
+            <div class="card border rounded-3 h-100">
+                <div class="card-header bg-light py-2">
+                    <h6 class="mb-0 fw-semibold small">
+                        <i class="fa-solid fa-folder-tree me-2 text-primary"></i>
+                        فرم‌ها
+                    </h6>
+                </div>
+                <div class="card-body p-2" id="perm-tree-container" style="max-height: 500px; overflow-y: auto;">
+                    <div class="text-center py-3 text-muted small">
+                        <i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Permissions Table Panel -->
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small" id="perm-table-header">
+                    <i class="fa-solid fa-list me-1"></i>
+                    یک فرم از درخت سمت چپ انتخاب کنید
+                </span>
+                <span class="badge bg-secondary" id="perm-sub-count"></span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm" style="font-size:0.85rem;">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="40">#</th>
+                            <th width="110">کد مجوز</th>
+                            <th>نام مجوز</th>
+                            <th width="70" class="text-center">وضعیت</th>
+                            <th width="100" class="text-center">تخصیص</th>
+                        </tr>
+                    </thead>
+                    <tbody id="perm-tbody">
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="fa-solid fa-hand-pointer me-2"></i>فرمی انتخاب نشده
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- General / Other Categories: Simple Table -->
+    <div class="table-responsive">
+        <table class="table table-hover table-sm" style="font-size:0.85rem;">
+            <thead class="table-light">
+                <tr>
+                    <th width="40">#</th>
+                    <th width="110">کد مجوز</th>
+                    <th>نام مجوز</th>
+                    <th>توضیحات</th>
+                    <th width="70" class="text-center">وضعیت</th>
+                    <th width="100" class="text-center">تخصیص</th>
+                </tr>
+            </thead>
+            <tbody id="perm-tbody">
+                <tr>
+                    <td colspan="6" class="text-center py-3">
+                        <i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
+
+<!-- ===== Assignment Modal ===== -->
+<div class="modal" id="permAssignModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title" id="permAssignTitle">
+                    <i class="fa-solid fa-key me-2"></i>تخصیص مجوز
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="row g-3">
+                    <!-- Column: Roles -->
+                    <div class="col-md-6">
+                        <div class="card border rounded-3 h-100">
+                            <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold small">
+                                    <i class="fa-solid fa-user-tie me-1 text-primary"></i>سمت‌های مجاز
+                                </span>
+                                <button class="btn btn-outline-primary btn-sm px-2 py-0" onclick="openRolePickerModal()" title="افزودن سمت">
+                                    <i class="fa-solid fa-plus me-1"></i>افزودن
+                                </button>
+                            </div>
+                            <div class="card-body p-2" id="assign-roles-list" style="min-height:160px; max-height:300px; overflow-y:auto;">
+                                <div class="text-muted text-center small py-3">
+                                    <i class="fa-solid fa-spinner fa-spin me-1"></i>بارگذاری...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column: Groups -->
+                    <div class="col-md-6">
+                        <div class="card border rounded-3 h-100">
+                            <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold small">
+                                    <i class="fa-solid fa-users-rectangle me-1 text-success"></i>گروه‌های کاربری مجاز
+                                </span>
+                                <button class="btn btn-outline-success btn-sm px-2 py-0" onclick="openGroupPickerModal()" title="افزودن گروه">
+                                    <i class="fa-solid fa-plus me-1"></i>افزودن
+                                </button>
+                            </div>
+                            <div class="card-body p-2" id="assign-groups-list" style="min-height:160px; max-height:300px; overflow-y:auto;">
+                                <div class="text-muted text-center small py-3">
+                                    <i class="fa-solid fa-spinner fa-spin me-1"></i>بارگذاری...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark me-1"></i>بستن
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Role Picker Modal ===== -->
+<div class="modal" id="rolePickerPermModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white py-2">
+                <h6 class="modal-title"><i class="fa-solid fa-user-tie me-2"></i>انتخاب سمت</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control form-control-sm" id="rpp-code" placeholder="کد سمت..." dir="ltr" onkeydown="if(event.key==='Enter') searchRolesPicker()">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control form-control-sm" id="rpp-corr" placeholder="عنوان مکاتبه‌ای..." onkeydown="if(event.key==='Enter') searchRolesPicker()">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control form-control-sm" id="rpp-display" placeholder="عنوان نمایشی..." onkeydown="if(event.key==='Enter') searchRolesPicker()">
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-info btn-sm w-100" onclick="searchRolesPicker()">
+                            <i class="fa-solid fa-search me-1"></i>جستجو
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height:360px; overflow-y:auto;">
+                    <table class="table table-hover table-sm" style="font-size:0.82rem;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th width="34">#</th>
+                                <th>کد سمت</th>
+                                <th>نام سمت</th>
+                                <th>عنوان مکاتبه‌ای</th>
+                                <th>عنوان نمایشی</th>
+                                <th>سازمان</th>
+                                <th>واحد</th>
+                                <th width="60">انتخاب</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rpp-tbody">
+                            <tr><td colspan="8" class="text-center text-muted py-3">جستجو کنید...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-muted small mt-2" id="rpp-count"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Group Picker Modal ===== -->
+<div class="modal" id="groupPickerPermModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white py-2">
+                <h6 class="modal-title"><i class="fa-solid fa-users-rectangle me-2"></i>انتخاب گروه کاربری</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="row g-2 mb-2">
+                    <div class="col-8">
+                        <input type="text" class="form-control form-control-sm" id="gpp-search" placeholder="نام گروه یا نام سمت..." onkeydown="if(event.key==='Enter') searchGroupsPicker()">
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-success btn-sm w-100" onclick="searchGroupsPicker()">
+                            <i class="fa-solid fa-search me-1"></i>جستجو
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height:360px; overflow-y:auto;">
+                    <table class="table table-hover table-sm" style="font-size:0.82rem;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th width="34">#</th>
+                                <th>کد گروه</th>
+                                <th>نام گروه</th>
+                                <th>سمت‌های عضو</th>
+                                <th width="60">انتخاب</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gpp-tbody">
+                            <tr><td colspan="5" class="text-center text-muted py-3">جستجو کنید...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-muted small mt-2" id="gpp-count"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .perm-tree-node {}
+    .perm-tree-header {
+        display: flex;
+        align-items: center;
+        padding: 4px 6px;
+        cursor: pointer;
+        border-radius: 4px;
+        white-space: nowrap;
+        font-size: 0.84rem;
+        transition: background 0.15s;
+    }
+    .perm-tree-header:hover { background: rgba(13,110,253,0.07); }
+    .perm-tree-header.selected { background: #cfe2ff; font-weight: 600; }
+    .perm-tree-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        min-width: 18px;
+        font-size: 0.68rem;
+        color: #6c757d;
+        cursor: pointer;
+    }
+    .perm-tree-toggle.invisible { visibility: hidden; }
+    .perm-tree-children { padding-right: 18px; }
+    .perm-tree-badge {
+        font-size: 0.68rem;
+        margin-right: 6px;
+        padding: 1px 5px;
+    }
+    .assign-chip {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin-bottom: 4px;
+        font-size: 0.82rem;
+    }
+    .assign-chip .chip-remove {
+        cursor: pointer;
+        color: #dc3545;
+        font-size: 0.75rem;
+        padding: 2px 4px;
+    }
+    .assign-chip .chip-remove:hover { color: #a71d2a; }
+</style>
+
+<script>
+(function () {
+    // ===== State =====
+    var allPermissions = [];
+    var formsList = [];
+    var currentCategory = '@activeCategory';
+    var isFormbuilder = @(isFormbuilder ? "true" : "false");
+    var assignModalInst = null;
+    var rolePickerInst = null;
+    var groupPickerInst = null;
+    var assignPermissionId = null;
+    var assignPermissionName = '';
+    var assignCurrentRoles = [];
+    var assignCurrentGroups = [];
+    var selectedFormCode = null;
+    var selectedTreeEl = null;
+
+    // ===== Init =====
+    var aEl = document.getElementById('permAssignModal');
+    if (aEl) assignModalInst = new bootstrap.Modal(aEl);
+    var rpEl = document.getElementById('rolePickerPermModal');
+    if (rpEl) rolePickerInst = new bootstrap.Modal(rpEl);
+    var gpEl = document.getElementById('groupPickerPermModal');
+    if (gpEl) groupPickerInst = new bootstrap.Modal(gpEl);
+
+    if (isFormbuilder) {
+        loadFormbuilderTree();
+    } else {
+        loadPermissions();
+    }
+
+    // ===== Load Permissions (General / non-formbuilder) =====
+    async function loadPermissions() {
+        try {
+            var res = await fetch('/api/settings/permissions/by-category');
+            var result = await res.json();
+            if (result.success) {
+                allPermissions = result.data;
+                renderPermTable();
+            }
+        } catch (e) {
+            document.getElementById('perm-tbody').innerHTML =
+                '<tr><td colspan="6" class="text-center py-3 text-danger">خطا در بارگذاری مجوزها</td></tr>';
+        }
+    }
+
+    function renderPermTable() {
+        var tbody = document.getElementById('perm-tbody');
+        var filtered = allPermissions.filter(function(p) {
+            var cat = (p.category || 'general').toLowerCase();
+            return cat === currentCategory;
+        });
+        document.getElementById('perm-count').textContent = filtered.length + ' مجوز';
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">مجوزی در این دسته تعریف نشده</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(function(p, i) {
+            return '<tr onclick="openAssignPopup(\'' + p.id + '\',\'' + esc(p.permissionName) + '\')" style="cursor:pointer;" title="کلیک برای تخصیص">' +
+                '<td>' + (i + 1) + '</td>' +
+                '<td><code class="small">' + esc(p.permissionCode) + '</code></td>' +
+                '<td><strong class="small">' + esc(p.permissionName) + '</strong></td>' +
+                '<td class="text-muted small">' + (p.description ? esc(p.description) : '-') + '</td>' +
+                '<td class="text-center">' + (p.isActive ? '<span class="badge bg-success">فعال</span>' : '<span class="badge bg-danger">غیرفعال</span>') + '</td>' +
+                '<td class="text-center">' +
+                    '<button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation();openAssignPopup(\'' + p.id + '\',\'' + esc(p.permissionName) + '\')" title="مدیریت تخصیص">' +
+                        '<i class="fa-solid fa-users me-1"></i>تخصیص' +
+                    '</button>' +
+                '</td>' +
+            '</tr>';
+        }).join('');
+    }
+
+    // ===== Formbuilder: Load Forms from Forms Table =====
+    async function loadFormbuilderTree() {
+        try {
+            var res = await fetch('/api/settings/permissions/formbuilder-tree');
+            var result = await res.json();
+            if (result.success) {
+                formsList = result.data || [];
+
+                var totalPerms = formsList.reduce(function(sum, f) { return sum + (f.permissionCount || 0); }, 0);
+                document.getElementById('perm-count').textContent = totalPerms + ' مجوز در ' + formsList.length + ' فرم';
+
+                renderFormTree();
+            }
+        } catch (e) {
+            document.getElementById('perm-tree-container').innerHTML =
+                '<div class="text-danger text-center small py-3">خطا در بارگذاری</div>';
+        }
+    }
+
+    function renderFormTree() {
+        var container = document.getElementById('perm-tree-container');
+        if (!formsList || formsList.length === 0) {
+            container.innerHTML = '<div class="text-muted text-center small py-3"><i class="fa-solid fa-folder-open me-1"></i>فرمی در فرمساز تعریف نشده</div>';
+            return;
+        }
+
+        var html = '';
+        formsList.forEach(function(f) {
+            var permCount = f.permissionCount || 0;
+            html += '<div class="perm-tree-node" id="permTreeForm_' + f.formCode + '">' +
+                '<div class="perm-tree-header" onclick="selectForm(\'' + esc(f.formCode) + '\',\'' + esc(f.nameFa) + '\')">' +
+                    '<i class="fa-solid fa-file-lines me-1 text-primary"></i>' +
+                    '<span>' + esc(f.nameFa) + '</span>' +
+                    '<span class="badge bg-primary-subtle text-primary perm-tree-badge">' + permCount + '</span>' +
+                '</div>' +
+            '</div>';
+        });
+
+        container.innerHTML = html;
+    }
+
+    // ===== Form Selection → Load Permissions =====
+    window.selectForm = async function(formCode, formName) {
+        if (selectedTreeEl) selectedTreeEl.classList.remove('selected');
+        var header = document.querySelector('#permTreeForm_' + formCode + ' > .perm-tree-header');
+        if (header) { header.classList.add('selected'); selectedTreeEl = header; }
+        selectedFormCode = formCode;
+
+        document.getElementById('perm-table-header').innerHTML =
+            '<i class="fa-solid fa-file-lines me-1 text-primary"></i>مجوزهای فرم: <strong>' + esc(formName) + '</strong>';
+
+        var tbody = document.getElementById('perm-tbody');
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>بارگذاری...</td></tr>';
+
+        try {
+            var res = await fetch('/api/settings/permissions/by-form/' + encodeURIComponent(formCode));
+            var result = await res.json();
+            var perms = (result.success ? result.data : []) || [];
+
+            document.getElementById('perm-sub-count').textContent = perms.length + ' مجوز';
+
+            if (perms.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">مجوزی برای این فرم تعریف نشده</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = perms.map(function(p, i) {
+                return '<tr onclick="openAssignPopup(\'' + p.id + '\',\'' + esc(p.permissionName) + '\')" style="cursor:pointer;" title="کلیک برای تخصیص">' +
+                    '<td>' + (i + 1) + '</td>' +
+                    '<td><code class="small">' + esc(p.permissionCode) + '</code></td>' +
+                    '<td><strong class="small">' + esc(p.permissionName) + '</strong></td>' +
+                    '<td class="text-center">' + (p.isActive !== false ? '<span class="badge bg-success">فعال</span>' : '<span class="badge bg-danger">غیرفعال</span>') + '</td>' +
+                    '<td class="text-center">' +
+                        '<button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation();openAssignPopup(\'' + p.id + '\',\'' + esc(p.permissionName) + '\')" title="مدیریت تخصیص">' +
+                            '<i class="fa-solid fa-users me-1"></i>تخصیص' +
+                        '</button>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        } catch (e) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-danger">خطا در بارگذاری مجوزها</td></tr>';
+        }
+    };
+
+    // ===== Assignment Popup =====
+    window.openAssignPopup = async function(permId, permName) {
+        assignPermissionId = permId;
+        assignPermissionName = permName;
+        assignCurrentRoles = [];
+        assignCurrentGroups = [];
+        document.getElementById('permAssignTitle').innerHTML =
+            '<i class="fa-solid fa-key me-2"></i>تخصیص مجوز: ' + esc(permName);
+        document.getElementById('assign-roles-list').innerHTML =
+            '<div class="text-muted text-center small py-3"><i class="fa-solid fa-spinner fa-spin me-1"></i>بارگذاری...</div>';
+        document.getElementById('assign-groups-list').innerHTML =
+            '<div class="text-muted text-center small py-3"><i class="fa-solid fa-spinner fa-spin me-1"></i>بارگذاری...</div>';
+
+        assignModalInst?.show();
+
+        try {
+            var res = await fetch('/api/settings/permissions/' + permId + '/assignments');
+            var result = await res.json();
+            if (result.success) {
+                assignCurrentRoles = result.roles || [];
+                assignCurrentGroups = result.groups || [];
+            }
+        } catch (e) { /* silent */ }
+
+        renderAssignRoles();
+        renderAssignGroups();
+    };
+
+    // ===== Roles Column =====
+    function renderAssignRoles() {
+        var container = document.getElementById('assign-roles-list');
+        if (assignCurrentRoles.length === 0) {
+            container.innerHTML = '<div class="text-muted text-center small py-3"><i class="fa-solid fa-user-tie me-1"></i>سمتی اضافه نشده</div>';
+            return;
+        }
+        container.innerHTML = assignCurrentRoles.map(function(r) {
+            return '<div class="assign-chip">' +
+                '<span>' +
+                    '<i class="fa-solid fa-user-tie me-1 text-primary"></i>' +
+                    '<strong>' + esc(r.roleName) + '</strong>' +
+                    ' <span class="text-muted">(' + esc(r.roleCode) + ')</span>' +
+                '</span>' +
+                '<span class="chip-remove" onclick="removeAssignRole(\'' + r.roleId + '\')" title="حذف">' +
+                    '<i class="fa-solid fa-trash"></i>' +
+                '</span>' +
+            '</div>';
+        }).join('');
+    }
+
+    function renderAssignGroups() {
+        var container = document.getElementById('assign-groups-list');
+        if (assignCurrentGroups.length === 0) {
+            container.innerHTML = '<div class="text-muted text-center small py-3"><i class="fa-solid fa-users-rectangle me-1"></i>گروهی اضافه نشده</div>';
+            return;
+        }
+        container.innerHTML = assignCurrentGroups.map(function(g) {
+            return '<div class="assign-chip">' +
+                '<span>' +
+                    '<i class="fa-solid fa-users-rectangle me-1 text-success"></i>' +
+                    '<strong>' + esc(g.groupName) + '</strong>' +
+                    ' <span class="text-muted">(' + esc(g.groupCode) + ')</span>' +
+                '</span>' +
+                '<span class="chip-remove" onclick="removeAssignGroup(\'' + g.groupId + '\')" title="حذف">' +
+                    '<i class="fa-solid fa-trash"></i>' +
+                '</span>' +
+            '</div>';
+        }).join('');
+    }
+
+    window.removeAssignRole = async function(roleId) {
+        try {
+            var res = await fetch('/api/settings/permissions/' + assignPermissionId + '/role/' + roleId, { method: 'DELETE' });
+            if (res.ok) {
+                assignCurrentRoles = assignCurrentRoles.filter(function(r) { return r.roleId !== roleId; });
+                renderAssignRoles();
+            }
+        } catch (e) { alert('خطا در اتصال به سرور'); }
+    };
+
+    window.removeAssignGroup = async function(groupId) {
+        try {
+            var res = await fetch('/api/settings/permissions/' + assignPermissionId + '/group/' + groupId, { method: 'DELETE' });
+            if (res.ok) {
+                assignCurrentGroups = assignCurrentGroups.filter(function(g) { return g.groupId !== groupId; });
+                renderAssignGroups();
+            }
+        } catch (e) { alert('خطا در اتصال به سرور'); }
+    };
+
+    // ===== Role Picker Modal =====
+    window.openRolePickerModal = function() {
+        document.getElementById('rpp-code').value = '';
+        document.getElementById('rpp-corr').value = '';
+        document.getElementById('rpp-display').value = '';
+        document.getElementById('rpp-tbody').innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">جستجو کنید...</td></tr>';
+        document.getElementById('rpp-count').textContent = '';
+        rolePickerInst?.show();
+    };
+
+    window.searchRolesPicker = async function() {
+        var code = document.getElementById('rpp-code').value.trim();
+        var corr = document.getElementById('rpp-corr').value.trim();
+        var display = document.getElementById('rpp-display').value.trim();
+
+        // Build combined search
+        var search = [code, corr, display].filter(function(s) { return s; }).join(' ');
+        if (!search) {
+            // If no search, load all
+            search = '';
+        }
+
+        var url = '/api/settings/roles/tree-picker';
+        if (search) url += '?search=' + encodeURIComponent(search);
+
+        try {
+            var res = await fetch(url);
+            var result = await res.json();
+            if (!result.success) return;
+
+            var roles = result.data || [];
+
+            // Client-side filter for more specific matching
+            if (code || corr || display) {
+                roles = roles.filter(function(r) {
+                    var matchCode = !code || (r.roleCode && r.roleCode.toLowerCase().indexOf(code.toLowerCase()) >= 0);
+                    var matchCorr = !corr || (r.correspondenceTitle && r.correspondenceTitle.indexOf(corr) >= 0) || (r.roleName && r.roleName.indexOf(corr) >= 0);
+                    var matchDisplay = !display || (r.displayTitle && r.displayTitle.indexOf(display) >= 0) || (r.roleName && r.roleName.indexOf(display) >= 0);
+                    return matchCode && matchCorr && matchDisplay;
+                });
+            }
+
+            // Exclude already assigned
+            var assignedIds = assignCurrentRoles.map(function(r) { return r.roleId; });
+            roles = roles.filter(function(r) { return assignedIds.indexOf(r.id) < 0; });
+
+            var tbody = document.getElementById('rpp-tbody');
+            document.getElementById('rpp-count').textContent = roles.length + ' سمت';
+
+            if (roles.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">نتیجه‌ای یافت نشد</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = roles.map(function(r, i) {
+                return '<tr>' +
+                    '<td>' + (i + 1) + '</td>' +
+                    '<td><code>' + esc(r.roleCode) + '</code></td>' +
+                    '<td>' + esc(r.roleName) + '</td>' +
+                    '<td class="small">' + esc(r.correspondenceTitle || '-') + '</td>' +
+                    '<td class="small">' + esc(r.displayTitle || '-') + '</td>' +
+                    '<td class="small">' + esc(r.organizationName || '-') + '</td>' +
+                    '<td class="small">' + esc(r.departmentName || '-') + '</td>' +
+                    '<td class="text-center">' +
+                        '<button class="btn btn-primary btn-sm py-0 px-2" onclick="assignRoleFromPicker(\'' + r.id + '\',\'' + esc(r.roleName) + '\',\'' + esc(r.roleCode) + '\')">' +
+                            '<i class="fa-solid fa-plus"></i>' +
+                        '</button>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        } catch (e) {
+            document.getElementById('rpp-tbody').innerHTML = '<tr><td colspan="8" class="text-center text-danger py-3">خطا در جستجو</td></tr>';
+        }
+    };
+
+    window.assignRoleFromPicker = async function(roleId, roleName, roleCode) {
+        try {
+            var res = await fetch('/api/settings/permissions/' + assignPermissionId + '/assign-role/' + roleId, { method: 'POST' });
+            var result = await res.json();
+            if (res.ok && result.success) {
+                assignCurrentRoles.push({ roleId: roleId, roleName: roleName, roleCode: roleCode });
+                renderAssignRoles();
+                searchRolesPicker(); // Refresh list
+            } else {
+                alert(result.error || 'خطا');
+            }
+        } catch (e) { alert('خطا در اتصال به سرور'); }
+    };
+
+    // ===== Group Picker Modal =====
+    window.openGroupPickerModal = function() {
+        document.getElementById('gpp-search').value = '';
+        document.getElementById('gpp-tbody').innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">جستجو کنید...</td></tr>';
+        document.getElementById('gpp-count').textContent = '';
+        groupPickerInst?.show();
+    };
+
+    window.searchGroupsPicker = async function() {
+        var search = document.getElementById('gpp-search').value.trim();
+
+        var url = '/api/settings/groups/tree-picker';
+        if (search) url += '?search=' + encodeURIComponent(search);
+
+        try {
+            var res = await fetch(url);
+            var result = await res.json();
+            if (!result.success) return;
+
+            var groups = result.data || [];
+
+            // Exclude already assigned
+            var assignedIds = assignCurrentGroups.map(function(g) { return g.groupId; });
+            groups = groups.filter(function(g) { return assignedIds.indexOf(g.id) < 0; });
+
+            var tbody = document.getElementById('gpp-tbody');
+            document.getElementById('gpp-count').textContent = groups.length + ' گروه';
+
+            if (groups.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">نتیجه‌ای یافت نشد</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = groups.map(function(g, i) {
+                var roleNames = (g.roles || []).map(function(r) { return r.roleName || ''; }).filter(function(n) { return n; }).join('، ');
+                return '<tr>' +
+                    '<td>' + (i + 1) + '</td>' +
+                    '<td><code>' + esc(g.groupCode) + '</code></td>' +
+                    '<td><strong>' + esc(g.groupName) + '</strong></td>' +
+                    '<td class="small text-muted">' + (roleNames ? esc(roleNames) : '-') + '</td>' +
+                    '<td class="text-center">' +
+                        '<button class="btn btn-success btn-sm py-0 px-2" onclick="assignGroupFromPicker(\'' + g.id + '\',\'' + esc(g.groupName) + '\',\'' + esc(g.groupCode) + '\')">' +
+                            '<i class="fa-solid fa-plus"></i>' +
+                        '</button>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        } catch (e) {
+            document.getElementById('gpp-tbody').innerHTML = '<tr><td colspan="5" class="text-center text-danger py-3">خطا در جستجو</td></tr>';
+        }
+    };
+
+    window.assignGroupFromPicker = async function(groupId, groupName, groupCode) {
+        try {
+            var res = await fetch('/api/settings/permissions/' + assignPermissionId + '/assign-group/' + groupId, { method: 'POST' });
+            var result = await res.json();
+            if (res.ok && result.success) {
+                assignCurrentGroups.push({ groupId: groupId, groupName: groupName, groupCode: groupCode });
+                renderAssignGroups();
+                searchGroupsPicker(); // Refresh list
+            } else {
+                alert(result.error || 'خطا');
+            }
+        } catch (e) { alert('خطا در اتصال به سرور'); }
+    };
+
+    // ===== Utility =====
+    function esc(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+})();
+</script>

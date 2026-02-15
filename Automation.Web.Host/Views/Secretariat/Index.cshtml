@@ -1,0 +1,277 @@
+@* Partial View: مدیریت دبیرخانه *@
+@{
+    Layout = null;
+}
+
+<ul class="nav nav-underline mb-4 border-bottom" id="secretariat-tabs" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active" id="sec-manage-tab" data-bs-toggle="tab" data-bs-target="#sec-manage-pane" type="button" role="tab">مدیریت دبیرخانه</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="sec-search-tab" data-bs-toggle="tab" data-bs-target="#sec-search-pane" type="button" role="tab">جستجو اسناد دبیرخانه</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="sec-email-tab" data-bs-toggle="tab" data-bs-target="#sec-email-pane" type="button" role="tab">صندوق ایمیل</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="sec-fax-tab" data-bs-toggle="tab" data-bs-target="#sec-fax-pane" type="button" role="tab">صندوق فکس</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="sec-archive-tab" data-bs-toggle="tab" data-bs-target="#sec-archive-pane" type="button" role="tab">بایگانی</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" id="sec-texts-tab" data-bs-toggle="tab" data-bs-target="#sec-texts-pane" type="button" role="tab">متن‌های پرکاربرد</button>
+    </li>
+</ul>
+
+<div class="tab-content" id="secretariat-tab-content">
+    <!-- Manage Tab -->
+    <div class="tab-pane fade show active" id="sec-manage-pane" role="tabpanel">
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-lg-6">
+                <div class="card h-100 border-0 custom-shadow rounded-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <h6 class="fw-bold m-0">کارتابل جاری</h6>
+                            <i class="fa-solid fa-ellipsis-vertical text-muted cursor-pointer"></i>
+                        </div>
+                        <div class="d-flex flex-column gap-2" id="sec-cabinet-list">
+                            <div class="text-center py-3 text-muted">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6">
+                <div class="card h-100 border-0 custom-shadow rounded-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <h6 class="fw-bold m-0">وظایف امروز</h6>
+                            <i class="fa-solid fa-ellipsis-vertical text-muted cursor-pointer"></i>
+                        </div>
+                        <div class="d-flex flex-column gap-2" id="sec-tasks-list">
+                            <div class="text-center py-3 text-muted">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6">
+                <div class="card h-100 border-0 custom-shadow rounded-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <h6 class="fw-bold m-0">آمار نامه‌ها</h6>
+                            <i class="fa-solid fa-chart-pie text-warning"></i>
+                        </div>
+                        <div class="donut-chart">
+                            <div class="donut-inner">
+                                <div class="text-center">
+                                    <h5 class="mb-0" id="sec-total-docs">0</h5>
+                                    <small class="text-muted">کل اسناد</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6">
+                <div class="d-flex flex-column gap-3 h-100">
+                    <div class="card border-0 custom-shadow rounded-4 bg-gradient-blue text-white flex-grow-1">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <div class="d-flex justify-content-between mb-2">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                <i class="fa-regular fa-envelope fs-5"></i>
+                            </div>
+                            <h6 class="m-0">نامه‌های پاسخ داده نشده</h6>
+                            <small class="opacity-75"><span id="sec-unanswered">0</span> مورد</small>
+                        </div>
+                    </div>
+                    <div class="card border-0 custom-shadow rounded-4 bg-left-border flex-grow-1">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                            <div class="d-flex justify-content-between mb-2">
+                                <i class="fa-solid fa-ellipsis-vertical text-muted"></i>
+                                <i class="fa-solid fa-envelope text-primary fs-5"></i>
+                            </div>
+                            <h6 class="m-0 text-dark">ایمیل‌های مشاهده نشده</h6>
+                            <small class="text-muted"><span id="sec-unread-emails">0</span> مورد</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-9">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="card card-hoverable h-100 p-3 bg-white" data-bs-toggle="modal" data-bs-target="#incomingModal">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="fw-bold mb-1">ثبت وارده</h6>
+                                    <small class="text-muted">ثبت نامه‌های دریافتی</small>
+                                </div>
+                                <i class="fa-solid fa-file-import fs-2 text-primary opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-hoverable h-100 p-3 bg-white" data-bs-toggle="modal" data-bs-target="#outgoingModal">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="fw-bold mb-1">ثبت صادره</h6>
+                                    <small class="text-muted">ثبت و صدور نامه</small>
+                                </div>
+                                <i class="fa-solid fa-file-export fs-2 text-primary opacity-75" style="color: var(--brand-purple) !important;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-hoverable h-100 p-3 bg-white">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="fw-bold mb-1">جستجوی اسناد</h6>
+                                    <small class="text-muted">جستجوی پیشرفته</small>
+                                </div>
+                                <i class="fa-solid fa-magnifying-glass-arrow-right fs-2 text-primary opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-hoverable h-100 p-3 bg-white">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="fw-bold mb-1">پیش‌نویس وارده</h6>
+                                    <small class="text-muted">مدیریت پیش‌نویس‌ها</small>
+                                </div>
+                                <i class="fa-solid fa-file-pen fs-2 text-info opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-hoverable h-100 p-3 bg-white">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="fw-bold mb-1">شماره رزرو</h6>
+                                    <small class="text-muted">مدیریت شماره‌ها</small>
+                                </div>
+                                <i class="fa-solid fa-list-ol fs-2 text-warning opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-hoverable h-100 p-3 bg-white">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="fw-bold mb-1">درخواست صادره</h6>
+                                    <small class="text-muted">درخواست صدور نامه</small>
+                                </div>
+                                <i class="fa-solid fa-envelope-open-text fs-2 text-primary opacity-75" style="color: var(--brand-purple) !important;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <div class="card border-0 custom-shadow rounded-4 h-100">
+                    <div class="card-body">
+                        <h6 class="fw-bold border-bottom pb-3 mb-3">
+                            <i class="fa-solid fa-sliders ms-2 text-primary"></i>
+                            ثبت پیش‌فرض‌ها
+                        </h6>
+                        <div class="d-flex flex-column gap-2">
+                            <a href="#" class="d-flex justify-content-between align-items-center p-2 rounded bg-light list-btn">
+                                <small>موضوعات اسناد</small>
+                                <i class="fa-solid fa-chevron-left text-muted" style="font-size:0.7rem"></i>
+                            </a>
+                            <a href="#" class="d-flex justify-content-between align-items-center p-2 rounded bg-light list-btn">
+                                <small>اسامی سازمان‌ها</small>
+                                <i class="fa-solid fa-chevron-left text-muted" style="font-size:0.7rem"></i>
+                            </a>
+                            <a href="#" class="d-flex justify-content-between align-items-center p-2 rounded bg-light list-btn">
+                                <small>توضیحات پیش‌فرض</small>
+                                <i class="fa-solid fa-chevron-left text-muted" style="font-size:0.7rem"></i>
+                            </a>
+                            <a href="#" class="d-flex justify-content-between align-items-center p-2 rounded bg-light list-btn">
+                                <small>موضوعات پرتکرار</small>
+                                <i class="fa-solid fa-chevron-left text-muted" style="font-size:0.7rem"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Tab -->
+    <div class="tab-pane fade" id="sec-search-pane" role="tabpanel">
+        <div class="text-center text-muted py-5">
+            <i class="fa-solid fa-magnifying-glass display-1 mb-3 opacity-25"></i>
+            <h5>جستجوی اسناد دبیرخانه</h5>
+            <p>این بخش در حال توسعه است.</p>
+        </div>
+    </div>
+
+    <!-- Email Tab -->
+    <div class="tab-pane fade" id="sec-email-pane" role="tabpanel">
+        <div class="text-center text-muted py-5">
+            <i class="fa-regular fa-envelope-open display-1 mb-3 opacity-25"></i>
+            <h5>صندوق ایمیل</h5>
+            <p>این بخش در حال توسعه است.</p>
+        </div>
+    </div>
+
+    <!-- Fax Tab -->
+    <div class="tab-pane fade" id="sec-fax-pane" role="tabpanel">
+        <div class="text-center text-muted py-5">
+            <i class="fa-solid fa-fax display-1 mb-3 opacity-25"></i>
+            <h5>صندوق فکس</h5>
+            <p>این بخش در حال توسعه است.</p>
+        </div>
+    </div>
+
+    <!-- Archive Tab -->
+    <div class="tab-pane fade" id="sec-archive-pane" role="tabpanel">
+        <div class="text-center text-muted py-5">
+            <i class="fa-solid fa-archive display-1 mb-3 opacity-25"></i>
+            <h5>بایگانی</h5>
+            <p>این بخش در حال توسعه است.</p>
+        </div>
+    </div>
+
+    <!-- Texts Tab -->
+    <div class="tab-pane fade" id="sec-texts-pane" role="tabpanel">
+        <div class="text-center text-muted py-5">
+            <i class="fa-solid fa-file-text display-1 mb-3 opacity-25"></i>
+            <h5>متن‌های پرکاربرد</h5>
+            <p>این بخش در حال توسعه است.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize immediately (loaded via AJAX, DOMContentLoaded already fired)
+    (function() {
+        loadSecretariatDashboard();
+    })();
+
+    async function loadSecretariatDashboard() {
+        // Load dashboard data
+        // This is a placeholder - actual data loading would be implemented here
+
+        // Cabinet list placeholder
+        document.getElementById('sec-cabinet-list').innerHTML = `
+            <div class="d-flex justify-content-between bg-light list-item p-2 rounded"><span>دبیرخانه مرکزی</span><span class="status-dot bg-success"></span></div>
+            <div class="d-flex justify-content-between bg-light list-item p-2 rounded"><span>دبیرخانه فرعی</span><span class="status-dot bg-warning"></span></div>
+        `;
+
+        // Tasks list placeholder
+        document.getElementById('sec-tasks-list').innerHTML = `
+            <div class="bg-light list-item p-2 rounded d-flex align-items-center opacity-50 text-muted">
+                <i class="fa-regular fa-square ms-2"></i> وظیفه‌ای برای امروز وجود ندارد
+            </div>
+        `;
+    }
+</script>

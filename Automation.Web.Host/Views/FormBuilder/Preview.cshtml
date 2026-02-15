@@ -1,0 +1,458 @@
+@using Automation.Core.Entities
+@{
+    ViewData["Title"] = "پیش‌نمایش فرم";
+    Layout = "_Layout";
+
+    var form = ViewBag.Form as dynamic;
+}
+
+@section Styles {
+    <link href="~/css/formbuilder.css" asp-append-version="true" rel="stylesheet" />
+    <!-- Persian Date Picker -->
+    <link href="https://unpkg.com/@@minasmart/jalali-date-picker@1.2.0/dist/jalali-date-picker.min.css" rel="stylesheet" />
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        .form-preview-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+        .form-footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .form-footer .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        /* Fix Quill editor styles in preview */
+        .ql-container {
+            font-size: 14px;
+            min-height: 200px;
+        }
+        .ql-toolbar {
+            border: 1px solid #ccc;
+            border-radius: 4px 4px 0 0;
+            background: #fafafa;
+            padding: 8px;
+        }
+        .ql-toolbar .ql-formats {
+            margin-right: 8px;
+            display: inline-block;
+        }
+        .ql-toolbar button {
+            width: 28px;
+            height: 28px;
+            padding: 4px;
+            margin: 0 2px;
+        }
+        .ql-toolbar button svg {
+            width: 18px;
+            height: 18px;
+        }
+        .ql-toolbar .ql-stroke {
+            stroke-width: 1.5;
+        }
+        .ql-toolbar .ql-fill {
+            fill: currentColor;
+        }
+        .ql-editor {
+            min-height: 200px;
+            font-size: 14px;
+        }
+        .rich-text-editor-container {
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+        /* Reduce control sizes in preview */
+        .form-preview-container .form-control,
+        .form-preview-container .form-select {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.5rem;
+            line-height: 1.4;
+        }
+        .form-preview-container .form-label {
+            font-size: 0.75rem;
+            margin-bottom: 0.375rem;
+        }
+        .form-preview-container .btn {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.75rem;
+        }
+        .form-preview-container .input-group-text {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.5rem;
+        }
+    </style>
+}
+
+<div class="form-preview-container">
+    <div class="mb-4">
+        <h2>@form?.NameFa</h2>
+        <p class="text-muted">@form?.Description</p>
+    </div>
+
+    <form id="preview-form">
+        <!-- Form fields will be rendered here by JavaScript -->
+        <div id="form-fields-container">
+            <!-- Dynamic content -->
+        </div>
+
+        <!-- Footer with Print Template Button -->
+        <div class="form-footer">
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary" id="btn-print-template-preview">
+                    <i class="bi bi-printer me-1"></i>قالب چاپ
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-save-form">
+                    <i class="bi bi-save me-1"></i>ذخیره
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btn-cancel">
+                    <i class="bi bi-x-lg me-1"></i>انصراف
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Print Template Selection Modal -->
+<div class="modal fade" id="modal-print-template-selection" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-printer me-2"></i>انتخاب قالب چاپ
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="print-templates-list" class="list-group">
+                    <!-- Templates will be loaded here -->
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-hourglass-split"></i> در حال بارگذاری...
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Persian Date Picker -->
+    <script src="https://unpkg.com/@@minasmart/jalali-date-picker@1.2.0/dist/jalali-date-picker.js"></script>
+    <!-- Quill Rich Text Editor -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="~/js/formbuilder/formbuilder.js" asp-append-version="true"></script>
+    
+    <script>
+        const formId = '@form?.Id';
+        const formDesignData = @Html.Raw(form?.DesignData ?? "null");
+        const formCanvasSize = @Html.Raw(form?.CanvasSize ?? "\"{\\\"width\\\":\\\"100%\\\",\\\"height\\\":\\\"auto\\\"}\"");
+        
+        // Apply canvas size to preview container
+        function applyCanvasSizeToPreview() {
+            const container = document.querySelector('.form-preview-container');
+            if (!container || !formCanvasSize) return;
+            
+            try {
+                const size = typeof formCanvasSize === 'string' ? JSON.parse(formCanvasSize) : formCanvasSize;
+                if (size.width) {
+                    container.style.width = size.width;
+                    container.style.maxWidth = size.width;
+                }
+                if (size.height && size.height !== "auto") {
+                    container.style.height = size.height;
+                    container.style.minHeight = size.height;
+                }
+            } catch (e) {
+                console.error("Error applying canvas size to preview:", e);
+            }
+        }
+        
+        // Render form fields
+        document.addEventListener('DOMContentLoaded', function() {
+            applyCanvasSizeToPreview();
+            renderFormFields();
+            setupEventListeners();
+            loadPrintTemplates();
+        });
+
+        function renderFormFields() {
+            const container = document.getElementById('form-fields-container');
+            
+            if (!formDesignData || !formDesignData.elements || formDesignData.elements.length === 0) {
+                container.innerHTML = '<p class="text-muted">فرم هنوز طراحی نشده است</p>';
+                return;
+            }
+
+            // Create a minimal FormBuilderEngine instance for rendering
+            const previewEngine = new FormBuilderEngine({
+                formId: formId,
+                isNew: false,
+                initialData: formDesignData,
+                fieldTypes: []
+            });
+
+            // Render all elements using the engine
+            const renderRecursive = (elements, parentContainer) => {
+                elements.forEach(el => {
+                    const wrapper = document.createElement("div");
+                    wrapper.className = "mb-3";
+                    wrapper.dataset.id = el.id;
+                    
+                    // Apply styles (but remove builder-specific styles)
+                    if (el.style) {
+                        const previewStyle = { ...el.style };
+                        // Remove builder controls
+                        delete previewStyle.cursor;
+                        Object.assign(wrapper.style, previewStyle);
+                    }
+                    
+                    // Render content
+                    if (el.children && el.children.length > 0) {
+                        renderRecursive(el.children, wrapper);
+                    } else {
+                        // Use engine's getControlHtml method
+                        wrapper.innerHTML = previewEngine.getControlHtml(el);
+                    }
+                    
+                    parentContainer.appendChild(wrapper);
+                });
+            };
+
+            renderRecursive(formDesignData.elements, container);
+
+            // Initialize controls after rendering
+            setTimeout(() => {
+                initializePreviewControls();
+            }, 100);
+        }
+
+        function initializePreviewControls() {
+            // Initialize Rich Text Editors
+            document.querySelectorAll('.rich-text-editor-container').forEach(container => {
+                const editorId = container.id.replace('editor_', '');
+                if (container.dataset.initialized === 'true') return;
+                
+                if (typeof Quill !== 'undefined') {
+                    try {
+                        const quill = new Quill(container, {
+                            theme: 'snow',
+                            modules: {
+                                toolbar: [
+                                    [{ 'header': [1, 2, 3, false] }],
+                                    ['bold', 'italic', 'underline', 'strike'],
+                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                    [{ 'color': [] }, { 'background': [] }],
+                                    ['link', 'image'],
+                                    ['clean']
+                                ]
+                            },
+                            placeholder: 'متن خود را اینجا بنویسید...'
+                        });
+                        container.dataset.initialized = 'true';
+                    } catch (error) {
+                        console.error('Error initializing Quill:', error);
+                    }
+                }
+            });
+
+            // Initialize Persian Date Pickers
+            if (typeof jalaliDatepicker !== 'undefined') {
+                try {
+                    // Wait a bit for DOM to be ready
+                    setTimeout(() => {
+                        // Start watch for all date pickers - this should be called once
+                        jalaliDatepicker.startWatch({
+                            minDate: 'attr',
+                            maxDate: 'attr',
+                            time: false
+                        });
+                        
+                        // Mark all inputs as initialized
+                        document.querySelectorAll('.persian-datepicker[data-jdp]').forEach(input => {
+                            input.dataset.initialized = 'true';
+                            // Ensure the input is clickable
+                            input.removeAttribute('readonly');
+                            input.style.cursor = 'pointer';
+                        });
+                    }, 200);
+                } catch (error) {
+                    console.error('Error initializing Persian Date Picker:', error);
+                }
+            }
+
+            // Initialize Signature Pads
+            document.querySelectorAll('canvas[id^="sig_canvas_"]').forEach(canvas => {
+                if (canvas.dataset.initialized === 'true') return;
+                
+                if (typeof SignaturePad !== 'undefined') {
+                    try {
+                        const signaturePad = new SignaturePad(canvas, {
+                            backgroundColor: 'rgb(255, 255, 255)',
+                            penColor: 'rgb(0, 0, 0)'
+                        });
+                        canvas.dataset.initialized = 'true';
+                    } catch (error) {
+                        console.error('Error initializing SignaturePad:', error);
+                    }
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            document.getElementById('btn-print-template-preview').addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('modal-print-template-selection'));
+                modal.show();
+            });
+
+            document.getElementById('btn-cancel').addEventListener('click', function() {
+                window.history.back();
+            });
+        }
+
+        async function loadPrintTemplates() {
+            try {
+                const response = await fetch(`/api/formbuilder/forms/${formId}/printtemplates`);
+                const templates = await response.json();
+                
+                const listContainer = document.getElementById('print-templates-list');
+                
+                if (!templates || templates.length === 0) {
+                    listContainer.innerHTML = `
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-inbox"></i>
+                            <p class="mt-2">هیچ قالب چاپی تعریف نشده است</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                listContainer.innerHTML = templates.map(template => `
+                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" 
+                         data-template-id="${template.id}" 
+                         style="cursor: pointer;">
+                        <div>
+                            <h6 class="mb-1">${template.name}</h6>
+                            ${template.description ? `<small class="text-muted">${template.description}</small>` : ''}
+                        </div>
+                        <button class="btn btn-sm btn-primary btn-view-template" data-template-id="${template.id}">
+                            <i class="bi bi-eye me-1"></i>مشاهده
+                        </button>
+                    </div>
+                `).join('');
+
+                // Add click handlers
+                listContainer.querySelectorAll('.list-group-item').forEach(item => {
+                    const templateId = item.dataset.templateId;
+                    
+                    // Double click handler
+                    item.addEventListener('dblclick', () => {
+                        openPrintTemplate(templateId);
+                    });
+                });
+
+                // View button handlers
+                listContainer.querySelectorAll('.btn-view-template').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openPrintTemplate(btn.dataset.templateId);
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading print templates:', error);
+                document.getElementById('print-templates-list').innerHTML = `
+                    <div class="alert alert-danger">
+                        خطا در بارگذاری قالب‌های چاپ
+                    </div>
+                `;
+            }
+        }
+
+        async function openPrintTemplate(templateId) {
+            try {
+                // Collect form data
+                const formData = collectFormData();
+                
+                // Generate Word document
+                const response = await fetch(`/api/formbuilder/printtemplates/${templateId}/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success && result.filePath) {
+                    // Open the generated Word document
+                    window.open(result.filePath, '_blank');
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modal-print-template-selection'));
+                    if (modal) modal.hide();
+                } else {
+                    alert('خطا در تولید فایل Word: ' + (result.error || 'خطای نامشخص'));
+                }
+            } catch (error) {
+                console.error('Error opening print template:', error);
+                alert('خطا در باز کردن قالب چاپ');
+            }
+        }
+
+        function collectFormData() {
+            const form = document.getElementById('preview-form');
+            const formData = {};
+            
+            // Collect all form field values
+            form.querySelectorAll('input, select, textarea').forEach(field => {
+                if (field.name) {
+                    formData[field.name] = field.value;
+                }
+            });
+
+            // Collect Rich Text Editor values
+            document.querySelectorAll('.rich-text-editor-container').forEach(container => {
+                const hiddenInput = document.getElementById(container.id.replace('editor_', 'editor_input_'));
+                if (hiddenInput && hiddenInput.name) {
+                    const quill = container.__quill;
+                    if (quill) {
+                        formData[hiddenInput.name] = quill.root.innerHTML;
+                    } else if (hiddenInput.value) {
+                        formData[hiddenInput.name] = hiddenInput.value;
+                    }
+                }
+            });
+
+            // Collect Signature values
+            document.querySelectorAll('canvas[id^="sig_canvas_"]').forEach(canvas => {
+                const hiddenInput = document.getElementById(canvas.id.replace('sig_canvas_', 'sig_input_'));
+                if (hiddenInput && hiddenInput.name) {
+                    const signaturePad = canvas.__signaturePad;
+                    if (signaturePad && !signaturePad.isEmpty()) {
+                        formData[hiddenInput.name] = signaturePad.toDataURL();
+                    }
+                }
+            });
+            
+            return formData;
+        }
+    </script>
+}
+

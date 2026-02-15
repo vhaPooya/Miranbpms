@@ -1,0 +1,69 @@
+@model Automation.Core.DTOs.WorkflowVisualizationDto
+@{
+    ViewData["Title"] = "مشاهده گردش سند";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">گردش سند #@Model.DocumentNumber</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>کاربر</th>
+                                    <th>سمت</th>
+                                    <th>تاریخ دریافت</th>
+                                    <th>تاریخ اولین مشاهده</th>
+                                    <th>تاریخ انجام</th>
+                                    <th>وضعیت</th>
+                                    <th>توضیحات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var tracking in Model.Trackings)
+                                {
+                                    <tr>
+                                        <td>@tracking.UserName</td>
+                                        <td>@tracking.PositionName</td>
+                                        <td>@(tracking.ReceivedDate?.ToString("yyyy/MM/dd HH:mm"))</td>
+                                        <td>@(tracking.FirstViewDate?.ToString("yyyy/MM/dd HH:mm"))</td>
+                                        <td>@(tracking.CompletionDate?.ToString("yyyy/MM/dd HH:mm"))</td>
+                                        <td>
+                                            @switch (tracking.Status)
+                                            {
+                                                case "COMPLETED":
+                                                    <span class="badge badge-success">انجام شده</span>
+                                                    break;
+                                                case "VIEWED":
+                                                    <span class="badge badge-warning">مشاهده شده</span>
+                                                    break;
+                                                case "PENDING":
+                                                    <span class="badge badge-info">در انتظار</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge badge-secondary">@tracking.Status</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>@tracking.Notes</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Add any additional JavaScript here for enhanced visualization
+    </script>
+}

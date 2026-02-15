@@ -1,0 +1,315 @@
+@{
+    Layout = null;
+}
+
+<div class="container-fluid py-3">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fa-solid fa-envelope me-2"></i>
+                    صندوق ایمیل
+                </h5>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary active" onclick="switchEmailTab('inbox')">
+                        <i class="fa-solid fa-inbox me-1"></i>دریافت
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="switchEmailTab('outbox')">
+                        <i class="fa-solid fa-paper-plane me-1"></i>ارسال
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inbox Tab -->
+    <div id="email-inbox-tab" class="email-tab-content">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <i class="fa-solid fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="email-search-input" placeholder="جستجو در ایمیل‌ها...">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex gap-2">
+                    <select class="form-select" id="email-status-filter">
+                        <option value="">همه وضعیت‌ها</option>
+                        <option value="unread">خوانده نشده</option>
+                        <option value="read">خوانده شده</option>
+                        <option value="archived">بایگانی شده</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadEmails('inbox')">
+                        <i class="fa-solid fa-sync me-1"></i>بروزرسانی
+                    </button>
+                    <button class="btn btn-success" onclick="showNewEmailModal()">
+                        <i class="fa-solid fa-plus me-1"></i>ایجاد ایمیل جدید
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 custom-shadow rounded-4">
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                    <table class="table table-hover mb-0" id="email-inbox-table">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th style="width: 50px;">
+                                    <input type="checkbox" id="select-all-emails">
+                                </th>
+                                <th style="width: 50px;"></th>
+                                <th>فرستنده</th>
+                                <th>موضوع</th>
+                                <th style="width: 150px;">تاریخ</th>
+                                <th style="width: 100px;">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="email-inbox-tbody">
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outbox Tab -->
+    <div id="email-outbox-tab" class="email-tab-content" style="display: none;">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <i class="fa-solid fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="email-outbox-search-input" placeholder="جستجو در ایمیل‌های ارسالی...">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex gap-2">
+                    <select class="form-select" id="email-outbox-status-filter">
+                        <option value="">همه وضعیت‌ها</option>
+                        <option value="sent">ارسال شده</option>
+                        <option value="failed">ناموفق</option>
+                        <option value="draft">پیش‌نویس</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadEmails('outbox')">
+                        <i class="fa-solid fa-sync me-1"></i>بروزرسانی
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 custom-shadow rounded-4">
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                    <table class="table table-hover mb-0" id="email-outbox-table">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th style="width: 50px;">
+                                    <input type="checkbox" id="select-all-outbox-emails">
+                                </th>
+                                <th>گیرنده</th>
+                                <th>موضوع</th>
+                                <th style="width: 150px;">تاریخ ارسال</th>
+                                <th style="width: 100px;">وضعیت</th>
+                                <th style="width: 100px;">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="email-outbox-tbody">
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Email Modal -->
+<div class="modal fade" id="newEmailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ایجاد ایمیل جدید</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="new-email-form">
+                    <div class="mb-3">
+                        <label class="form-label">گیرنده</label>
+                        <input type="email" class="form-control" id="email-to" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">موضوع</label>
+                        <input type="text" class="form-control" id="email-subject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">متن ایمیل</label>
+                        <textarea class="form-control" id="email-body" rows="10" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">پیوست</label>
+                        <input type="file" class="form-control" id="email-attachments" multiple>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" onclick="sendEmail()">ارسال</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentEmailTab = 'inbox';
+    let emailCurrentPage = 1;
+    let emailPageSize = 20;
+
+    function switchEmailTab(tab) {
+        currentEmailTab = tab;
+        document.querySelectorAll('.email-tab-content').forEach(el => el.style.display = 'none');
+        document.getElementById(`email-${tab}-tab`).style.display = 'block';
+        
+        document.querySelectorAll('.btn-group button').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        loadEmails(tab);
+    }
+
+    async function loadEmails(type) {
+        const tbody = document.getElementById(`email-${type}-tbody`);
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...</td></tr>';
+
+        try {
+            const response = await fetch(`/api/email?messageType=${type}&page=${emailCurrentPage}&pageSize=${emailPageSize}`);
+            const result = await response.json();
+
+            if (result.success && result.data && result.data.items) {
+                renderEmails(type, result.data.items);
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">ایمیلی یافت نشد</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error loading emails:', error);
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-danger">خطا در بارگذاری ایمیل‌ها</td></tr>';
+        }
+    }
+
+    function renderEmails(type, emails) {
+        const tbody = document.getElementById(`email-${type}-tbody`);
+        tbody.innerHTML = '';
+
+        if (emails.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">ایمیلی یافت نشد</td></tr>';
+            return;
+        }
+
+        emails.forEach(email => {
+            const tr = document.createElement('tr');
+            tr.className = email.isRead ? '' : 'table-active';
+            
+            if (type === 'inbox') {
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="email-checkbox" value="${email.id}"></td>
+                    <td><i class="fa-${email.isRead ? 'regular' : 'solid'} fa-envelope${email.isRead ? '-open' : ''} ${email.isRead ? 'text-muted' : 'text-primary'}"></i></td>
+                    <td>${email.fromEmail || '-'}</td>
+                    <td>${email.subject || '-'}</td>
+                    <td>${new Date(email.createdDateTime).toLocaleDateString('fa-IR')}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewEmail('${email.id}')" title="مشاهده">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </td>
+                `;
+            } else {
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="email-checkbox" value="${email.id}"></td>
+                    <td>${email.toEmail || '-'}</td>
+                    <td>${email.subject || '-'}</td>
+                    <td>${new Date(email.createdDateTime).toLocaleDateString('fa-IR')}</td>
+                    <td>
+                        <span class="badge bg-${email.status === 'SENT' ? 'success' : email.status === 'FAILED' ? 'danger' : 'warning'}">
+                            ${email.status === 'SENT' ? 'ارسال شده' : email.status === 'FAILED' ? 'ناموفق' : 'پیش‌نویس'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewEmail('${email.id}')" title="مشاهده">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </td>
+                `;
+            }
+            
+            tbody.appendChild(tr);
+        });
+    }
+
+    function showNewEmailModal() {
+        const modal = new bootstrap.Modal(document.getElementById('newEmailModal'));
+        modal.show();
+    }
+
+    async function sendEmail() {
+        const form = document.getElementById('new-email-form');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const formData = {
+            toEmail: document.getElementById('email-to').value,
+            subject: document.getElementById('email-subject').value,
+            body: document.getElementById('email-body').value,
+            isHtml: false
+        };
+
+        try {
+            const response = await fetch('/api/email/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('ایمیل با موفقیت ارسال شد');
+                bootstrap.Modal.getInstance(document.getElementById('newEmailModal')).hide();
+                loadEmails('outbox');
+            } else {
+                alert('خطا در ارسال ایمیل: ' + (result.error || 'خطای نامشخص'));
+            }
+        } catch (error) {
+            console.error('Error sending email:', error);
+            alert('خطا در ارسال ایمیل');
+        }
+    }
+
+    function viewEmail(emailId) {
+        window.location.href = `/email/view/${emailId}`;
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        loadEmails('inbox');
+        
+        document.getElementById('email-search-input')?.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                // TODO: Implement search
+                loadEmails('inbox');
+            }
+        });
+    });
+</script>
+

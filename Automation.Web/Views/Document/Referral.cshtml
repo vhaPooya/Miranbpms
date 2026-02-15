@@ -1,0 +1,177 @@
+@{
+    ViewData["Title"] = "ارجاع مدرک";
+    Layout = "_LayoutGlass";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0" style="font-size: 1rem;">ارجاع مدرک</h4>
+                </div>
+                <div class="card-body" style="font-size: 0.875rem;">
+                    <form id="referralForm">
+                        <input type="hidden" id="documentId" value="@ViewBag.DocumentId">
+                        <input type="hidden" id="formId" value="@ViewBag.FormId">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label" style="font-size: 0.875rem;">نوع عمل <span class="text-danger">*</span></label>
+                                <select id="actionTypeId" class="form-select form-select-sm" required style="font-size: 0.875rem;">
+                                    <option value="">انتخاب کنید...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" style="font-size: 0.875rem;">مهلت انجام</label>
+                                <input type="date" id="dueDate" class="form-control form-control-sm" style="font-size: 0.875rem;">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size: 0.875rem;">ارجاع به کاربران</label>
+                            <select id="referredToUserIds" class="form-select form-select-sm" multiple style="font-size: 0.875rem;">
+                                <option value="">انتخاب کنید...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size: 0.875rem;">ارجاع به نقش‌ها</label>
+                            <select id="referredToRoleIds" class="form-select form-select-sm" multiple style="font-size: 0.875rem;">
+                                <option value="">انتخاب کنید...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size: 0.875rem;">ارجاع به بخش‌ها</label>
+                            <select id="referredToDepartmentIds" class="form-select form-select-sm" multiple style="font-size: 0.875rem;">
+                                <option value="">انتخاب کنید...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size: 0.875rem;">یادداشت</label>
+                            <textarea id="notes" class="form-control form-control-sm" rows="3" style="font-size: 0.875rem;"></textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="submitReferral()" style="font-size: 0.875rem;">ارجاع</button>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="window.history.back()" style="font-size: 0.875rem;">انصراف</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    loadActionTypes();
+    loadUsers();
+    loadRoles();
+    loadDepartments();
+});
+
+function loadActionTypes() {
+    $.ajax({
+        url: '/api/actiontypes',
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                const select = $('#actionTypeId');
+                select.empty().append('<option value="">انتخاب کنید...</option>');
+                response.data.forEach(action => {
+                    select.append(`<option value="${action.id}">${action.actionName}</option>`);
+                });
+            }
+        }
+    });
+}
+
+function loadUsers() {
+    $.ajax({
+        url: '/api/users',
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                const select = $('#referredToUserIds');
+                response.data.forEach(user => {
+                    select.append(`<option value="${user.id}">${user.firstName} ${user.lastName}</option>`);
+                });
+            }
+        }
+    });
+}
+
+function loadRoles() {
+    $.ajax({
+        url: '/api/roles',
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                const select = $('#referredToRoleIds');
+                response.data.forEach(role => {
+                    select.append(`<option value="${role.id}">${role.roleName}</option>`);
+                });
+            }
+        }
+    });
+}
+
+function loadDepartments() {
+    $.ajax({
+        url: '/api/departments',
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                const select = $('#referredToDepartmentIds');
+                response.data.forEach(dept => {
+                    select.append(`<option value="${dept.id}">${dept.departmentName}</option>`);
+                });
+            }
+        }
+    });
+}
+
+function submitReferral() {
+    const documentId = $('#documentId').val();
+    const formId = $('#formId').val();
+    const actionTypeId = $('#actionTypeId').val();
+    
+    if (!actionTypeId) {
+        alert('لطفاً نوع عمل را انتخاب کنید');
+        return;
+    }
+    
+    const data = {
+        formId: formId,
+        actionTypeId: actionTypeId,
+        referredToUserIds: Array.from($('#referredToUserIds').val() || []),
+        referredToRoleIds: Array.from($('#referredToRoleIds').val() || []),
+        referredToDepartmentIds: Array.from($('#referredToDepartmentIds').val() || []),
+        notes: $('#notes').val(),
+        dueDate: $('#dueDate').val() || null
+    };
+    
+    $.ajax({
+        url: `/api/documents/${documentId}/refer`,
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            if (response.success) {
+                alert('مدرک با موفقیت ارجاع شد');
+                window.location.href = '/Cabinet/Inbox';
+            } else {
+                alert('خطا: ' + (response.error || 'خطا در ارجاع مدرک'));
+            }
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON?.error || 'خطا در ارجاع مدرک';
+            alert('خطا: ' + error);
+        }
+    });
+}
+</script>
+

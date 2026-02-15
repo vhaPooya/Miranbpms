@@ -1,0 +1,330 @@
+@{
+    Layout = null;
+}
+
+<div class="container-fluid py-3">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fa-solid fa-fax me-2"></i>
+                    صندوق فکس
+                </h5>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary active" onclick="switchFaxTab('inbox')">
+                        <i class="fa-solid fa-inbox me-1"></i>دریافت
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="switchFaxTab('outbox')">
+                        <i class="fa-solid fa-paper-plane me-1"></i>ارسال
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inbox Tab -->
+    <div id="fax-inbox-tab" class="fax-tab-content">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <i class="fa-solid fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="fax-search-input" placeholder="جستجو در فکس‌ها...">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex gap-2">
+                    <select class="form-select" id="fax-status-filter">
+                        <option value="">همه وضعیت‌ها</option>
+                        <option value="received">دریافت شده</option>
+                        <option value="read">خوانده شده</option>
+                        <option value="archived">بایگانی شده</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadFaxes('inbox')">
+                        <i class="fa-solid fa-sync me-1"></i>بروزرسانی
+                    </button>
+                    <button class="btn btn-success" onclick="showNewFaxModal()">
+                        <i class="fa-solid fa-plus me-1"></i>ارسال فکس جدید
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 custom-shadow rounded-4">
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                    <table class="table table-hover mb-0" id="fax-inbox-table">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th style="width: 50px;">
+                                    <input type="checkbox" id="select-all-faxes">
+                                </th>
+                                <th style="width: 50px;"></th>
+                                <th>فرستنده</th>
+                                <th>شماره فرستنده</th>
+                                <th>موضوع</th>
+                                <th style="width: 150px;">تاریخ</th>
+                                <th style="width: 100px;">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fax-inbox-tbody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outbox Tab -->
+    <div id="fax-outbox-tab" class="fax-tab-content" style="display: none;">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <i class="fa-solid fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="fax-outbox-search-input" placeholder="جستجو در فکس‌های ارسالی...">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex gap-2">
+                    <select class="form-select" id="fax-outbox-status-filter">
+                        <option value="">همه وضعیت‌ها</option>
+                        <option value="sent">ارسال شده</option>
+                        <option value="failed">ناموفق</option>
+                        <option value="pending">در انتظار</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadFaxes('outbox')">
+                        <i class="fa-solid fa-sync me-1"></i>بروزرسانی
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 custom-shadow rounded-4">
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                    <table class="table table-hover mb-0" id="fax-outbox-table">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th style="width: 50px;">
+                                    <input type="checkbox" id="select-all-outbox-faxes">
+                                </th>
+                                <th>گیرنده</th>
+                                <th>شماره گیرنده</th>
+                                <th>موضوع</th>
+                                <th style="width: 150px;">تاریخ ارسال</th>
+                                <th style="width: 100px;">وضعیت</th>
+                                <th style="width: 100px;">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fax-outbox-tbody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Fax Modal -->
+<div class="modal fade" id="newFaxModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ارسال فکس جدید</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="new-fax-form">
+                    <div class="mb-3">
+                        <label class="form-label">گیرنده</label>
+                        <input type="text" class="form-control" id="fax-to-name" placeholder="نام گیرنده">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">شماره فکس گیرنده <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="fax-to-number" required placeholder="02112345678">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">موضوع</label>
+                        <input type="text" class="form-control" id="fax-subject">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">فایل <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="fax-file" accept=".pdf,.tif,.tiff,.jpg,.jpeg,.png" required>
+                        <small class="text-muted">فرمت‌های مجاز: PDF, TIFF, JPG, PNG</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" onclick="sendFax()">ارسال</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentFaxTab = 'inbox';
+    let currentFaxPage = 1;
+    let faxPageSize = 20;
+
+    function switchFaxTab(tab) {
+        currentFaxTab = tab;
+        document.querySelectorAll('.fax-tab-content').forEach(el => el.style.display = 'none');
+        document.getElementById(`fax-${tab}-tab`).style.display = 'block';
+        
+        document.querySelectorAll('#fax-pane .btn-group button').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        loadFaxes(tab);
+    }
+
+    async function loadFaxes(type) {
+        const tbody = document.getElementById(`fax-${type}-tbody`);
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...</td></tr>';
+
+        try {
+            const response = await fetch(`/api/fax?messageType=${type}&page=${currentFaxPage}&pageSize=${faxPageSize}`);
+            const result = await response.json();
+
+            if (result.success && result.data && result.data.items) {
+                renderFaxes(type, result.data.items);
+            } else {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">فکسی یافت نشد</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error loading faxes:', error);
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">خطا در بارگذاری فکس‌ها</td></tr>';
+        }
+    }
+
+    function renderFaxes(type, faxes) {
+        const tbody = document.getElementById(`fax-${type}-tbody`);
+        tbody.innerHTML = '';
+
+        if (faxes.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">فکسی یافت نشد</td></tr>';
+            return;
+        }
+
+        faxes.forEach(fax => {
+            const tr = document.createElement('tr');
+            tr.className = fax.isRead ? '' : 'table-active';
+            
+            if (type === 'inbox') {
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="fax-checkbox" value="${fax.id}"></td>
+                    <td><i class="fa-${fax.isRead ? 'regular' : 'solid'} fa-fax ${fax.isRead ? 'text-muted' : 'text-primary'}"></i></td>
+                    <td>${fax.fromName || '-'}</td>
+                    <td>${fax.fromFaxNumber || '-'}</td>
+                    <td>${fax.subject || '-'}</td>
+                    <td>${new Date(fax.createdDateTime).toLocaleDateString('fa-IR')}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewFax('${fax.id}')" title="مشاهده">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="downloadFax('${fax.id}')" title="دانلود">
+                            <i class="fa-solid fa-download"></i>
+                        </button>
+                    </td>
+                `;
+            } else {
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="fax-checkbox" value="${fax.id}"></td>
+                    <td>${fax.toName || '-'}</td>
+                    <td>${fax.toFaxNumber || '-'}</td>
+                    <td>${fax.subject || '-'}</td>
+                    <td>${new Date(fax.createdDateTime).toLocaleDateString('fa-IR')}</td>
+                    <td>
+                        <span class="badge bg-${fax.status === 'SENT' ? 'success' : fax.status === 'FAILED' ? 'danger' : 'warning'}">
+                            ${fax.status === 'SENT' ? 'ارسال شده' : fax.status === 'FAILED' ? 'ناموفق' : 'در انتظار'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewFax('${fax.id}')" title="مشاهده">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </td>
+                `;
+            }
+            
+            tbody.appendChild(tr);
+        });
+    }
+
+    function showNewFaxModal() {
+        const modal = new bootstrap.Modal(document.getElementById('newFaxModal'));
+        modal.show();
+    }
+
+    async function sendFax() {
+        const form = document.getElementById('new-fax-form');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const fileInput = document.getElementById('fax-file');
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert('لطفاً فایلی انتخاب کنید');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('toFaxNumber', document.getElementById('fax-to-number').value);
+        formData.append('toName', document.getElementById('fax-to-name').value);
+        formData.append('subject', document.getElementById('fax-subject').value);
+        formData.append('file', fileInput.files[0]);
+
+        try {
+            const response = await fetch('/api/fax/send', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('فکس با موفقیت ارسال شد');
+                bootstrap.Modal.getInstance(document.getElementById('newFaxModal')).hide();
+                loadFaxes('outbox');
+            } else {
+                alert('خطا در ارسال فکس: ' + (result.error || 'خطای نامشخص'));
+            }
+        } catch (error) {
+            console.error('Error sending fax:', error);
+            alert('خطا در ارسال فکس');
+        }
+    }
+
+    function viewFax(faxId) {
+        window.location.href = `/fax/view/${faxId}`;
+    }
+
+    function downloadFax(faxId) {
+        window.location.href = `/api/fax/${faxId}/download`;
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        loadFaxes('inbox');
+        
+        document.getElementById('fax-search-input')?.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                loadFaxes('inbox');
+            }
+        });
+    });
+</script>
+

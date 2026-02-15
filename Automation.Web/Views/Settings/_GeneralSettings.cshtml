@@ -1,0 +1,28 @@
+@* Partial View: تنظیمات عمومی سیستم *@
+
+<h5 class="fw-bold border-bottom pb-3 mb-4">
+    <i class="fa-solid fa-gear me-2 text-primary"></i>
+    تنظیمات عمومی سیستم
+</h5>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <label class="form-label">عنوان سیستم</label>
+        <input type="text" class="form-control" value="اتوماسیون اداری" id="system-title">
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">حجم آپلود (مگابایت)</label>
+        <input type="number" class="form-control" value="25" id="max-upload-size">
+    </div>
+    <div class="col-12 text-end mt-4">
+        <button class="btn btn-primary px-4" onclick="saveGeneralSettings()">
+            <i class="fa-solid fa-save me-2"></i>ذخیره تغییرات
+        </button>
+    </div>
+</div>
+
+<script>
+    function saveGeneralSettings() {
+        alert('ذخیره تنظیمات در حال توسعه است');
+    }
+</script>

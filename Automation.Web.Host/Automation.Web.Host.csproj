@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Automation.Web.Host</RootNamespace>
+    <AssemblyName>Automation.Web.Host</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Automation.Web\Automation.Web.csproj" />
+    <ProjectReference Include="..\Automation.Core\Automation.Core.csproj" />
+    <ProjectReference Include="..\Automation.Infrastructure\Automation.Infrastructure.csproj" />
+    <ProjectReference Include="..\Automation.Module.FormBuilder\Automation.Module.FormBuilder.csproj" />
+    <ProjectReference Include="..\Automation.Module.Workflow\Automation.Module.Workflow.csproj" />
+    <ProjectReference Include="..\Automation.Module.Secretariat\Automation.Module.Secretariat.csproj" />
+  </ItemGroup>
+
+</Project>

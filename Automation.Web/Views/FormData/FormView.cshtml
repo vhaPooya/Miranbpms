@@ -1,0 +1,370 @@
+@using Automation.Core.Entities
+@{
+    Layout = null; // No layout for modal display
+
+    var form = ViewBag.Form as dynamic;
+    var formDesign = ViewBag.FormDesign as FormDesign;
+    var designData = ViewBag.DesignData as string;
+    var documentId = ViewBag.DocumentId as int?;
+    var formDataId = ViewBag.FormDataId as int?;
+
+    // Set ViewBag for partial views
+    ViewBag.FormId = form?.Id ?? 0;
+    ViewBag.DocumentId = documentId;
+    ViewBag.FormDataId = formDataId;
+    ViewBag.CanEdit = ViewBag.CanEdit ?? true;
+    ViewBag.CanSubmit = ViewBag.CanSubmit ?? true;
+    ViewBag.CanRefer = ViewBag.CanRefer ?? true;
+    ViewBag.CanAttach = ViewBag.CanAttach ?? true;
+    ViewBag.CanViewWorkflow = false;
+    ViewBag.CanSign = ViewBag.CanSign ?? false;
+    ViewBag.CanPrint = ViewBag.CanPrint ?? true;
+    ViewBag.IsLocked = ViewBag.IsLocked ?? false;
+}
+
+<!-- Styles -->
+<link href="https://unpkg.com/@@minasmart/jalali-date-picker@1.2.0/dist/jalali-date-picker.min.css" rel="stylesheet" />
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.css" />
+
+<style>
+    #form-modal-body .form-container {
+        padding: 20px;
+    }
+    #form-modal-body .form-header {
+        background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Form Controls */
+    #form-modal-body .form-control,
+    #form-modal-body .form-select {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        color: #212529;
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+    }
+
+    #form-modal-body .form-control:focus,
+    #form-modal-body .form-select:focus {
+        border-color: #1e3a5f;
+        box-shadow: 0 0 0 0.2rem rgba(30, 58, 95, 0.25);
+    }
+
+    #form-modal-body .form-label {
+        color: #212529;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    #form-modal-body .btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+    }
+
+    /* Validation Styles */
+    #form-modal-body .form-control.is-invalid,
+    #form-modal-body .form-select.is-invalid {
+        border-color: #dc3545;
+        padding-right: calc(1.5em + 0.75rem);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6 .4.4.4-.4'/%3e%3cpath d='m6 6v2.8'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    #form-modal-body .form-control.is-invalid:focus,
+    #form-modal-body .form-select.is-invalid:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+    #form-modal-body .invalid-feedback {
+        display: block;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #dc3545;
+    }
+</style>
+
+<div class="form-container">
+    <div class="form-header">
+        <h2>@(form?.NameFa)</h2>
+        @if (!string.IsNullOrEmpty(form?.Description))
+        {
+            <p class="mb-0">@form.Description</p>
+        }
+    </div>
+
+    <form id="dynamicForm" method="post">
+        <div id="form-canvas">
+            <!-- Form will be rendered here -->
+        </div>
+
+        @* Standard Form Buttons *@
+        @await Html.PartialAsync("_FormStandardButtons")
+    </form>
+</div>
+
+@* Modals *@
+@await Html.PartialAsync("_AttachModal")
+@await Html.PartialAsync("_ReferenceModal")
+@await Html.PartialAsync("_ReferModal")
+
+<!-- Scripts -->
+<script src="https://unpkg.com/@@minasmart/jalali-date-picker@1.2.0/dist/jalali-date-picker.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
+    <script src="/js/form-action-buttons.js"></script>
+
+    <script>
+        (function() {
+            const designDataRaw = @Html.Raw(designData ?? "null");
+            const formId = '@form?.Id';
+
+            console.log('Form ID:', formId);
+            console.log('Design Data Raw:', designDataRaw);
+            console.log('Design Data Type:', typeof designDataRaw);
+
+            if (designDataRaw) {
+                try {
+                    // Parse the design data
+                    const elements = typeof designDataRaw === 'string' ? JSON.parse(designDataRaw) : designDataRaw;
+                    console.log('Parsed Elements:', elements);
+
+                    // Render form directly without builder UI
+                    const canvas = document.getElementById('form-canvas');
+                    if (canvas && Array.isArray(elements)) {
+                        renderFormElements(elements, canvas);
+
+                        // Initialize special controls after rendering
+                        setTimeout(() => {
+                            initializeFormControls();
+                        }, 100);
+                    }
+                } catch (error) {
+                    console.error('Error rendering form:', error);
+                    document.getElementById('form-canvas').innerHTML = '<div class="alert alert-danger">خطا در بارگذاری فرم</div>';
+                }
+            } else {
+                document.getElementById('form-canvas').innerHTML = '<div class="alert alert-warning">طراحی فرم یافت نشد</div>';
+            }
+
+            function renderFormElements(elements, container) {
+                elements.forEach(el => {
+                    const elemHtml = createElementHtml(el);
+                    if (elemHtml) {
+                        container.insertAdjacentHTML('beforeend', elemHtml);
+                    }
+                });
+            }
+
+            function createElementHtml(el) {
+                if (!el || !el.type) return '';
+
+                const props = el.props || el.data || {};
+                const styles = el.styles || {};
+                const styleAttr = Object.entries(styles).map(([k, v]) => `${k}: ${v}`).join('; ');
+
+                // Build common attributes
+                const commonAttrs = `
+                    ${props.nameEn ? `name="${props.nameEn}"` : ''}
+                    ${props.id || el.id ? `id="${props.id || el.id}"` : ''}
+                    ${props.required ? 'required' : ''}
+                    ${props.disabled ? 'disabled' : ''}
+                    ${props.readonly ? 'readonly' : ''}
+                    ${props.placeholder ? `placeholder="${props.placeholder}"` : ''}
+                    ${props.maxlength ? `maxlength="${props.maxlength}"` : ''}
+                    ${styleAttr ? `style="${styleAttr}"` : ''}
+                    class="form-control ${props.cssClass || ''}"
+                `.trim();
+
+                // Render based on type
+                switch (el.type) {
+                    case 'textbox':
+                    case 'input':
+                        return `
+                            <div class="mb-3">
+                                ${props.labelFa ? `<label class="form-label">${props.labelFa}${props.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
+                                <input type="text" ${commonAttrs} value="${props.defaultValue || ''}" />
+                                ${props.helpText ? `<small class="text-muted">${props.helpText}</small>` : ''}
+                            </div>
+                        `;
+
+                    case 'textarea':
+                        return `
+                            <div class="mb-3">
+                                ${props.labelFa ? `<label class="form-label">${props.labelFa}${props.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
+                                <textarea ${commonAttrs} rows="${props.rows || 3}">${props.defaultValue || ''}</textarea>
+                                ${props.helpText ? `<small class="text-muted">${props.helpText}</small>` : ''}
+                            </div>
+                        `;
+
+                    case 'select':
+                    case 'dropdown':
+                        const options = props.options || [];
+                        const optionsHtml = options.map(opt =>
+                            `<option value="${opt.value || opt}">${opt.text || opt}</option>`
+                        ).join('');
+                        return `
+                            <div class="mb-3">
+                                ${props.labelFa ? `<label class="form-label">${props.labelFa}${props.required ? ' <span class="text-danger">*</span>' : ''}</label>` : ''}
+                                <select ${commonAttrs}>${optionsHtml}</select>
+                                ${props.helpText ? `<small class="text-muted">${props.helpText}</small>` : ''}
+                            </div>
+                        `;
+
+                    case 'checkbox':
+                        return `
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" ${commonAttrs} class="form-check-input" ${props.checked ? 'checked' : ''} />
+                                ${props.labelFa ? `<label class="form-check-label">${props.labelFa}</label>` : ''}
+                            </div>
+                        `;
+
+                    case 'label':
+                    case 'heading':
+                        return `<div class="mb-2"><${props.tag || 'h5'}>${props.text || props.labelFa || ''}</${props.tag || 'h5'}></div>`;
+
+                    default:
+                        // For unknown types, try to render basic HTML
+                        return el.html || '';
+                }
+            }
+
+            function initializeFormControls() {
+                // Initialize date pickers, rich text editors, etc.
+                console.log('Form controls initialized');
+            }
+
+            // Handle form submission with validation
+            const formElement = document.getElementById('dynamicForm');
+            if (formElement) {
+                formElement.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    // HTML5 Validation
+                    if (!this.checkValidity()) {
+                        this.reportValidity();
+                        return;
+                    }
+
+                    // Custom validation
+                    let isValid = true;
+                    const invalidFields = [];
+
+                    formElement.querySelectorAll('[required], [data-validation]').forEach(field => {
+                        if (field.hasAttribute('required') && !field.value.trim()) {
+                            isValid = false;
+                            invalidFields.push(field);
+                            field.classList.add('is-invalid');
+                        } else {
+                            field.classList.remove('is-invalid');
+                        }
+
+                        // Pattern validation
+                        if (field.hasAttribute('pattern')) {
+                            const pattern = new RegExp(field.getAttribute('pattern'));
+                            if (field.value && !pattern.test(field.value)) {
+                                isValid = false;
+                                invalidFields.push(field);
+                                field.classList.add('is-invalid');
+                            }
+                        }
+
+                        // Min/Max length validation
+                        if (field.hasAttribute('minlength') && field.value.length < parseInt(field.getAttribute('minlength'))) {
+                            isValid = false;
+                            invalidFields.push(field);
+                            field.classList.add('is-invalid');
+                        }
+                        if (field.hasAttribute('maxlength') && field.value.length > parseInt(field.getAttribute('maxlength'))) {
+                            isValid = false;
+                            invalidFields.push(field);
+                            field.classList.add('is-invalid');
+                        }
+                    });
+
+                    if (!isValid) {
+                        if (invalidFields.length > 0) {
+                            invalidFields[0].focus();
+                            invalidFields[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        alert('لطفاً تمام فیلدهای الزامی را پر کنید');
+                        return;
+                    }
+
+                    const formData = {};
+
+                    // Collect form data
+                    formElement.querySelectorAll('input, select, textarea').forEach(input => {
+                        if (input.name && input.type !== 'submit' && input.type !== 'button') {
+                            if (input.type === 'checkbox') {
+                                formData[input.name] = input.checked;
+                            } else if (input.type === 'radio') {
+                                if (input.checked) {
+                                    formData[input.name] = input.value;
+                                }
+                            } else {
+                                formData[input.name] = input.value;
+                            }
+                        }
+                    });
+
+                    // Get Quill editor content
+                    document.querySelectorAll('.ql-editor').forEach(editor => {
+                        const hiddenInput = editor.closest('.rich-text-editor-container')?.querySelector('input[type="hidden"]');
+                        if (hiddenInput) {
+                            formData[hiddenInput.name] = hiddenInput.value;
+                        }
+                    });
+
+                    // Get Signature Pad content
+                    document.querySelectorAll('canvas[id^="sig_canvas_"]').forEach(canvas => {
+                        const hiddenInput = document.getElementById(canvas.id.replace('sig_canvas_', 'sig_input_'));
+                        if (hiddenInput) {
+                            formData[hiddenInput.name] = hiddenInput.value;
+                        }
+                    });
+
+                    try {
+                        const response = await fetch(`/api/forms/${formId}/data`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(formData)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            alert('فرم با موفقیت ذخیره شد');
+                            // Close modal instead of redirect
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('form-modal'));
+                            if (modal) modal.hide();
+                        } else {
+                            alert('خطا در ذخیره فرم: ' + (result.error || 'خطای نامشخص'));
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('خطا در ارسال فرم');
+                    }
+                });
+            }
+
+            // Initialize form action buttons
+            if (typeof FormActionButtons !== 'undefined') {
+                FormActionButtons.init();
+            }
+        })();
+    </script>

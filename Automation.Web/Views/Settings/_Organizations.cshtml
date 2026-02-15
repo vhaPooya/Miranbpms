@@ -1,0 +1,397 @@
+
+<style>
+    .org-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.2rem;
+    }
+    .org-header h5 {
+        margin: 0;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .org-search-bar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 1rem;
+    }
+    .org-search-bar input {
+        flex: 1;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+    .org-table-wrap {
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+    .org-table {
+        width: 100%;
+        margin: 0;
+        font-size: 0.84rem;
+    }
+    .org-table thead th {
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        color: #334155;
+        font-weight: 600;
+        padding: 10px 12px;
+        border: none;
+        white-space: nowrap;
+        text-align: center;
+    }
+    .org-table tbody td {
+        padding: 9px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        text-align: center;
+    }
+    .org-table tbody tr:hover {
+        background: #f8fafc;
+    }
+    .org-table .col-name {
+        min-width: 220px;
+        text-align: right;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .org-table .col-row {
+        width: 45px;
+    }
+    .org-table .col-code {
+        min-width: 100px;
+    }
+    .org-bool-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 500;
+    }
+    .org-bool-badge.yes {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .org-bool-badge.no {
+        background: #f1f5f9;
+        color: #94a3b8;
+    }
+    .org-actions {
+        display: flex;
+        gap: 4px;
+        justify-content: center;
+        flex-wrap: nowrap;
+    }
+    .org-actions .btn {
+        padding: 3px 7px;
+        font-size: 0.78rem;
+        border-radius: 6px;
+    }
+    .org-actions .btn i {
+        font-size: 0.8rem;
+    }
+    .org-actions .btn-nav {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+    .org-pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        margin-top: 1rem;
+    }
+    .org-pagination .page-info {
+        font-size: 0.82rem;
+        color: #64748b;
+    }
+    .org-empty {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #94a3b8;
+    }
+    .org-empty i {
+        font-size: 2.5rem;
+        margin-bottom: 0.8rem;
+        display: block;
+    }
+</style>
+
+<!-- Header -->
+<div class="org-header">
+    <h5><i class="fa-solid fa-city me-2 text-primary"></i>مدیریت سازمان‌ها</h5>
+    <button class="btn btn-primary btn-sm rounded-3" onclick="openOrgModal()">
+        <i class="fa-solid fa-plus me-1"></i>ایجاد سازمان جدید
+    </button>
+</div>
+
+<!-- Search -->
+<div class="org-search-bar">
+    <input type="text" id="orgSearchInput" placeholder="جستجو بر اساس نام یا کد سازمان..." onkeydown="if(event.key==='Enter') searchOrgs()">
+    <button class="btn btn-outline-secondary btn-sm rounded-3" onclick="searchOrgs()">
+        <i class="fa-solid fa-search"></i>
+    </button>
+</div>
+
+<!-- Table -->
+<div class="org-table-wrap">
+    <table class="org-table">
+        <thead>
+            <tr>
+                <th class="col-row">#</th>
+                <th class="col-name" style="text-align: right;">نام سازمان</th>
+                <th>سازمان مرجع</th>
+                <th>سازمان تابعه</th>
+                <th class="col-code">کد سازمان</th>
+                <th style="min-width: 200px;">عملیات</th>
+            </tr>
+        </thead>
+        <tbody id="orgTableBody">
+            <tr><td colspan="6" class="org-empty"><i class="fa-solid fa-spinner fa-spin"></i>در حال بارگذاری...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+<div class="org-pagination" id="orgPagination"></div>
+
+<!-- Organization Modal -->
+<div class="modal fade" id="orgModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold" id="orgModalTitle">ایجاد سازمان</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">کد سازمان <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm rounded-3" id="orgCode" dir="ltr">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">نام سازمان <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm rounded-3" id="orgName">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" id="orgIsParent">
+                            <label class="form-check-label small" for="orgIsParent">سازمان مرجع</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" id="orgIsSubsidiary">
+                            <label class="form-check-label small" for="orgIsSubsidiary">سازمان تابعه</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold">توضیحات</label>
+                        <textarea class="form-control form-control-sm rounded-3" id="orgDescription" rows="2"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="orgIsActive" checked>
+                            <label class="form-check-label small" for="orgIsActive">فعال</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button class="btn btn-sm btn-light rounded-3" data-bs-dismiss="modal">انصراف</button>
+                <button class="btn btn-sm btn-primary rounded-3" onclick="saveOrg()">
+                    <i class="fa-solid fa-check me-1"></i>ذخیره
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var orgPage = 1;
+    var orgPageSize = 10;
+    var orgSearch = '';
+    var orgModalInst = null;
+    var editingOrgId = null;
+
+    orgModalInst = new bootstrap.Modal(document.getElementById('orgModal'));
+
+    // === Load Organizations ===
+    window.loadOrgs = function() {
+        var url = '/api/settings/organizations?page=' + orgPage + '&pageSize=' + orgPageSize;
+        if (orgSearch) url += '&search=' + encodeURIComponent(orgSearch);
+
+        fetch(url)
+            .then(r => r.json())
+            .then(res => {
+                if (!res.success) return;
+                var tbody = document.getElementById('orgTableBody');
+                if (!res.data || res.data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="org-empty"><i class="fa-solid fa-city"></i>سازمانی یافت نشد</td></tr>';
+                    document.getElementById('orgPagination').innerHTML = '';
+                    return;
+                }
+
+                var html = '';
+                res.data.forEach(function(o, i) {
+                    var rowNum = (orgPage - 1) * orgPageSize + i + 1;
+                    html += '<tr>';
+                    html += '<td class="col-row">' + rowNum + '</td>';
+                    html += '<td class="col-name">' + escHtml(o.organizationName) + '</td>';
+                    html += '<td>' + boolBadge(o.isParentOrganization) + '</td>';
+                    html += '<td>' + boolBadge(o.isSubsidiary) + '</td>';
+                    html += '<td class="col-code"><code>' + escHtml(o.organizationCode) + '</code></td>';
+                    html += '<td><div class="org-actions">';
+                    html += '<button class="btn btn-outline-primary btn-nav" onclick="goToDepartments(\'' + o.id + '\',\'' + escAttr(o.organizationName) + '\')" title="واحدها"><i class="fa-solid fa-sitemap me-1"></i>واحدها</button>';
+                    html += '<button class="btn btn-outline-info btn-nav" onclick="goToRoles(\'' + o.id + '\',\'' + escAttr(o.organizationName) + '\')" title="سمت ها"><i class="fa-solid fa-user-tie me-1"></i>سمت ها</button>';
+                    html += '<button class="btn btn-outline-warning" onclick="editOrg(\'' + o.id + '\')" title="ویرایش"><i class="fa-solid fa-pen"></i></button>';
+                    html += '<button class="btn btn-outline-danger" onclick="deleteOrg(\'' + o.id + '\',\'' + escAttr(o.organizationName) + '\')" title="حذف"><i class="fa-solid fa-trash"></i></button>';
+                    html += '</div></td>';
+                    html += '</tr>';
+                });
+                tbody.innerHTML = html;
+
+                // Pagination
+                var totalPages = Math.ceil(res.totalCount / orgPageSize);
+                var pHtml = '';
+                if (totalPages > 1) {
+                    pHtml += '<span class="page-info">صفحه ' + orgPage + ' از ' + totalPages + ' (' + res.totalCount + ' سازمان)</span>';
+                    pHtml += '<div class="btn-group btn-group-sm">';
+                    pHtml += '<button class="btn btn-outline-secondary" ' + (orgPage <= 1 ? 'disabled' : '') + ' onclick="orgGoPage(' + (orgPage - 1) + ')"><i class="fa-solid fa-chevron-right"></i></button>';
+                    for (var p = 1; p <= totalPages && p <= 5; p++) {
+                        pHtml += '<button class="btn btn-outline-secondary ' + (p === orgPage ? 'active' : '') + '" onclick="orgGoPage(' + p + ')">' + p + '</button>';
+                    }
+                    if (totalPages > 5) {
+                        pHtml += '<button class="btn btn-outline-secondary" disabled>...</button>';
+                        pHtml += '<button class="btn btn-outline-secondary ' + (totalPages === orgPage ? 'active' : '') + '" onclick="orgGoPage(' + totalPages + ')">' + totalPages + '</button>';
+                    }
+                    pHtml += '<button class="btn btn-outline-secondary" ' + (orgPage >= totalPages ? 'disabled' : '') + ' onclick="orgGoPage(' + (orgPage + 1) + ')"><i class="fa-solid fa-chevron-left"></i></button>';
+                    pHtml += '</div>';
+                } else if (res.totalCount > 0) {
+                    pHtml += '<span class="page-info">' + res.totalCount + ' سازمان</span>';
+                }
+                document.getElementById('orgPagination').innerHTML = pHtml;
+            });
+    };
+
+    window.orgGoPage = function(p) { orgPage = p; loadOrgs(); };
+
+    window.searchOrgs = function() {
+        orgSearch = document.getElementById('orgSearchInput').value.trim();
+        orgPage = 1;
+        loadOrgs();
+    };
+
+    // === Modal ===
+    window.openOrgModal = function(id) {
+        editingOrgId = id || null;
+        document.getElementById('orgModalTitle').textContent = id ? 'ویرایش سازمان' : 'ایجاد سازمان';
+        document.getElementById('orgCode').value = '';
+        document.getElementById('orgName').value = '';
+        document.getElementById('orgIsParent').checked = false;
+        document.getElementById('orgIsSubsidiary').checked = false;
+        document.getElementById('orgDescription').value = '';
+        document.getElementById('orgIsActive').checked = true;
+
+        if (id) {
+            fetch('/api/settings/organizations/' + id)
+                .then(r => r.json())
+                .then(res => {
+                    if (!res.success) return;
+                    var d = res.data;
+                    document.getElementById('orgCode').value = d.organizationCode || '';
+                    document.getElementById('orgName').value = d.organizationName || '';
+                    document.getElementById('orgIsParent').checked = !!d.isParentOrganization;
+                    document.getElementById('orgIsSubsidiary').checked = !!d.isSubsidiary;
+                    document.getElementById('orgDescription').value = d.description || '';
+                    document.getElementById('orgIsActive').checked = d.isActive !== false;
+                    orgModalInst.show();
+                });
+        } else {
+            orgModalInst.show();
+        }
+    };
+
+    window.editOrg = function(id) { openOrgModal(id); };
+
+    window.saveOrg = function() {
+        var code = document.getElementById('orgCode').value.trim();
+        var name = document.getElementById('orgName').value.trim();
+        if (!code || !name) {
+            alert('کد و نام سازمان الزامی است');
+            return;
+        }
+
+        var dto = {
+            organizationCode: code,
+            organizationName: name,
+            isParentOrganization: document.getElementById('orgIsParent').checked,
+            isSubsidiary: document.getElementById('orgIsSubsidiary').checked,
+            description: document.getElementById('orgDescription').value.trim() || null,
+            isActive: document.getElementById('orgIsActive').checked
+        };
+
+        var url = '/api/settings/organizations';
+        var method = 'POST';
+        if (editingOrgId) {
+            url += '/' + editingOrgId;
+            method = 'PUT';
+        }
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dto)
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                orgModalInst.hide();
+                loadOrgs();
+            } else {
+                alert(res.error || 'خطا در ذخیره سازمان');
+            }
+        });
+    };
+
+    window.deleteOrg = function(id, name) {
+        if (!confirm('آیا از حذف سازمان "' + name + '" مطمئن هستید؟')) return;
+        fetch('/api/settings/organizations/' + id, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) loadOrgs();
+                else alert(res.error || 'خطا در حذف');
+            });
+    };
+
+    // === Navigation to other sections ===
+    window.goToDepartments = function(orgId, orgName) {
+        sessionStorage.setItem('deptFilterOrgId', orgId);
+        sessionStorage.setItem('deptFilterOrgName', orgName);
+        loadSettingsContent('departments');
+    };
+
+    window.goToRoles = function(orgId, orgName) {
+        sessionStorage.setItem('roleFilterOrgId', orgId);
+        sessionStorage.setItem('roleFilterOrgName', orgName);
+        loadSettingsContent('roles');
+    };
+
+    // === Helpers ===
+    function escHtml(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function escAttr(s) { return (s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+    function boolBadge(val) {
+        if (val) return '<span class="org-bool-badge yes"><i class="fa-solid fa-check" style="font-size:0.7rem"></i> بله</span>';
+        return '<span class="org-bool-badge no"><i class="fa-solid fa-minus" style="font-size:0.7rem"></i> خیر</span>';
+    }
+
+    // Init
+    loadOrgs();
+})();
+</script>

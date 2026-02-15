@@ -1,0 +1,302 @@
+@* Partial View: کارتابل وارده *@
+@{
+    Layout = null;
+}
+
+<div class="row g-3">
+    <!-- Sidebar - Action Types -->
+    <div class="col-lg-3">
+        <div class="card border-0 custom-shadow rounded-4 h-100">
+            <div class="card-body p-3">
+                <h6 class="fw-bold border-bottom pb-2 mb-3 text-secondary" style="font-size: 0.9rem;">
+                    <i class="fa-solid fa-folder-tree ms-2 text-primary"></i>
+                    دسته‌بندی بر اساس اقدام
+                </h6>
+                <div class="d-flex flex-column gap-1" id="inbox-action-types">
+                    <div class="text-center py-3 text-muted">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-9">
+        <div class="card border-0 custom-shadow rounded-4">
+            <div class="card-body p-0">
+                <!-- Toolbar -->
+                <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3 bg-white rounded-top-4">
+                    <div class="d-flex align-items-center gap-2 flex-grow-1" style="max-width: 400px;">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                            <input type="text" class="form-control bg-light border-start-0" placeholder="جستجو در نامه‌ها..." id="inbox-search" onkeypress="if(event.key==='Enter') loadInboxData()">
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 text-nowrap" onclick="loadInboxData()">
+                            <i class="fa-solid fa-filter"></i> فیلتر
+                        </button>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-outline-danger" title="نامه‌های مسدود شده">مسدود</button>
+                        <button class="btn btn-sm btn-outline-primary active">همه</button>
+                        <button class="btn btn-sm btn-light text-secondary"><i class="fa-solid fa-sliders"></i></button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table class="table table-custom table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 40px;">
+                                    <input class="form-check-input" type="checkbox" id="inbox-select-all">
+                                </th>
+                                <th class="text-center" style="width: 50px;">#</th>
+                                <th class="text-center" style="width: 40px;"><i class="fa-regular fa-envelope"></i></th>
+                                <th class="text-center" style="width: 40px;"><i class="fa-regular fa-bell"></i></th>
+                                <th class="text-center" style="width: 40px;"><i class="fa-solid fa-lock"></i></th>
+                                <th>شماره نامه</th>
+                                <th>موضوع</th>
+                                <th>فرستنده</th>
+                                <th>تاریخ دریافت</th>
+                                <th class="text-center">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inbox-tbody">
+                            <tr>
+                                <td colspan="10" class="text-center py-4 text-muted">
+                                    <i class="fa-solid fa-spinner fa-spin me-2"></i>
+                                    در حال بارگذاری...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="p-3 border-top d-flex justify-content-between align-items-center bg-white rounded-bottom-4" id="inbox-pagination-container" style="display: none !important;">
+                    <small class="text-muted" id="inbox-pagination-info">نمایش 0 تا 0 از 0 ورودی</small>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0" id="inbox-pagination"></ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let inboxCurrentPage = 1;
+    let inboxCurrentActionType = null;
+    const inboxPageSize = 10;
+
+    // Initialize immediately (AJAX loaded)
+    (function() {
+        loadInboxData();
+    })();
+
+    // Load action type counts
+    async function loadActionTypeCounts(counts) {
+        const container = document.getElementById('inbox-action-types');
+
+        if (!counts || Object.keys(counts).length === 0) {
+            container.innerHTML = `
+                <a href="#" class="list-btn rounded active" onclick="filterByActionType(null, this); return false;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-inbox"></i>
+                        <span>همه</span>
+                    </div>
+                    <span class="badge bg-light text-secondary border rounded-pill">0</span>
+                </a>`;
+            return;
+        }
+
+        let html = `
+            <a href="#" class="list-btn rounded ${!inboxCurrentActionType ? 'active' : ''}" onclick="filterByActionType(null, this); return false;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-inbox"></i>
+                    <span>همه</span>
+                </div>
+                <span class="badge bg-primary-subtle text-primary rounded-pill">${Object.values(counts).reduce((a,b) => a+b, 0)}</span>
+            </a>`;
+
+        for (const [actionType, count] of Object.entries(counts)) {
+            html += `
+                <a href="#" class="list-btn rounded ${inboxCurrentActionType === actionType ? 'active' : ''}" onclick="filterByActionType('${actionType}', this); return false;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-signature"></i>
+                        <span>${actionType}</span>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary rounded-pill">${count}</span>
+                </a>`;
+        }
+
+        container.innerHTML = html;
+    }
+
+    // Filter by action type
+    function filterByActionType(actionType, element) {
+        inboxCurrentActionType = actionType;
+        inboxCurrentPage = 1;
+
+        // Update active state
+        document.querySelectorAll('#inbox-action-types .list-btn').forEach(btn => btn.classList.remove('active'));
+        if (element) element.classList.add('active');
+
+        loadInboxData();
+    }
+
+    // Load inbox data
+    async function loadInboxData(page = 1) {
+        inboxCurrentPage = page;
+        const tbody = document.getElementById('inbox-tbody');
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...</td></tr>';
+
+        try {
+            const search = document.getElementById('inbox-search')?.value || '';
+            let url = `/api/inbox?page=${page}&pageSize=${inboxPageSize}`;
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+            if (inboxCurrentActionType) url += `&actionType=${encodeURIComponent(inboxCurrentActionType)}`;
+
+            const response = await fetch(url);
+            const result = await response.json();
+
+            if (result.success) {
+                renderInboxTable(result.data, result.totalCount);
+                loadActionTypeCounts(result.actionTypeCounts);
+            } else {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-danger">${result.error || 'خطا در بارگذاری'}</td></tr>`;
+            }
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-danger">خطا در اتصال به سرور</td></tr>';
+        }
+    }
+
+    // Render inbox table
+    function renderInboxTable(items, totalCount) {
+        const tbody = document.getElementById('inbox-tbody');
+        const paginationContainer = document.getElementById('inbox-pagination-container');
+
+        if (!items || items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-muted">موردی یافت نشد</td></tr>';
+            paginationContainer.style.display = 'none';
+            return;
+        }
+
+        tbody.innerHTML = items.map((item, index) => {
+            const rowNum = (inboxCurrentPage - 1) * inboxPageSize + index + 1;
+            const attachmentPin = item.attachmentCount > 0
+                ? `<div class="attachment-pin-wrapper">${rowNum} <i class="fa-solid fa-paperclip attachment-pin"></i></div>`
+                : rowNum;
+
+            const envelopeClass = item.isViewed ? 'fa-regular fa-envelope-open read' : 'fa-solid fa-envelope unread';
+
+            let priorityIcon = '<i class="fa-solid fa-bell text-muted opacity-50" title="عادی"></i>';
+            if (item.priority === 'VERY_URGENT') {
+                priorityIcon = '<i class="fa-solid fa-bell prio-very-immediate" title="خیلی فوری"></i>';
+            } else if (item.priority === 'URGENT') {
+                priorityIcon = '<i class="fa-solid fa-bell prio-immediate" title="فوری"></i>';
+            }
+
+            let confIcon = '<i class="fa-solid fa-lock-open text-muted opacity-50" title="عادی"></i>';
+            if (item.confidentialityLevel) {
+                confIcon = `<i class="fa-solid fa-lock conf-${item.confidentialityLevel.toLowerCase()}" title="${item.confidentialityLevel}"></i>`;
+            }
+
+            const receivedDate = new Date(item.receivedDateTime).toLocaleDateString('fa-IR');
+
+            return `
+                <tr data-document-id="${item.documentId}">
+                    <td class="text-center"><input class="form-check-input inbox-row-check" type="checkbox"></td>
+                    <td class="text-center">${attachmentPin}</td>
+                    <td class="text-center envelope-dropdown">
+                        <div class="dropdown">
+                            <i class="${envelopeClass} envelope-icon dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></i>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-7">
+                                <li><a class="dropdown-item small cursor-pointer" onclick="setInboxReadStatus('${item.documentId}', true, this)"><i class="fa-regular fa-envelope-open me-2"></i>خوانده شده</a></li>
+                                <li><a class="dropdown-item small cursor-pointer" onclick="setInboxReadStatus('${item.documentId}', false, this)"><i class="fa-solid fa-envelope me-2"></i>خوانده نشده</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                    <td class="text-center">${priorityIcon}</td>
+                    <td class="text-center">${confIcon}</td>
+                    <td><span class="fw-bold text-dark">${item.documentNumber}</span></td>
+                    <td>${item.subject}</td>
+                    <td>${item.senderName || 'نامشخص'}</td>
+                    <td class="text-muted">${receivedDate}</td>
+                    <td class="text-center">
+                        <button class="btn-action" title="بیشتر"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                        <button class="btn-action" title="ویرایش"><i class="fa-regular fa-pen-to-square"></i></button>
+                        <button class="btn-action" title="حذف"><i class="fa-regular fa-trash-can"></i></button>
+                    </td>
+                </tr>`;
+        }).join('');
+
+        // Update pagination
+        const start = (inboxCurrentPage - 1) * inboxPageSize + 1;
+        const end = Math.min(inboxCurrentPage * inboxPageSize, totalCount);
+        document.getElementById('inbox-pagination-info').textContent = `نمایش ${start} تا ${end} از ${totalCount} ورودی`;
+
+        renderInboxPagination(totalCount);
+        paginationContainer.style.display = totalCount > 0 ? 'flex' : 'none';
+    }
+
+    // Render pagination
+    function renderInboxPagination(totalCount) {
+        const totalPages = Math.ceil(totalCount / inboxPageSize);
+        const pagination = document.getElementById('inbox-pagination');
+        let html = '';
+
+        // Previous button
+        if (inboxCurrentPage > 1) {
+            html += `<li class="page-item"><a class="page-link" href="#" onclick="loadInboxData(${inboxCurrentPage - 1}); return false;"><i class="fa-solid fa-chevron-right"></i></a></li>`;
+        } else {
+            html += `<li class="page-item disabled"><a class="page-link" href="#"><i class="fa-solid fa-chevron-right"></i></a></li>`;
+        }
+
+        // Page numbers
+        for (let i = Math.max(1, inboxCurrentPage - 2); i <= Math.min(inboxCurrentPage + 2, totalPages); i++) {
+            html += `<li class="page-item ${i === inboxCurrentPage ? 'active' : ''}"><a class="page-link" href="#" onclick="loadInboxData(${i}); return false;">${i}</a></li>`;
+        }
+
+        // Next button
+        if (inboxCurrentPage < totalPages) {
+            html += `<li class="page-item"><a class="page-link" href="#" onclick="loadInboxData(${inboxCurrentPage + 1}); return false;"><i class="fa-solid fa-chevron-left"></i></a></li>`;
+        } else {
+            html += `<li class="page-item disabled"><a class="page-link" href="#"><i class="fa-solid fa-chevron-left"></i></a></li>`;
+        }
+
+        pagination.innerHTML = html;
+    }
+
+    // Set read status
+    async function setInboxReadStatus(documentId, isRead, element) {
+        try {
+            const response = await fetch('/api/inbox/read-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ documentId, isRead })
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                // Update icon
+                const row = element.closest('tr');
+                const icon = row.querySelector('.envelope-icon');
+                if (isRead) {
+                    icon.className = 'fa-regular fa-envelope-open envelope-icon read dropdown-toggle';
+                } else {
+                    icon.className = 'fa-solid fa-envelope envelope-icon unread dropdown-toggle';
+                }
+            }
+        } catch (error) {
+            console.error('Error setting read status:', error);
+        }
+    }
+
+    // Select all checkbox
+    document.getElementById('inbox-select-all')?.addEventListener('change', function() {
+        document.querySelectorAll('.inbox-row-check').forEach(cb => cb.checked = this.checked);
+    });
+</script>

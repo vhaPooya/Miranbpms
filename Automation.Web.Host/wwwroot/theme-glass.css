@@ -1,0 +1,450 @@
+/* ===================================
+   Glass Theme - Modern Dark UI
+   Based on Themes folder designs
+   =================================== */
+
+:root {
+    --bg-dark: #0f1221;
+    --glass-bg-base: rgba(30, 41, 59, 0.4);
+    --glass-header: rgba(15, 23, 42, 0.8);
+    --glass-input: rgba(0, 0, 0, 0.3);
+    --glass-modal: rgba(15, 23, 42, 0.95);
+    --text-white: #ffffff;
+    --text-gray: #94a3b8;
+    --text-light-gray: #cbd5e1;
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    --accent-purple-glow: rgba(139, 92, 246, 0.25);
+    --border-light: rgba(255, 255, 255, 0.25);
+    --status-green: #10b981;
+    --status-yellow: #f59e0b;
+    --status-red: #ef4444;
+    --font-main: 'Vazirmatn', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    outline: none;
+}
+
+body.theme-glass {
+    font-family: var(--font-main);
+    background-color: var(--bg-dark);
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 10%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
+    color: var(--text-white);
+    min-height: 100vh;
+    padding: 20px 40px;
+    overflow-x: hidden;
+}
+
+/* --- Header --- */
+.theme-glass header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    margin-bottom: 25px;
+}
+
+.theme-glass .header-left,
+.theme-glass .header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.theme-glass .brand-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+}
+
+.theme-glass .logo-box {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.theme-glass .icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+    color: var(--text-gray);
+    border: 1px solid var(--border-light);
+}
+
+.theme-glass .icon-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    box-shadow: 0 0 10px rgba(255,255,255,0.1);
+}
+
+.theme-glass .user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid var(--border-light);
+    object-fit: cover;
+}
+
+/* --- Navbar (Ribbon) --- */
+.theme-glass .glass-nav {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+    border-radius: 20px;
+    padding: 5px 15px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    overflow-x: auto;
+    gap: 5px;
+}
+
+.theme-glass .nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 15px;
+    color: var(--text-gray);
+    text-decoration: none;
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 12px;
+    min-width: 90px;
+    position: relative;
+    border: 1px solid transparent;
+}
+
+.theme-glass .nav-link i {
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+    transition: 0.3s;
+    z-index: 2;
+}
+
+.theme-glass .nav-link span {
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 2;
+    white-space: nowrap;
+}
+
+.theme-glass .nav-link:hover {
+    color: white;
+    background: rgba(255,255,255,0.05);
+}
+
+.theme-glass .nav-link.active {
+    color: white;
+    background: linear-gradient(to top, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0) 100%);
+    border-bottom: 2px solid #60a5fa;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-left: 1px solid rgba(255,255,255,0.05);
+    border-right: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 
+        inset 0 -10px 15px -5px rgba(59, 130, 246, 0.4),
+        0 10px 20px -5px rgba(59, 130, 246, 0.6);
+}
+
+.theme-glass .nav-link.active i {
+    color: #60a5fa;
+    transform: translateY(-2px);
+    text-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+}
+
+/* --- Card Styles --- */
+.theme-glass .card {
+    background-color: var(--glass-bg-base);
+    background-image: 
+        radial-gradient(circle at 100% 0%, var(--accent-purple-glow) 0%, transparent 20%),
+        radial-gradient(circle at 0% 100%, rgba(59, 130, 246, 0.15) 0%, transparent 20%);
+    border: 1px solid var(--border-light);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.theme-glass .card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 2;
+}
+
+.theme-glass .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.theme-glass .card-desc {
+    font-size: 0.8rem;
+    color: var(--text-gray);
+    line-height: 1.5;
+}
+
+/* Colored Cards */
+.theme-glass .grad-blue-cyan {
+    background-image: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+    border-color: rgba(6, 182, 212, 0.4);
+}
+
+.theme-glass .grad-purple {
+    background-image: linear-gradient(135deg, rgba(139, 92, 246, 0.6) 0%, rgba(124, 58, 237, 0.4) 100%);
+    border-color: rgba(167, 139, 250, 0.5);
+    border-top: 1px solid rgba(255,255,255,0.5);
+}
+
+.theme-glass .grad-blue-solid {
+    background-image: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(37, 99, 235, 0.4) 100%);
+    border-color: rgba(96, 165, 250, 0.5);
+    border-top: 1px solid rgba(255,255,255,0.5);
+}
+
+/* --- Form Elements --- */
+.theme-glass .form-input,
+.theme-glass .form-select {
+    background: var(--glass-input);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 0 12px;
+    height: 38px;
+    color: white;
+    font-family: inherit;
+    font-size: 0.85rem;
+    transition: 0.3s;
+    width: 100%;
+}
+
+.theme-glass .form-select option {
+    background: #1e293b;
+    color: white;
+}
+
+.theme-glass .form-input:focus,
+.theme-glass .form-select:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.theme-glass .input-label {
+    font-size: 0.8rem;
+    color: var(--text-gray);
+    font-weight: 500;
+    margin-right: 5px;
+}
+
+/* --- Buttons --- */
+.theme-glass .btn-large {
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: 0.3s;
+}
+
+.theme-glass .btn-save-send {
+    background: var(--accent-blue);
+    color: white;
+    border: 1px solid #2563eb;
+}
+
+.theme-glass .btn-save {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 1px solid var(--border-light);
+}
+
+.theme-glass .btn-cancel {
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* --- Table Styles --- */
+.theme-glass .custom-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 5px;
+}
+
+.theme-glass .custom-table th {
+    text-align: center;
+    padding: 15px 5px;
+    color: var(--text-light-gray);
+    font-weight: 600;
+    font-size: 0.9rem;
+    position: sticky;
+    top: 0;
+    background: rgba(15, 23, 42, 0.95);
+    z-index: 10;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.theme-glass .custom-table th.text-start {
+    text-align: right;
+    padding-right: 10px;
+}
+
+.theme-glass .custom-table td {
+    background: rgba(255,255,255,0.03);
+    padding: 12px 5px;
+    font-size: 0.9rem;
+    text-align: center;
+    border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+    transition: 0.2s;
+    vertical-align: middle;
+    color: var(--text-white);
+}
+
+.theme-glass .custom-table td.text-start {
+    text-align: right;
+    padding-right: 10px;
+}
+
+.theme-glass .custom-table tr:hover td {
+    background: rgba(255,255,255,0.08);
+}
+
+.theme-glass .custom-table td:first-child {
+    border-right: 1px solid var(--border-light);
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.theme-glass .custom-table td:last-child {
+    border-left: 1px solid var(--border-light);
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+/* --- Scrollbar Styling --- */
+.theme-glass ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.theme-glass ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+
+.theme-glass ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.theme-glass ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 1300px) {
+    .theme-glass .nav-link {
+        min-width: auto;
+        padding: 10px;
+    }
+    .theme-glass .nav-link span {
+        font-size: 0.75rem;
+    }
+}
+
+/* --- Navigation Dropdown --- */
+.theme-glass .nav-dropdown {
+    position: relative;
+}
+
+.theme-glass .nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 5px;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+    min-width: 200px;
+    z-index: 1000;
+    padding: 5px;
+    overflow: hidden;
+}
+
+.theme-glass .nav-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    color: var(--text-gray);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: 0.3s;
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+}
+
+.theme-glass .nav-dropdown-item i {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.theme-glass .nav-dropdown-item:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+.theme-glass .nav-dropdown-item.active {
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.3), transparent);
+    color: #60a5fa;
+    border-right: 2px solid #60a5fa;
+}
+
+@media (max-width: 768px) {
+    body.theme-glass {
+        padding: 15px;
+    }
+    .theme-glass .header-left span,
+    .theme-glass .nav-link span {
+        display: none;
+    }
+    .theme-glass .glass-nav {
+        justify-content: space-between;
+    }
+}
+

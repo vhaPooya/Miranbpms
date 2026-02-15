@@ -1,0 +1,297 @@
+<!-- Modal جستجو -->
+<div class="modal-overlay" id="searchModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 10003; display: none; align-items: center; justify-content: center;">
+    <div class="modal-box" style="background: rgba(15, 23, 42, 0.95); border: 1px solid var(--border-light); width: 95%; max-width: 1200px; max-height: 90vh; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); overflow: hidden;">
+        <div class="modal-header" style="font-weight: 700; font-size: 1.2rem; border-bottom: 1px solid var(--border-light); padding-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+            <span>جستجوی مدرک</span>
+            <i class="fa-solid fa-xmark close-modal" style="cursor: pointer; color: var(--text-gray); font-size: 1.2rem;" onclick="closeSearchModal()"></i>
+        </div>
+        
+        <div class="modal-body" style="flex: 1; overflow-y: auto; padding-right: 5px;">
+            <!-- پنل جستجو -->
+            <div class="search-panel" style="background: var(--glass-bg-base); border: 1px solid var(--border-light); backdrop-filter: blur(15px); border-radius: 16px; padding: 15px 25px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                <div class="search-row" style="display: flex; width: 100%; justify-content: center; gap: 20px; align-items: end;">
+                    <div class="control-wrapper" style="display: flex; flex-direction: column; gap: 5px; width: 260px; position: relative;">
+                        <label class="input-label" style="font-size: 0.8rem; color: var(--text-gray); font-weight: 500;">نوع مدرک</label>
+                        <select class="form-select" id="searchDocType" onchange="showSearchCriteria()" style="height: 32px; font-size: 0.8rem; padding: 0 10px;">
+                            <option value="" selected disabled>انتخاب کنید...</option>
+                            <option>سربرگ</option>
+                            <option>مرخصی روزانه</option>
+                            <option>ماموریت روزانه</option>
+                            <option>درخواست کالا</option>
+                            <option>صورتجلسه</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="search-row" id="searchRowCriteria" style="display: flex; width: 100%; justify-content: center; gap: 20px; align-items: end;">
+                    <div class="control-wrapper" style="display: flex; flex-direction: column; gap: 5px; width: 260px; position: relative;">
+                        <label class="input-label" style="font-size: 0.8rem; color: var(--text-gray); font-weight: 500;">جستجو براساس</label>
+                        <select class="form-select" id="searchCriteria" onchange="toggleSearchFields()" style="height: 32px; font-size: 0.8rem; padding: 0 10px;">
+                            <option value="" selected disabled>انتخاب کنید...</option>
+                            <option value="subject">موضوع / متن نامه</option>
+                            <option value="date">تاریخ مدرک</option>
+                            <option value="daterange">بازه ای از تاریخ</option>
+                            <option value="user">فرستنده / گیرنده</option>
+                            <option value="number">شماره (صادره/وارده/داخلی)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-wrapper wide" id="searchFieldSubject" style="display:none; width: 400px;">
+                        <label class="input-label" style="font-size: 0.8rem; color: var(--text-gray); font-weight: 500;">عبارت جستجو</label>
+                        <input type="text" class="form-input" placeholder="بخشی از متن..." style="height: 32px; font-size: 0.8rem; padding: 0 10px;">
+                    </div>
+
+                    <div class="control-wrapper" id="searchFieldDate" style="display:none; width: 260px;">
+                        <label class="input-label" style="font-size: 0.8rem; color: var(--text-gray); font-weight: 500;">تاریخ مدرک</label>
+                        <div style="position:relative">
+                            <input type="text" class="form-input" placeholder="۱۴۰۴/۰۱/۰۱" style="height: 32px; font-size: 0.8rem; padding: 0 10px 0 35px;">
+                            <i class="fa-regular fa-calendar" style="position:absolute; left:10px; top:8px; color:var(--text-gray); font-size:0.85rem"></i>
+                        </div>
+                    </div>
+
+                    <div class="control-wrapper double" id="searchFieldDaterange" style="display:none; width: 540px; flex-direction: row; gap: 20px;">
+                        <div style="flex:1; position:relative; display:flex; flex-direction:column; gap:5px;">
+                            <label class="input-label" style="font-size: 0.8rem; color: var(--text-gray); font-weight: 500;">از تاریخ</label>
+                            <input type="text" class="form-input" style="height: 32px; font-size: 0.8rem; padding: 0 10px 0 35px;">
+                            <i class="fa-regular fa-calendar" style="position:absolute; left:10px; top:28px; color:var(--text-gray); font-size:0.85rem"></i>
+                        </div>
+                        <div style="flex:1; position:relative; display:flex; flex-direction:column; gap:5px;">
+                            <label class="input-label" style="font-size: 0.8rem; color: var(--text-gray); font-weight: 500;">تا تاریخ</label>
+                            <input type="text" class="form-input" style="height: 32px; font-size: 0.8rem; padding: 0 10px 0 35px;">
+                            <i class="fa-regular fa-calendar" style="position:absolute; left:10px; top:28px; color:var(--text-gray); font-size:0.85rem"></i>
+                        </div>
+                    </div>
+
+                    <div class="control-wrapper" id="searchFieldUser" style="display:none; width: 260px;">
+                        <label class="input-label" style="font-size: 0.8rem; color: var(--text-gray); font-weight: 500;">طرف مکاتبه</label>
+                        <div style="position:relative">
+                            <input type="text" id="searchUserInput" class="form-input" placeholder="انتخاب کنید..." readonly onclick="openUserSelectModal()" style="height: 32px; font-size: 0.8rem; padding: 0 10px 0 35px; cursor: pointer;">
+                            <i class="fa-solid fa-user-tag" style="position:absolute; left:10px; top:8px; color:var(--text-gray); font-size:0.85rem"></i>
+                        </div>
+                    </div>
+
+                    <div class="control-wrapper" id="searchFieldNumber" style="display:none; width: 260px;">
+                        <label class="input-label" style="font-size: 0.8rem; color: var(--text-gray); font-weight: 500;">شماره مدرک</label>
+                        <input type="text" class="form-input" placeholder="شماره..." style="height: 32px; font-size: 0.8rem; padding: 0 10px;">
+                    </div>
+                </div>
+
+                <div class="button-row" style="display: flex; justify-content: center; margin-top: 10px;">
+                    <button class="search-btn" onclick="performSearch()" style="background: var(--accent-blue); color: white; border: none; padding: 10px 30px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; transition: 0.3s;">
+                        <i class="fa-solid fa-magnifying-glass"></i> جستجو
+                    </button>
+                </div>
+            </div>
+
+            <!-- نتایج جستجو -->
+            <div class="results-container" style="background: var(--glass-bg-base); border: 1px solid var(--border-light); backdrop-filter: blur(15px); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+                <div class="results-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border-light);">
+                    <span style="font-weight: 700; font-size: 1rem;">نتیجه جستجو</span>
+                    <span id="searchResultsCount" style="font-size:0.8rem; color:var(--text-gray); font-weight:400">۰ مورد یافت شد</span>
+                </div>
+
+                <div class="table-wrapper" style="overflow-x: auto; max-height: 400px; overflow-y: auto;">
+                    <table class="custom-table" style="width: 100%; border-collapse: separate; border-spacing: 0 5px;">
+                        <thead>
+                            <tr>
+                                <th style="width:50px; text-align: center; padding: 10px; color: var(--text-gray); font-weight: 600; font-size: 0.85rem;">انتخاب</th>
+                                <th style="width:50px; text-align: center; padding: 10px; color: var(--text-gray); font-weight: 600; font-size: 0.85rem;">ردیف</th>
+                                <th style="text-align: right; padding: 10px; color: var(--text-gray); font-weight: 600; font-size: 0.85rem;">تاریخ مدرک</th>
+                                <th style="text-align: right; padding: 10px; color: var(--text-gray); font-weight: 600; font-size: 0.85rem;">فرستنده / گیرنده</th>
+                                <th style="text-align: right; padding: 10px; color: var(--text-gray); font-weight: 600; font-size: 0.85rem;">موضوع</th>
+                                <th style="text-align: right; padding: 10px; color: var(--text-gray); font-weight: 600; font-size: 0.85rem;">شماره</th>
+                            </tr>
+                        </thead>
+                        <tbody id="searchResultsBody">
+                            <tr><td colspan="6" class="text-center" style="color: var(--text-gray); padding: 20px;">لطفا جستجو را انجام دهید</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid var(--border-light); flex-shrink: 0;">
+            <button class="btn-large btn-cancel" onclick="closeSearchModal()" style="padding: 10px 20px; font-size: 0.9rem;">انصراف</button>
+            <button class="btn-large btn-save-send" onclick="confirmSearchSelection()" style="padding: 10px 20px; font-size: 0.9rem;">تایید</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-input, .form-select {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+        color: white;
+        font-family: inherit;
+        transition: 0.3s;
+        width: 100%;
+    }
+    .form-input:focus, .form-select:focus {
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        background: rgba(0, 0, 0, 0.5);
+        outline: none;
+    }
+    .form-select option {
+        background: #1e293b;
+        color: white;
+    }
+    .search-btn:hover {
+        background: #2563eb !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    .custom-table tbody tr {
+        background: rgba(255,255,255,0.03);
+        transition: 0.2s;
+    }
+    .custom-table tbody tr:hover {
+        background: rgba(255,255,255,0.08);
+    }
+    .custom-table tbody td {
+        padding: 10px;
+        font-size: 0.85rem;
+        color: var(--text-white);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+</style>
+
+<script>
+    let searchCurrentType = 'attachment';
+    let selectedSearchDocuments = [];
+
+    function openSearchModal(type) {
+        searchCurrentType = type || 'attachment';
+        selectedSearchDocuments = [];
+        document.getElementById('searchModal').style.display = 'flex';
+    }
+
+    function closeSearchModal() {
+        document.getElementById('searchModal').style.display = 'none';
+    }
+
+    function showSearchCriteria() {
+        const docType = document.getElementById('searchDocType').value;
+        if (docType) {
+            document.getElementById('searchRowCriteria').style.display = 'flex';
+        } else {
+            document.getElementById('searchRowCriteria').style.display = 'none';
+        }
+    }
+
+    function toggleSearchFields() {
+        const criteria = document.getElementById('searchCriteria').value;
+        // Hide all fields
+        document.getElementById('searchFieldSubject').style.display = 'none';
+        document.getElementById('searchFieldDate').style.display = 'none';
+        document.getElementById('searchFieldDaterange').style.display = 'none';
+        document.getElementById('searchFieldUser').style.display = 'none';
+        document.getElementById('searchFieldNumber').style.display = 'none';
+        
+        // Show selected field
+        if (criteria === 'subject') {
+            document.getElementById('searchFieldSubject').style.display = 'flex';
+        } else if (criteria === 'date') {
+            document.getElementById('searchFieldDate').style.display = 'flex';
+        } else if (criteria === 'daterange') {
+            document.getElementById('searchFieldDaterange').style.display = 'flex';
+        } else if (criteria === 'user') {
+            document.getElementById('searchFieldUser').style.display = 'flex';
+        } else if (criteria === 'number') {
+            document.getElementById('searchFieldNumber').style.display = 'flex';
+        }
+    }
+
+    function openUserSelectModal() {
+        alert('مدال انتخاب کاربر در حال توسعه است');
+    }
+
+    async function performSearch() {
+        const criteria = document.getElementById('searchCriteria').value;
+        if (!criteria) {
+            alert('لطفا معیار جستجو را انتخاب کنید');
+            return;
+        }
+
+        // TODO: Call API for search
+        // For now, show sample results
+        const sampleResults = [
+            { id: 1, documentDate: '۱۴۰۴/۰۲/۱۵', sender: 'شرکت ملی گاز', subject: 'درخواست انشعاب جدید فاز ۲', number: '۹۹/۵۱۱۲' },
+            { id: 2, documentDate: '۱۴۰۴/۰۲/۱۶', sender: 'وزارت نیرو', subject: 'اعلام قطعی برق', number: '۹۹/۵۱۱۳' },
+            { id: 3, documentDate: '۱۴۰۴/۰۲/۱۷', sender: 'شهرداری', subject: 'درخواست پروانه ساخت', number: '۹۹/۵۱۱۴' }
+        ];
+
+        renderSearchResults(sampleResults);
+    }
+
+    function renderSearchResults(results) {
+        const tbody = document.getElementById('searchResultsBody');
+        document.getElementById('searchResultsCount').textContent = `${results.length} مورد یافت شد`;
+        
+        if (results.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color: var(--text-gray); padding: 20px;">موردی یافت نشد</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = results.map((doc, index) => `
+            <tr>
+                <td style="text-align: center;">
+                    <input type="checkbox" class="doc-checkbox" value="${doc.id}" onchange="toggleDocumentSelection(${doc.id}, this.checked)">
+                </td>
+                <td style="text-align: center;">${index + 1}</td>
+                <td>${doc.documentDate}</td>
+                <td>${doc.sender}</td>
+                <td>${doc.subject}</td>
+                <td>${doc.number}</td>
+            </tr>
+        `).join('');
+    }
+
+    function toggleDocumentSelection(id, checked) {
+        if (checked) {
+            if (!selectedSearchDocuments.find(d => d.id === id)) {
+                selectedSearchDocuments.push({ id: id });
+            }
+        } else {
+            selectedSearchDocuments = selectedSearchDocuments.filter(d => d.id !== id);
+        }
+    }
+
+    function confirmSearchSelection() {
+        if (selectedSearchDocuments.length === 0) {
+            alert('لطفا حداقل یک مدرک را انتخاب کنید');
+            return;
+        }
+
+        // Get full document data
+        const checkboxes = document.querySelectorAll('.doc-checkbox:checked');
+        const documents = Array.from(checkboxes).map(cb => {
+            const row = cb.closest('tr');
+            return {
+                id: parseInt(cb.value),
+                documentDate: row.cells[2].textContent,
+                sender: row.cells[3].textContent,
+                subject: row.cells[4].textContent,
+                documentNumber: row.cells[5].textContent
+            };
+        });
+
+        // Add to attachments or follow-ups
+        if (typeof window.addDocumentsFromSearch === 'function') {
+            window.addDocumentsFromSearch(documents, searchCurrentType);
+        }
+
+        closeSearchModal();
+    }
+
+    document.getElementById('searchModal').addEventListener('click', (e) => {
+        if (e.target.id === 'searchModal') {
+            closeSearchModal();
+        }
+    });
+
+    // Expose function globally
+    window.openSearchModal = openSearchModal;
+</script>
+

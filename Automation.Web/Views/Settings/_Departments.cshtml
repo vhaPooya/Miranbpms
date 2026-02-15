@@ -1,0 +1,928 @@
+@* Partial View: واحدهای سازمانی *@
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+    <h5 class="fw-bold mb-0">
+        <i class="fa-solid fa-sitemap me-2 text-primary"></i>
+        واحدهای سازمانی
+    </h5>
+    <button class="btn btn-primary btn-sm" onclick="openDeptModal()">
+        <i class="fa-solid fa-plus me-1"></i>
+        ایجاد واحد جدید
+    </button>
+</div>
+
+<!-- Breadcrumb -->
+<nav class="mb-3">
+    <ol class="breadcrumb breadcrumb-sm mb-0" id="dept-breadcrumb">
+        <li class="breadcrumb-item" style="cursor:pointer;" onclick="deptNavigateToRoot()">
+            <i class="fa-solid fa-layer-group me-1"></i>واحدها
+        </li>
+    </ol>
+</nav>
+
+<!-- Tree + Table Layout -->
+<div class="row g-3">
+
+    <!-- Tree Panel -->
+    <div class="col-md-4">
+        <div class="card border rounded-3 h-100">
+            <div class="card-header bg-light py-2">
+                <h6 class="mb-0 fw-semibold small">
+                    <i class="fa-solid fa-diagram-project me-2 text-primary"></i>
+                    ساختار واحدها
+                </h6>
+            </div>
+            <div class="card-body p-2" id="dept-tree-container" style="max-height: 400px; overflow-y: auto;">
+                <div class="text-center py-3 text-muted small">
+                    <i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Panel -->
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small" id="dept-table-header">
+                <i class="fa-solid fa-list me-1"></i>
+                واحدهای سطح اول
+            </span>
+            <span class="badge bg-secondary" id="dept-count"></span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-sm" style="font-size:0.85rem;">
+                <thead class="table-light">
+                    <tr>
+                        <th width="40">#</th>
+                        <th width="90">کد واحد</th>
+                        <th>نام واحد</th>
+                        <th>توضیحات</th>
+                        <th width="70" class="text-center">سمت ها</th>
+                        <th width="70" class="text-center">وضعیت</th>
+                        <th width="120" class="text-center">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody id="dept-tbody">
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Roles Panel (shown when a department is selected) -->
+        <div id="dept-roles-panel" class="mt-3" style="display:none;">
+            <div class="card border rounded-3">
+                <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold small">
+                        <i class="fa-solid fa-user-tie me-1 text-primary"></i>
+                        سمت‌های واحد: <span id="dept-roles-title" class="text-primary"></span>
+                    </span>
+                    <button class="btn btn-outline-primary btn-sm px-2 py-0" onclick="openRolePicker()" title="افزودن سمت">
+                        <i class="fa-solid fa-plus me-1"></i>افزودن سمت
+                    </button>
+                </div>
+                <div class="card-body p-2" id="dept-roles-list" style="max-height: 200px; overflow-y: auto;">
+                    <div class="text-muted text-center small py-2">سمتی اضافه نشده</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Department Modal -->
+<div class="modal" id="deptModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title" id="deptModalTitle">
+                    <i class="fa-solid fa-plus me-2"></i>ایجاد واحد جدید
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="text-muted small mb-3 border-bottom pb-2" id="deptModalSubtitle">
+                    ایجاد واحد جدید در سطح اول
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">کد واحد <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" id="deptCode" dir="ltr">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">نام واحد <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" id="deptName">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">سازمان</label>
+                        <select class="form-select form-select-sm" id="deptOrganization">
+                            <option value="">بدون سازمان</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">واحد والد</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control form-control-sm" id="deptParentName" readonly placeholder="بدون والد (سطح اول)">
+                            <button class="btn btn-outline-secondary" type="button" onclick="openParentDeptPicker()">
+                                <i class="fa-solid fa-search"></i>
+                            </button>
+                            <button class="btn btn-outline-danger" type="button" onclick="clearParentDept()">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                        <input type="hidden" id="deptParentId">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold">توضیحات</label>
+                        <textarea class="form-control form-control-sm" id="deptDescription" rows="2"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="deptIsActive" checked>
+                            <label class="form-check-label small" for="deptIsActive">فعال</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button class="btn btn-sm btn-light" data-bs-dismiss="modal">انصراف</button>
+                <button class="btn btn-sm btn-primary" onclick="saveDept()">
+                    <i class="fa-solid fa-check me-1"></i>ذخیره
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Parent Department Picker Modal -->
+<div class="modal" id="parentDeptPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white py-2">
+                <h6 class="modal-title"><i class="fa-solid fa-sitemap me-2"></i>انتخاب واحد والد</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="row g-2 mb-2">
+                    <div class="col-8">
+                        <input type="text" class="form-control form-control-sm" id="pdp-search" placeholder="جستجوی نام واحد..." onkeydown="if(event.key==='Enter') searchParentDepts()">
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-info btn-sm w-100" onclick="searchParentDepts()"><i class="fa-solid fa-search me-1"></i>جستجو</button>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height:300px; overflow-y:auto;">
+                    <table class="table table-hover table-sm" style="font-size:0.82rem;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>#</th>
+                                <th>نام واحد</th>
+                                <th>کد واحد</th>
+                                <th>سازمان</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pdp-results">
+                            <tr><td colspan="4" class="text-center text-muted py-3">جستجو کنید...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span class="text-muted small" id="pdp-count"></span>
+                    <div id="pdp-pagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Role Picker Modal -->
+<div class="modal" id="rolePickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white py-2">
+                <h6 class="modal-title"><i class="fa-solid fa-user-tie me-2"></i>انتخاب سمت برای انتساب</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control form-control-sm" id="rp-name" placeholder="نام سمت..." onkeydown="if(event.key==='Enter') searchRolesForPicker()">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control form-control-sm" id="rp-code" placeholder="کد سمت..." dir="ltr" onkeydown="if(event.key==='Enter') searchRolesForPicker()">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select form-select-sm" id="rp-org">
+                            <option value="">همه سازمان ها</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-success btn-sm w-100" onclick="searchRolesForPicker()"><i class="fa-solid fa-search me-1"></i>جستجو</button>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height:340px; overflow-y:auto;">
+                    <table class="table table-hover table-sm" style="font-size:0.82rem;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th width="34">#</th>
+                                <th>نام سمت</th>
+                                <th>کد سمت</th>
+                                <th>سازمان</th>
+                                <th>واحد فعلی</th>
+                                <th width="70">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rp-tbody">
+                            <tr><td colspan="6" class="text-center text-muted py-3">جستجو کنید...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span class="text-muted small" id="rp-count"></span>
+                    <div id="rp-pagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dept-tree-header {
+        display: flex;
+        align-items: center;
+        padding: 3px 4px;
+        cursor: pointer;
+        border-radius: 4px;
+        white-space: nowrap;
+        font-size: 0.84rem;
+        transition: background 0.15s;
+    }
+    .dept-tree-header:hover { background: rgba(13,110,253,0.07); }
+    .dept-tree-header.selected { background: #cfe2ff; font-weight: 600; }
+    .dept-tree-header.org-header-node { font-weight: 600; }
+    .dept-tree-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        min-width: 16px;
+        font-size: 0.68rem;
+        color: #6c757d;
+    }
+    .dept-tree-toggle.clickable { cursor: pointer; }
+    .dept-tree-toggle.invisible { visibility: hidden; }
+    .dept-tree-children { padding-right: 16px; }
+    #dept-breadcrumb .breadcrumb-item:not(.active) { cursor: pointer; color: #0d6efd; }
+    #dept-breadcrumb .breadcrumb-item:not(.active):hover { text-decoration: underline; }
+    .role-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        background: #e8f0fe;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        margin: 2px;
+    }
+    .role-chip .remove-role {
+        cursor: pointer;
+        color: #dc3545;
+        font-size: 0.7rem;
+        margin-right: 4px;
+    }
+    .role-chip .remove-role:hover { color: #a71d2a; }
+</style>
+
+<script>
+    // ===== State =====
+    var deptTreeData = null;
+    var currentDeptOrgId = null;
+    var currentParentDeptId = null;
+    var deptBreadcrumb = [];
+    var deptModalInst = null;
+    var parentDeptPickerInst = null;
+    var rolePickerInst = null;
+    var editingDeptId = null;
+    var selectedDeptTreeEl = null;
+    var selectedDeptForRoles = null;
+    var pdpPage = 1, pdpTotal = 0;
+    var rpPage = 1, rpTotal = 0;
+
+    // ===== Init =====
+    (function () {
+        var el1 = document.getElementById('deptModal');
+        if (el1) deptModalInst = new bootstrap.Modal(el1);
+        var el2 = document.getElementById('parentDeptPickerModal');
+        if (el2) parentDeptPickerInst = new bootstrap.Modal(el2);
+        var el3 = document.getElementById('rolePickerModal');
+        if (el3) rolePickerInst = new bootstrap.Modal(el3);
+
+        loadDeptTree();
+
+        // Check if navigated from Organizations page
+        var filterOrgId = sessionStorage.getItem('deptFilterOrgId');
+        var filterOrgName = sessionStorage.getItem('deptFilterOrgName');
+        sessionStorage.removeItem('deptFilterOrgId');
+        sessionStorage.removeItem('deptFilterOrgName');
+
+        if (filterOrgId) {
+            currentDeptOrgId = filterOrgId;
+            deptBreadcrumb = [{ type: 'org', id: filterOrgId, name: filterOrgName }];
+            updateDeptBreadcrumb();
+            loadDeptChildren(null, filterOrgId);
+        } else {
+            loadDeptChildren(null, null);
+        }
+    })();
+
+    // ===== Tree Loading & Render =====
+    async function loadDeptTree() {
+        try {
+            var res = await fetch('/api/settings/departments/tree');
+            var result = await res.json();
+            if (result.success) {
+                deptTreeData = result;
+                renderDeptTree();
+            }
+        } catch (e) {
+            document.getElementById('dept-tree-container').innerHTML =
+                '<div class="text-danger text-center small py-3">خطا در بارگذاری ساختار</div>';
+        }
+    }
+
+    function renderDeptTree() {
+        var container = document.getElementById('dept-tree-container');
+        if (!deptTreeData) {
+            container.innerHTML = '<div class="text-muted text-center small py-3">داده‌ای یافت نشد</div>';
+            return;
+        }
+        var html = '';
+        deptTreeData.organizations.forEach(function(org) { html += buildDeptOrgNode(org); });
+
+        // Orphan departments (no organization, no parent)
+        deptTreeData.departments
+            .filter(function(d) { return !d.organizationId && !d.parentDepartmentId; })
+            .forEach(function(d) { html += buildDeptTreeNode(d); });
+
+        container.innerHTML = html || '<div class="text-muted text-center small py-3">سازمانی تعریف نشده</div>';
+
+        // Auto-expand if came from organizations page
+        if (currentDeptOrgId) {
+            var orgNode = document.getElementById('deptTreeOrg_' + currentDeptOrgId);
+            if (orgNode) {
+                var ch = document.getElementById('deptTreeOrg_' + currentDeptOrgId + '_ch');
+                if (ch) { ch.style.display = 'block'; }
+                var toggle = orgNode.querySelector(':scope > .dept-tree-header .dept-tree-toggle');
+                if (toggle) toggle.textContent = '\u25BC';
+                var header = orgNode.querySelector(':scope > .dept-tree-header');
+                if (header) {
+                    if (selectedDeptTreeEl) selectedDeptTreeEl.classList.remove('selected');
+                    header.classList.add('selected');
+                    selectedDeptTreeEl = header;
+                }
+            }
+        }
+    }
+
+    function buildDeptOrgNode(org) {
+        var topDepts = deptTreeData.departments.filter(function(d) { return d.organizationId === org.id && !d.parentDepartmentId; });
+        var hasChildren = topDepts.length > 0;
+        var childrenHtml = '';
+        topDepts.forEach(function(d) { childrenHtml += buildDeptTreeNode(d); });
+
+        return '<div class="dept-tree-node" id="deptTreeOrg_' + org.id + '">' +
+            '<div class="dept-tree-header org-header-node" onclick="deptSelectOrganization(\'' + org.id + '\',\'' + deptEsc(org.organizationName) + '\')">' +
+                '<span class="dept-tree-toggle ' + (hasChildren ? 'clickable' : 'invisible') + '" onclick="event.stopPropagation();deptToggleNode(\'deptTreeOrg_' + org.id + '\')">' + (hasChildren ? '\u25B6' : '') + '</span>' +
+                '<i class="fa-solid fa-building me-1 text-primary"></i>' +
+                '<span>' + deptEsc(org.organizationName) + '</span>' +
+            '</div>' +
+            (hasChildren ? '<div class="dept-tree-children" id="deptTreeOrg_' + org.id + '_ch" style="display:none">' + childrenHtml + '</div>' : '') +
+        '</div>';
+    }
+
+    function buildDeptTreeNode(dept) {
+        var children = deptTreeData.departments.filter(function(d) { return d.parentDepartmentId === dept.id; });
+        var hasChildren = children.length > 0;
+        var childrenHtml = '';
+        children.forEach(function(c) { childrenHtml += buildDeptTreeNode(c); });
+
+        return '<div class="dept-tree-node" id="deptTreeDept_' + dept.id + '">' +
+            '<div class="dept-tree-header ' + (dept.isActive ? '' : 'text-muted') + '" onclick="deptSelectDept(\'' + dept.id + '\',\'' + deptEsc(dept.departmentName) + '\')">' +
+                '<span class="dept-tree-toggle ' + (hasChildren ? 'clickable' : 'invisible') + '" onclick="event.stopPropagation();deptToggleNode(\'deptTreeDept_' + dept.id + '\')">' + (hasChildren ? '\u25B6' : '') + '</span>' +
+                '<i class="fa-solid fa-sitemap me-1 ' + (dept.isActive ? 'text-success' : 'text-secondary') + '"></i>' +
+                '<span>' + deptEsc(dept.departmentName) + '</span>' +
+                '<span class="text-muted ms-1" style="font-size:0.74rem">(' + deptEsc(dept.departmentCode) + ')</span>' +
+            '</div>' +
+            (hasChildren ? '<div class="dept-tree-children" id="deptTreeDept_' + dept.id + '_ch" style="display:none">' + childrenHtml + '</div>' : '') +
+        '</div>';
+    }
+
+    function deptToggleNode(nodeId) {
+        var ch = document.getElementById(nodeId + '_ch');
+        if (!ch) return;
+        var open = ch.style.display !== 'none';
+        ch.style.display = open ? 'none' : 'block';
+        var el = document.getElementById(nodeId);
+        var toggle = el ? el.querySelector(':scope > .dept-tree-header .dept-tree-toggle') : null;
+        if (toggle) toggle.textContent = open ? '\u25B6' : '\u25BC';
+    }
+
+    // ===== Tree Selection =====
+    function deptSelectOrganization(orgId, orgName) {
+        if (selectedDeptTreeEl) selectedDeptTreeEl.classList.remove('selected');
+        var header = document.querySelector('#deptTreeOrg_' + orgId + ' > .dept-tree-header');
+        if (header) { header.classList.add('selected'); selectedDeptTreeEl = header; }
+
+        // Expand children
+        var ch = document.getElementById('deptTreeOrg_' + orgId + '_ch');
+        if (ch) { ch.style.display = 'block'; }
+        var toggle = document.querySelector('#deptTreeOrg_' + orgId + ' > .dept-tree-header .dept-tree-toggle');
+        if (toggle) toggle.textContent = '\u25BC';
+
+        currentDeptOrgId = orgId;
+        currentParentDeptId = null;
+        selectedDeptForRoles = null;
+        document.getElementById('dept-roles-panel').style.display = 'none';
+        deptBreadcrumb = [{ type: 'org', id: orgId, name: orgName }];
+        updateDeptBreadcrumb();
+        loadDeptChildren(null, orgId);
+    }
+
+    function deptSelectDept(deptId, deptName) {
+        if (selectedDeptTreeEl) selectedDeptTreeEl.classList.remove('selected');
+        var header = document.querySelector('#deptTreeDept_' + deptId + ' > .dept-tree-header');
+        if (header) { header.classList.add('selected'); selectedDeptTreeEl = header; }
+
+        // Expand children
+        var ch = document.getElementById('deptTreeDept_' + deptId + '_ch');
+        if (ch) { ch.style.display = 'block'; }
+        var toggle = document.querySelector('#deptTreeDept_' + deptId + ' > .dept-tree-header .dept-tree-toggle');
+        if (toggle) toggle.textContent = '\u25BC';
+
+        currentParentDeptId = deptId;
+
+        // Add to breadcrumb
+        var existsIdx = deptBreadcrumb.findIndex(function(b) { return b.id === deptId; });
+        if (existsIdx >= 0) {
+            deptBreadcrumb = deptBreadcrumb.slice(0, existsIdx + 1);
+        } else {
+            deptBreadcrumb.push({ type: 'dept', id: deptId, name: deptName });
+        }
+        updateDeptBreadcrumb();
+        loadDeptChildren(deptId, null);
+
+        // Show roles for this department
+        selectedDeptForRoles = deptId;
+        loadDeptRoles(deptId, deptName);
+    }
+
+    function deptNavigateToRoot() {
+        if (selectedDeptTreeEl) selectedDeptTreeEl.classList.remove('selected');
+        selectedDeptTreeEl = null;
+        currentDeptOrgId = null;
+        currentParentDeptId = null;
+        selectedDeptForRoles = null;
+        document.getElementById('dept-roles-panel').style.display = 'none';
+        deptBreadcrumb = [];
+        updateDeptBreadcrumb();
+        loadDeptChildren(null, null);
+    }
+
+    function deptBreadcrumbClick(index) {
+        var item = deptBreadcrumb[index];
+        deptBreadcrumb = deptBreadcrumb.slice(0, index + 1);
+
+        if (item.type === 'org') {
+            currentDeptOrgId = item.id;
+            currentParentDeptId = null;
+            selectedDeptForRoles = null;
+            document.getElementById('dept-roles-panel').style.display = 'none';
+            updateDeptBreadcrumb();
+            loadDeptChildren(null, item.id);
+        } else {
+            currentParentDeptId = item.id;
+            updateDeptBreadcrumb();
+            loadDeptChildren(item.id, null);
+
+            selectedDeptForRoles = item.id;
+            loadDeptRoles(item.id, item.name);
+        }
+    }
+
+    function updateDeptBreadcrumb() {
+        var bc = document.getElementById('dept-breadcrumb');
+        var html = '<li class="breadcrumb-item" style="cursor:pointer;" onclick="deptNavigateToRoot()"><i class="fa-solid fa-layer-group me-1"></i>واحدها</li>';
+        deptBreadcrumb.forEach(function(item, i) {
+            var isLast = (i === deptBreadcrumb.length - 1);
+            var icon = item.type === 'org' ? 'fa-building' : 'fa-sitemap';
+            if (isLast) {
+                html += '<li class="breadcrumb-item active"><i class="fa-solid ' + icon + ' me-1"></i>' + deptEsc(item.name) + '</li>';
+            } else {
+                html += '<li class="breadcrumb-item" onclick="deptBreadcrumbClick(' + i + ')"><i class="fa-solid ' + icon + ' me-1"></i>' + deptEsc(item.name) + '</li>';
+            }
+        });
+        bc.innerHTML = html;
+
+        // Update table header
+        var th = document.getElementById('dept-table-header');
+        if (deptBreadcrumb.length === 0) {
+            th.innerHTML = '<i class="fa-solid fa-list me-1"></i>واحدهای سطح اول';
+        } else {
+            var last = deptBreadcrumb[deptBreadcrumb.length - 1];
+            th.innerHTML = '<i class="fa-solid fa-list me-1"></i>زیرمجموعه‌های ' + deptEsc(last.name);
+        }
+    }
+
+    // ===== Load Department Children (table) =====
+    async function loadDeptChildren(parentDeptId, orgId) {
+        var url = '/api/settings/departments/children?';
+        if (parentDeptId) url += 'parentDepartmentId=' + parentDeptId;
+        else if (orgId) url += 'organizationId=' + orgId;
+
+        try {
+            var res = await fetch(url);
+            var result = await res.json();
+            var tbody = document.getElementById('dept-tbody');
+
+            if (!result.success || !result.data || result.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted"><i class="fa-solid fa-sitemap me-2"></i>واحدی یافت نشد</td></tr>';
+                document.getElementById('dept-count').textContent = '';
+                return;
+            }
+
+            var html = '';
+            result.data.forEach(function(d, i) {
+                html += '<tr style="cursor:pointer;" ondblclick="deptSelectDept(\'' + d.id + '\',\'' + deptEsc(d.departmentName) + '\')">';
+                html += '<td>' + (i + 1) + '</td>';
+                html += '<td><code>' + deptEsc(d.departmentCode) + '</code></td>';
+                html += '<td class="fw-semibold">' + deptEsc(d.departmentName);
+                if (d.hasChildren) html += ' <span class="badge bg-light text-primary border" style="font-size:0.7rem;"><i class="fa-solid fa-diagram-project"></i></span>';
+                html += '</td>';
+                html += '<td class="text-muted small">' + deptEsc(d.description || '') + '</td>';
+                html += '<td class="text-center">';
+                if (d.roleCount > 0) html += '<span class="badge bg-primary">' + d.roleCount + '</span>';
+                else html += '<span class="text-muted">-</span>';
+                html += '</td>';
+                html += '<td class="text-center">';
+                html += d.isActive
+                    ? '<span class="badge bg-success-subtle text-success">فعال</span>'
+                    : '<span class="badge bg-secondary-subtle text-secondary">غیرفعال</span>';
+                html += '</td>';
+                html += '<td class="text-center">';
+                html += '<button class="btn btn-outline-primary btn-sm p-0 px-1 me-1" onclick="event.stopPropagation(); editDept(\'' + d.id + '\')" title="ویرایش"><i class="fa-solid fa-pen" style="font-size:0.75rem;"></i></button>';
+                html += '<button class="btn btn-outline-danger btn-sm p-0 px-1 me-1" onclick="event.stopPropagation(); deleteDept(\'' + d.id + '\',\'' + deptEsc(d.departmentName) + '\')" title="حذف"><i class="fa-solid fa-trash" style="font-size:0.75rem;"></i></button>';
+                html += '<button class="btn btn-outline-success btn-sm p-0 px-1" onclick="event.stopPropagation(); showDeptRoles(\'' + d.id + '\',\'' + deptEsc(d.departmentName) + '\')" title="سمت ها"><i class="fa-solid fa-user-tie" style="font-size:0.75rem;"></i></button>';
+                html += '</td>';
+                html += '</tr>';
+            });
+            tbody.innerHTML = html;
+            document.getElementById('dept-count').textContent = result.data.length + ' واحد';
+        } catch (e) {
+            document.getElementById('dept-tbody').innerHTML =
+                '<tr><td colspan="7" class="text-center py-4 text-danger">خطا در بارگذاری</td></tr>';
+        }
+    }
+
+    // ===== Department CRUD =====
+    function openDeptModal(id) {
+        editingDeptId = id || null;
+        document.getElementById('deptModalTitle').innerHTML = id
+            ? '<i class="fa-solid fa-pen me-2"></i>ویرایش واحد'
+            : '<i class="fa-solid fa-plus me-2"></i>ایجاد واحد جدید';
+
+        // Set subtitle
+        var sub = document.getElementById('deptModalSubtitle');
+        if (!id && deptBreadcrumb.length > 0) {
+            var last = deptBreadcrumb[deptBreadcrumb.length - 1];
+            sub.textContent = 'ایجاد زیرمجموعه ' + last.name;
+        } else if (!id) {
+            sub.textContent = 'ایجاد واحد جدید در سطح اول';
+        } else {
+            sub.textContent = 'ویرایش اطلاعات واحد';
+        }
+
+        // Reset fields
+        document.getElementById('deptCode').value = '';
+        document.getElementById('deptName').value = '';
+        document.getElementById('deptDescription').value = '';
+        document.getElementById('deptIsActive').checked = true;
+        document.getElementById('deptParentId').value = currentParentDeptId || '';
+        document.getElementById('deptParentName').value = '';
+
+        // Set parent name from breadcrumb
+        if (!id && currentParentDeptId && deptBreadcrumb.length > 0) {
+            var parentItem = deptBreadcrumb.find(function(b) { return b.type === 'dept' && b.id === currentParentDeptId; });
+            if (parentItem) document.getElementById('deptParentName').value = parentItem.name;
+        }
+
+        // Load organizations for dropdown
+        loadOrgDropdown('deptOrganization', currentDeptOrgId);
+
+        if (id) {
+            fetch('/api/settings/departments/' + id)
+                .then(function(r) { return r.json(); })
+                .then(function(res) {
+                    if (!res.success) return;
+                    var d = res.data;
+                    document.getElementById('deptCode').value = d.departmentCode || '';
+                    document.getElementById('deptName').value = d.departmentName || '';
+                    document.getElementById('deptDescription').value = d.description || '';
+                    document.getElementById('deptIsActive').checked = d.isActive !== false;
+                    document.getElementById('deptOrganization').value = d.organizationId || '';
+                    document.getElementById('deptParentId').value = d.parentDepartmentId || '';
+                    document.getElementById('deptParentName').value = d.parentDepartmentName || '';
+                    deptModalInst.show();
+                });
+        } else {
+            deptModalInst.show();
+        }
+    }
+
+    function editDept(id) { openDeptModal(id); }
+
+    function saveDept() {
+        var code = document.getElementById('deptCode').value.trim();
+        var name = document.getElementById('deptName').value.trim();
+        if (!code || !name) {
+            alert('کد و نام واحد الزامی است');
+            return;
+        }
+
+        var dto = {
+            departmentCode: code,
+            departmentName: name,
+            description: document.getElementById('deptDescription').value.trim() || null,
+            organizationId: document.getElementById('deptOrganization').value || null,
+            parentDepartmentId: document.getElementById('deptParentId').value || null,
+            isActive: document.getElementById('deptIsActive').checked
+        };
+
+        var url = '/api/settings/departments';
+        var method = 'POST';
+        if (editingDeptId) {
+            url += '/' + editingDeptId;
+            method = 'PUT';
+        }
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dto)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            if (res.success) {
+                deptModalInst.hide();
+                loadDeptTree();
+                loadDeptChildren(currentParentDeptId, currentParentDeptId ? null : currentDeptOrgId);
+            } else {
+                alert(res.error || 'خطا در ذخیره واحد');
+            }
+        });
+    }
+
+    function deleteDept(id, name) {
+        if (!confirm('آیا از حذف واحد "' + name + '" مطمئن هستید؟')) return;
+        fetch('/api/settings/departments/' + id, { method: 'DELETE' })
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (res.success) {
+                    loadDeptTree();
+                    loadDeptChildren(currentParentDeptId, currentParentDeptId ? null : currentDeptOrgId);
+                    if (selectedDeptForRoles === id) {
+                        document.getElementById('dept-roles-panel').style.display = 'none';
+                        selectedDeptForRoles = null;
+                    }
+                } else {
+                    alert(res.error || 'خطا در حذف');
+                }
+            });
+    }
+
+    // ===== Department Roles =====
+    function showDeptRoles(deptId, deptName) {
+        selectedDeptForRoles = deptId;
+        loadDeptRoles(deptId, deptName);
+    }
+
+    async function loadDeptRoles(deptId, deptName) {
+        document.getElementById('dept-roles-panel').style.display = 'block';
+        document.getElementById('dept-roles-title').textContent = deptName || '';
+        var container = document.getElementById('dept-roles-list');
+
+        try {
+            var res = await fetch('/api/settings/departments/' + deptId + '/roles');
+            var result = await res.json();
+
+            if (!result.success || !result.data || result.data.length === 0) {
+                container.innerHTML = '<div class="text-muted text-center small py-2">سمتی به این واحد اضافه نشده</div>';
+                return;
+            }
+
+            var html = '';
+            result.data.forEach(function(r) {
+                html += '<span class="role-chip">';
+                html += '<i class="fa-solid fa-user-tie text-primary" style="font-size:0.75rem;"></i>';
+                html += deptEsc(r.roleName);
+                if (r.personnelName) html += ' <span class="text-muted">(' + deptEsc(r.personnelName) + ')</span>';
+                html += '<i class="fa-solid fa-times remove-role" onclick="removeRoleFromDept(\'' + deptId + '\',\'' + r.id + '\')" title="حذف"></i>';
+                html += '</span>';
+            });
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = '<div class="text-danger text-center small py-2">خطا در بارگذاری</div>';
+        }
+    }
+
+    function removeRoleFromDept(deptId, roleId) {
+        if (!confirm('آیا از حذف این سمت از واحد مطمئن هستید؟')) return;
+        fetch('/api/settings/departments/' + deptId + '/roles/' + roleId, { method: 'DELETE' })
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (res.success) {
+                    loadDeptRoles(selectedDeptForRoles, document.getElementById('dept-roles-title').textContent);
+                    loadDeptChildren(currentParentDeptId, currentParentDeptId ? null : currentDeptOrgId);
+                }
+            });
+    }
+
+    // ===== Role Picker =====
+    function openRolePicker() {
+        if (!selectedDeptForRoles) {
+            alert('ابتدا یک واحد انتخاب کنید');
+            return;
+        }
+        rpPage = 1;
+        document.getElementById('rp-name').value = '';
+        document.getElementById('rp-code').value = '';
+        document.getElementById('rp-tbody').innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">جستجو کنید...</td></tr>';
+        document.getElementById('rp-count').textContent = '';
+        document.getElementById('rp-pagination').innerHTML = '';
+        loadOrgDropdown('rp-org', null);
+        rolePickerInst.show();
+    }
+
+    function searchRolesForPicker() {
+        var name = document.getElementById('rp-name').value.trim();
+        var code = document.getElementById('rp-code').value.trim();
+        var orgId = document.getElementById('rp-org').value;
+
+        var url = '/api/settings/roles/search?page=' + rpPage + '&pageSize=10';
+        if (name) url += '&name=' + encodeURIComponent(name);
+        if (code) url += '&code=' + encodeURIComponent(code);
+        if (orgId) url += '&organizationId=' + orgId;
+
+        fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (!res.success) return;
+                rpTotal = res.totalCount;
+                var tbody = document.getElementById('rp-tbody');
+
+                if (!res.data || res.data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">نتیجه‌ای یافت نشد</td></tr>';
+                    document.getElementById('rp-count').textContent = '';
+                    document.getElementById('rp-pagination').innerHTML = '';
+                    return;
+                }
+
+                var html = '';
+                res.data.forEach(function(r, i) {
+                    html += '<tr>';
+                    html += '<td>' + ((rpPage - 1) * 10 + i + 1) + '</td>';
+                    html += '<td>' + deptEsc(r.roleName) + '</td>';
+                    html += '<td><code>' + deptEsc(r.roleCode) + '</code></td>';
+                    html += '<td>' + deptEsc(r.organizationName || '-') + '</td>';
+                    html += '<td>' + deptEsc(r.departmentName || '-') + '</td>';
+                    html += '<td class="text-center"><button class="btn btn-success btn-sm py-0 px-2" onclick="assignRoleToDept(\'' + r.id + '\')"><i class="fa-solid fa-plus"></i></button></td>';
+                    html += '</tr>';
+                });
+                tbody.innerHTML = html;
+
+                document.getElementById('rp-count').textContent = rpTotal + ' سمت';
+
+                // Pagination
+                var totalPages = Math.ceil(rpTotal / 10);
+                var pHtml = '';
+                if (totalPages > 1) {
+                    pHtml += '<div class="btn-group btn-group-sm">';
+                    pHtml += '<button class="btn btn-outline-secondary" ' + (rpPage <= 1 ? 'disabled' : '') + ' onclick="rpGoPage(' + (rpPage - 1) + ')"><i class="fa-solid fa-chevron-right"></i></button>';
+                    for (var p = 1; p <= totalPages && p <= 5; p++) {
+                        pHtml += '<button class="btn btn-outline-secondary ' + (p === rpPage ? 'active' : '') + '" onclick="rpGoPage(' + p + ')">' + p + '</button>';
+                    }
+                    pHtml += '<button class="btn btn-outline-secondary" ' + (rpPage >= totalPages ? 'disabled' : '') + ' onclick="rpGoPage(' + (rpPage + 1) + ')"><i class="fa-solid fa-chevron-left"></i></button>';
+                    pHtml += '</div>';
+                }
+                document.getElementById('rp-pagination').innerHTML = pHtml;
+            });
+    }
+
+    function rpGoPage(p) { rpPage = p; searchRolesForPicker(); }
+
+    function assignRoleToDept(roleId) {
+        fetch('/api/settings/departments/' + selectedDeptForRoles + '/roles/' + roleId, { method: 'POST' })
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (res.success) {
+                    loadDeptRoles(selectedDeptForRoles, document.getElementById('dept-roles-title').textContent);
+                    loadDeptChildren(currentParentDeptId, currentParentDeptId ? null : currentDeptOrgId);
+                    searchRolesForPicker(); // Refresh list
+                } else {
+                    alert(res.error || 'خطا');
+                }
+            });
+    }
+
+    // ===== Parent Department Picker =====
+    function openParentDeptPicker() {
+        pdpPage = 1;
+        document.getElementById('pdp-search').value = '';
+        document.getElementById('pdp-results').innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">جستجو کنید...</td></tr>';
+        document.getElementById('pdp-count').textContent = '';
+        document.getElementById('pdp-pagination').innerHTML = '';
+        parentDeptPickerInst.show();
+        searchParentDepts();
+    }
+
+    function searchParentDepts() {
+        var search = document.getElementById('pdp-search').value.trim();
+        var url = '/api/settings/departments?page=' + pdpPage + '&pageSize=10';
+        if (search) url += '&search=' + encodeURIComponent(search);
+
+        fetch(url)
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (!res.success) return;
+                pdpTotal = res.totalCount;
+                var tbody = document.getElementById('pdp-results');
+
+                if (!res.data || res.data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">نتیجه‌ای یافت نشد</td></tr>';
+                    return;
+                }
+
+                var html = '';
+                res.data.forEach(function(d, i) {
+                    html += '<tr style="cursor:pointer;" onclick="selectParentDept(\'' + d.id + '\',\'' + deptEsc(d.departmentName) + '\')">';
+                    html += '<td>' + ((pdpPage - 1) * 10 + i + 1) + '</td>';
+                    html += '<td>' + deptEsc(d.departmentName) + '</td>';
+                    html += '<td><code>' + deptEsc(d.departmentCode) + '</code></td>';
+                    html += '<td>' + deptEsc(d.organizationName || '-') + '</td>';
+                    html += '</tr>';
+                });
+                tbody.innerHTML = html;
+
+                document.getElementById('pdp-count').textContent = pdpTotal + ' واحد';
+
+                var totalPages = Math.ceil(pdpTotal / 10);
+                var pHtml = '';
+                if (totalPages > 1) {
+                    pHtml += '<div class="btn-group btn-group-sm">';
+                    pHtml += '<button class="btn btn-outline-secondary" ' + (pdpPage <= 1 ? 'disabled' : '') + ' onclick="pdpGoPage(' + (pdpPage - 1) + ')"><i class="fa-solid fa-chevron-right"></i></button>';
+                    for (var p = 1; p <= totalPages && p <= 5; p++) {
+                        pHtml += '<button class="btn btn-outline-secondary ' + (p === pdpPage ? 'active' : '') + '" onclick="pdpGoPage(' + p + ')">' + p + '</button>';
+                    }
+                    pHtml += '<button class="btn btn-outline-secondary" ' + (pdpPage >= totalPages ? 'disabled' : '') + ' onclick="pdpGoPage(' + (pdpPage + 1) + ')"><i class="fa-solid fa-chevron-left"></i></button>';
+                    pHtml += '</div>';
+                }
+                document.getElementById('pdp-pagination').innerHTML = pHtml;
+            });
+    }
+
+    function pdpGoPage(p) { pdpPage = p; searchParentDepts(); }
+
+    function selectParentDept(id, name) {
+        document.getElementById('deptParentId').value = id;
+        document.getElementById('deptParentName').value = name;
+        parentDeptPickerInst.hide();
+    }
+
+    function clearParentDept() {
+        document.getElementById('deptParentId').value = '';
+        document.getElementById('deptParentName').value = '';
+    }
+
+    // ===== Helpers =====
+    function loadOrgDropdown(selectId, selectedVal) {
+        fetch('/api/settings/organizations/list')
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (!res.success) return;
+                var sel = document.getElementById(selectId);
+                var firstOpt = sel.options[0].outerHTML;
+                sel.innerHTML = firstOpt;
+                res.data.forEach(function(o) {
+                    var opt = document.createElement('option');
+                    opt.value = o.id;
+                    opt.textContent = o.organizationName;
+                    if (selectedVal && o.id === selectedVal) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+            });
+    }
+
+    function deptEsc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML.replace(/'/g, "\\'"); }
+</script>

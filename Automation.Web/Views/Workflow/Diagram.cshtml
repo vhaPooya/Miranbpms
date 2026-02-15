@@ -1,0 +1,121 @@
+@model Automation.Core.DTOs.WorkflowDiagramDto
+@{
+    ViewData["Title"] = "نمودار گردش سند";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">نمودار گردش سند #@Model.DocumentNumber</h4>
+                    <button id="refreshDiagram" class="btn btn-light btn-sm">
+                        <i class="fas fa-sync-alt"></i> بروزرسانی
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="workflow-diagram-container" style="min-height: 500px; position: relative;">
+                        <!-- Diagram will be rendered here -->
+                        <div class="d-flex flex-wrap justify-content-center">
+                            @for (int i = 0; i < Model.Nodes.Count; i++)
+                            {
+                                var node = Model.Nodes[i];
+                                <div class="workflow-node mx-3 my-2 position-relative" 
+                                     data-node-id="@node.Id"
+                                     style="width: 200px; min-height: 120px; border: 2px solid #007bff; border-radius: 8px; padding: 10px; background: #f8f9fa;">
+                                    <div class="node-header text-center" style="border-bottom: 1px solid #dee2e6; padding-bottom: 5px; margin-bottom: 5px;">
+                                        <strong>@node.PositionName</strong>
+                                    </div>
+                                    <div class="node-content">
+                                        <div class="user-name">@node.UserName</div>
+                                        <div class="status mt-2">
+                                            @switch (node.Status)
+                                            {
+                                                case "COMPLETED":
+                                                    <span class="badge badge-success">انجام شده</span>
+                                                    break;
+                                                case "VIEWED":
+                                                    <span class="badge badge-warning">مشاهده شده</span>
+                                                    break;
+                                                case "PENDING":
+                                                    <span class="badge badge-info">در انتظار</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge badge-secondary">@node.Status</span>
+                                                    break;
+                                            }
+                                        </div>
+                                        <div class="dates mt-2 small">
+                                            <div>دریافت: @(node.ReceivedDate?.ToString("dd/MM HH:mm"))</div>
+                                            <div>مشاهده: @(node.FirstViewDate?.ToString("dd/MM HH:mm"))</div>
+                                            <div>انجام: @(node.CompletionDate?.ToString("dd/MM HH:mm"))</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                @if (i < Model.Nodes.Count - 1)
+                                {
+                                    <div class="connection-arrow mx-2 d-flex align-items-center" style="align-self: center;">
+                                        <i class="fas fa-arrow-left fa-2x text-muted"></i>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button class="btn btn-primary" onclick="showReferralModal(@Model.DocumentId)">
+                            <i class="fas fa-share"></i> ارجاع دستی
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Referral Modal -->
+<div class="modal fade" id="referralModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">ارجاع سند</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="referralModalContent">
+                    <!-- Modal content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.workflow-node').click(function() {
+                var nodeId = $(this).data('node-id');
+                showNodeDetails(nodeId);
+            });
+            
+            $('#refreshDiagram').click(function() {
+                location.reload();
+            });
+        });
+        
+        function showNodeDetails(nodeId) {
+            // Show details popup for the clicked node
+            alert('جزئیات گره: ' + nodeId);
+        }
+        
+        function showReferralModal(documentId) {
+            $.get('/workflow/referral-modal/' + documentId, function(data) {
+                $('#referralModalContent').html(data);
+                $('#referralModal').modal('show');
+            });
+        }
+    </script>
+}

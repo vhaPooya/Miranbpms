@@ -1,0 +1,759 @@
+@{
+    ViewData["Title"] = "پارامترهای دبیرخانه";
+    Layout = "_LayoutGlass";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0" style="font-size: 1rem;">پارامترهای دبیرخانه</h4>
+                </div>
+                <div class="card-body">
+                    <!-- تب‌ها -->
+                    <ul class="nav nav-tabs mb-3" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="docTypes-tab" data-bs-toggle="tab" data-bs-target="#docTypes" type="button" role="tab" onclick="loadDocumentTypes()" style="font-size: 0.875rem;">
+                                انواع مدرک
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="classifications-tab" data-bs-toggle="tab" data-bs-target="#classifications" type="button" role="tab" onclick="loadClassifications()" style="font-size: 0.875rem;">
+                                طبقه‌بندی‌ها
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="receiptMethods-tab" data-bs-toggle="tab" data-bs-target="#receiptMethods" type="button" role="tab" onclick="loadReceiptMethods()" style="font-size: 0.875rem;">
+                                نحوه دریافت
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="urgencies-tab" data-bs-toggle="tab" data-bs-target="#urgencies" type="button" role="tab" onclick="loadUrgencies()" style="font-size: 0.875rem;">
+                                فوریت‌ها
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <!-- انواع مدرک -->
+                        <div class="tab-pane fade show active" id="docTypes" role="tabpanel">
+                            <div class="d-flex justify-content-between mb-3">
+                                <h5 style="font-size: 0.9rem;">انواع مدرک</h5>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="showCreateDocumentTypeModal()" style="font-size: 0.875rem;">
+                                    <i class="fas fa-plus"></i> افزودن
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table id="docTypesTable" class="table table-striped table-bordered table-sm" style="font-size: 0.875rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>کد</th>
+                                            <th>نام</th>
+                                            <th>توضیحات</th>
+                                            <th style="width: 80px;">ترتیب</th>
+                                            <th style="width: 120px;">عملیات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- طبقه‌بندی‌ها -->
+                        <div class="tab-pane fade" id="classifications" role="tabpanel">
+                            <div class="d-flex justify-content-between mb-3">
+                                <h5 style="font-size: 0.9rem;">طبقه‌بندی‌ها</h5>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="showCreateClassificationModal()" style="font-size: 0.875rem;">
+                                    <i class="fas fa-plus"></i> افزودن
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table id="classificationsTable" class="table table-striped table-bordered table-sm" style="font-size: 0.875rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>کد</th>
+                                            <th>نام</th>
+                                            <th>توضیحات</th>
+                                            <th style="width: 80px;">ترتیب</th>
+                                            <th style="width: 120px;">عملیات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- نحوه دریافت -->
+                        <div class="tab-pane fade" id="receiptMethods" role="tabpanel">
+                            <div class="d-flex justify-content-between mb-3">
+                                <h5 style="font-size: 0.9rem;">نحوه دریافت</h5>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="showCreateReceiptMethodModal()" style="font-size: 0.875rem;">
+                                    <i class="fas fa-plus"></i> افزودن
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table id="receiptMethodsTable" class="table table-striped table-bordered table-sm" style="font-size: 0.875rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>کد</th>
+                                            <th>نام</th>
+                                            <th>توضیحات</th>
+                                            <th style="width: 80px;">ترتیب</th>
+                                            <th style="width: 120px;">عملیات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- فوریت‌ها -->
+                        <div class="tab-pane fade" id="urgencies" role="tabpanel">
+                            <div class="d-flex justify-content-between mb-3">
+                                <h5 style="font-size: 0.9rem;">فوریت‌ها</h5>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="showCreateUrgencyModal()" style="font-size: 0.875rem;">
+                                    <i class="fas fa-plus"></i> افزودن
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table id="urgenciesTable" class="table table-striped table-bordered table-sm" style="font-size: 0.875rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>کد</th>
+                                            <th>نام</th>
+                                            <th>توضیحات</th>
+                                            <th style="width: 80px;">ترتیب</th>
+                                            <th style="width: 120px;">عملیات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal انواع مدرک -->
+<div class="modal fade" id="documentTypeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="documentTypeModalTitle" style="font-size: 1rem;">نوع مدرک جدید</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="font-size: 0.875rem;">
+                <form id="documentTypeForm">
+                    <input type="hidden" id="documentTypeId">
+                    <div class="mb-3">
+                        <label class="form-label">کد <span class="text-danger">*</span></label>
+                        <input type="text" id="documentTypeCode" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">نام <span class="text-danger">*</span></label>
+                        <input type="text" id="documentTypeName" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">توضیحات</label>
+                        <textarea id="documentTypeDescription" class="form-control form-control-sm" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ترتیب نمایش</label>
+                        <input type="number" id="documentTypeDisplayOrder" class="form-control form-control-sm" value="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="font-size: 0.875rem;">لغو</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveDocumentType()" style="font-size: 0.875rem;">ذخیره</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal طبقه‌بندی -->
+<div class="modal fade" id="classificationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="classificationModalTitle" style="font-size: 1rem;">طبقه‌بندی جدید</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="font-size: 0.875rem;">
+                <form id="classificationForm">
+                    <input type="hidden" id="classificationId">
+                    <div class="mb-3">
+                        <label class="form-label">کد <span class="text-danger">*</span></label>
+                        <input type="text" id="classificationCode" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">نام <span class="text-danger">*</span></label>
+                        <input type="text" id="classificationName" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">توضیحات</label>
+                        <textarea id="classificationDescription" class="form-control form-control-sm" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ترتیب نمایش</label>
+                        <input type="number" id="classificationDisplayOrder" class="form-control form-control-sm" value="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="font-size: 0.875rem;">لغو</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveClassification()" style="font-size: 0.875rem;">ذخیره</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal نحوه دریافت -->
+<div class="modal fade" id="receiptMethodModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="receiptMethodModalTitle" style="font-size: 1rem;">نحوه دریافت جدید</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="font-size: 0.875rem;">
+                <form id="receiptMethodForm">
+                    <input type="hidden" id="receiptMethodId">
+                    <div class="mb-3">
+                        <label class="form-label">کد <span class="text-danger">*</span></label>
+                        <input type="text" id="receiptMethodCode" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">نام <span class="text-danger">*</span></label>
+                        <input type="text" id="receiptMethodName" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">توضیحات</label>
+                        <textarea id="receiptMethodDescription" class="form-control form-control-sm" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ترتیب نمایش</label>
+                        <input type="number" id="receiptMethodDisplayOrder" class="form-control form-control-sm" value="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="font-size: 0.875rem;">لغو</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveReceiptMethod()" style="font-size: 0.875rem;">ذخیره</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal فوریت -->
+<div class="modal fade" id="urgencyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="urgencyModalTitle" style="font-size: 1rem;">فوریت جدید</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="font-size: 0.875rem;">
+                <form id="urgencyForm">
+                    <input type="hidden" id="urgencyId">
+                    <div class="mb-3">
+                        <label class="form-label">کد <span class="text-danger">*</span></label>
+                        <input type="text" id="urgencyCode" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">نام <span class="text-danger">*</span></label>
+                        <input type="text" id="urgencyName" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">توضیحات</label>
+                        <textarea id="urgencyDescription" class="form-control form-control-sm" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ترتیب نمایش</label>
+                        <input type="number" id="urgencyDisplayOrder" class="form-control form-control-sm" value="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="font-size: 0.875rem;">لغو</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveUrgency()" style="font-size: 0.875rem;">ذخیره</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Document Types
+let docTypesData = [];
+
+function loadDocumentTypes() {
+    $.ajax({
+        url: '/api/metadata/document-types',
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                docTypesData = response.data;
+                renderDocumentTypesTable(docTypesData);
+            }
+        }
+    });
+}
+
+function renderDocumentTypesTable(data) {
+    const tbody = $('#docTypesTable tbody');
+    tbody.empty();
+    data.forEach(item => {
+        const row = `
+            <tr style="font-size: 0.875rem;">
+                <td style="font-size: 0.8125rem;">${item.documentTypeCode}</td>
+                <td style="font-size: 0.8125rem;">${item.documentTypeName}</td>
+                <td style="font-size: 0.8125rem;">${item.description || '-'}</td>
+                <td style="text-align: center; font-size: 0.8125rem;">${item.displayOrder}</td>
+                <td style="text-align: center;">
+                    <button class="btn btn-sm btn-primary" onclick="editDocumentType('${item.id}')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteDocumentType('${item.id}')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.append(row);
+    });
+}
+
+function showCreateDocumentTypeModal() {
+    $('#documentTypeModalTitle').text('نوع مدرک جدید');
+    $('#documentTypeForm')[0].reset();
+    $('#documentTypeId').val('');
+    $('#documentTypeModal').modal('show');
+}
+
+function editDocumentType(id) {
+    const item = docTypesData.find(d => d.id === id);
+    if (!item) return;
+    
+    $('#documentTypeModalTitle').text('ویرایش نوع مدرک');
+    $('#documentTypeId').val(item.id);
+    $('#documentTypeCode').val(item.documentTypeCode);
+    $('#documentTypeName').val(item.documentTypeName);
+    $('#documentTypeDescription').val(item.description || '');
+    $('#documentTypeDisplayOrder').val(item.displayOrder);
+    $('#documentTypeModal').modal('show');
+}
+
+function saveDocumentType() {
+    const id = $('#documentTypeId').val();
+    const data = {
+        documentTypeCode: $('#documentTypeCode').val(),
+        documentTypeName: $('#documentTypeName').val(),
+        description: $('#documentTypeDescription').val() || null,
+        displayOrder: parseInt($('#documentTypeDisplayOrder').val()) || 0
+    };
+    
+    const url = id ? `/api/metadata/document-types/${id}` : '/api/metadata/document-types';
+    const method = id ? 'PUT' : 'POST';
+    
+    $.ajax({
+        url: url,
+        method: method,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            if (response.success) {
+                showAlert(id ? 'نوع مدرک با موفقیت به‌روزرسانی شد' : 'نوع مدرک با موفقیت ایجاد شد', 'success');
+                $('#documentTypeModal').modal('hide');
+                loadDocumentTypes();
+            } else {
+                showAlert(response.error || 'خطا در ذخیره', 'danger');
+            }
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON?.error || 'خطا در ذخیره';
+            showAlert(error, 'danger');
+        }
+    });
+}
+
+function deleteDocumentType(id) {
+    if (!confirm('آیا از حذف این نوع مدرک اطمینان دارید؟')) return;
+    
+    $.ajax({
+        url: `/api/metadata/document-types/${id}`,
+        method: 'DELETE',
+        success: function(response) {
+            if (response.success) {
+                showAlert('نوع مدرک با موفقیت حذف شد', 'success');
+                loadDocumentTypes();
+            } else {
+                showAlert(response.error || 'خطا در حذف', 'danger');
+            }
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON?.error || 'خطا در حذف';
+            showAlert(error, 'danger');
+        }
+    });
+}
+
+// Classifications
+let classificationsData = [];
+
+function loadClassifications() {
+    $.ajax({
+        url: '/api/metadata/classifications',
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                classificationsData = response.data;
+                renderClassificationsTable(classificationsData);
+            }
+        }
+    });
+}
+
+function renderClassificationsTable(data) {
+    const tbody = $('#classificationsTable tbody');
+    tbody.empty();
+    data.forEach(item => {
+        const row = `
+            <tr style="font-size: 0.875rem;">
+                <td style="font-size: 0.8125rem;">${item.classificationCode}</td>
+                <td style="font-size: 0.8125rem;">${item.classificationName}</td>
+                <td style="font-size: 0.8125rem;">${item.description || '-'}</td>
+                <td style="text-align: center; font-size: 0.8125rem;">${item.displayOrder}</td>
+                <td style="text-align: center;">
+                    <button class="btn btn-sm btn-primary" onclick="editClassification('${item.id}')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteClassification('${item.id}')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.append(row);
+    });
+}
+
+function showCreateClassificationModal() {
+    $('#classificationModalTitle').text('طبقه‌بندی جدید');
+    $('#classificationForm')[0].reset();
+    $('#classificationId').val('');
+    $('#classificationModal').modal('show');
+}
+
+function editClassification(id) {
+    const item = classificationsData.find(c => c.id === id);
+    if (!item) return;
+    
+    $('#classificationModalTitle').text('ویرایش طبقه‌بندی');
+    $('#classificationId').val(item.id);
+    $('#classificationCode').val(item.classificationCode);
+    $('#classificationName').val(item.classificationName);
+    $('#classificationDescription').val(item.description || '');
+    $('#classificationDisplayOrder').val(item.displayOrder);
+    $('#classificationModal').modal('show');
+}
+
+function saveClassification() {
+    const id = $('#classificationId').val();
+    const data = {
+        classificationCode: $('#classificationCode').val(),
+        classificationName: $('#classificationName').val(),
+        description: $('#classificationDescription').val() || null,
+        displayOrder: parseInt($('#classificationDisplayOrder').val()) || 0
+    };
+    
+    const url = id ? `/api/metadata/classifications/${id}` : '/api/metadata/classifications';
+    const method = id ? 'PUT' : 'POST';
+    
+    $.ajax({
+        url: url,
+        method: method,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            if (response.success) {
+                showAlert(id ? 'طبقه‌بندی با موفقیت به‌روزرسانی شد' : 'طبقه‌بندی با موفقیت ایجاد شد', 'success');
+                $('#classificationModal').modal('hide');
+                loadClassifications();
+            } else {
+                showAlert(response.error || 'خطا در ذخیره', 'danger');
+            }
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON?.error || 'خطا در ذخیره';
+            showAlert(error, 'danger');
+        }
+    });
+}
+
+function deleteClassification(id) {
+    if (!confirm('آیا از حذف این طبقه‌بندی اطمینان دارید؟')) return;
+    
+    $.ajax({
+        url: `/api/metadata/classifications/${id}`,
+        method: 'DELETE',
+        success: function(response) {
+            if (response.success) {
+                showAlert('طبقه‌بندی با موفقیت حذف شد', 'success');
+                loadClassifications();
+            } else {
+                showAlert(response.error || 'خطا در حذف', 'danger');
+            }
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON?.error || 'خطا در حذف';
+            showAlert(error, 'danger');
+        }
+    });
+}
+
+// Receipt Methods
+let receiptMethodsData = [];
+
+function loadReceiptMethods() {
+    $.ajax({
+        url: '/api/metadata/receipt-methods',
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                receiptMethodsData = response.data;
+                renderReceiptMethodsTable(receiptMethodsData);
+            }
+        }
+    });
+}
+
+function renderReceiptMethodsTable(data) {
+    const tbody = $('#receiptMethodsTable tbody');
+    tbody.empty();
+    data.forEach(item => {
+        const row = `
+            <tr style="font-size: 0.875rem;">
+                <td style="font-size: 0.8125rem;">${item.receiptMethodCode}</td>
+                <td style="font-size: 0.8125rem;">${item.receiptMethodName}</td>
+                <td style="font-size: 0.8125rem;">${item.description || '-'}</td>
+                <td style="text-align: center; font-size: 0.8125rem;">${item.displayOrder}</td>
+                <td style="text-align: center;">
+                    <button class="btn btn-sm btn-primary" onclick="editReceiptMethod('${item.id}')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteReceiptMethod('${item.id}')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.append(row);
+    });
+}
+
+function showCreateReceiptMethodModal() {
+    $('#receiptMethodModalTitle').text('نحوه دریافت جدید');
+    $('#receiptMethodForm')[0].reset();
+    $('#receiptMethodId').val('');
+    $('#receiptMethodModal').modal('show');
+}
+
+function editReceiptMethod(id) {
+    const item = receiptMethodsData.find(r => r.id === id);
+    if (!item) return;
+    
+    $('#receiptMethodModalTitle').text('ویرایش نحوه دریافت');
+    $('#receiptMethodId').val(item.id);
+    $('#receiptMethodCode').val(item.receiptMethodCode);
+    $('#receiptMethodName').val(item.receiptMethodName);
+    $('#receiptMethodDescription').val(item.description || '');
+    $('#receiptMethodDisplayOrder').val(item.displayOrder);
+    $('#receiptMethodModal').modal('show');
+}
+
+function saveReceiptMethod() {
+    const id = $('#receiptMethodId').val();
+    const data = {
+        receiptMethodCode: $('#receiptMethodCode').val(),
+        receiptMethodName: $('#receiptMethodName').val(),
+        description: $('#receiptMethodDescription').val() || null,
+        displayOrder: parseInt($('#receiptMethodDisplayOrder').val()) || 0
+    };
+    
+    const url = id ? `/api/metadata/receipt-methods/${id}` : '/api/metadata/receipt-methods';
+    const method = id ? 'PUT' : 'POST';
+    
+    $.ajax({
+        url: url,
+        method: method,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            if (response.success) {
+                showAlert(id ? 'نحوه دریافت با موفقیت به‌روزرسانی شد' : 'نحوه دریافت با موفقیت ایجاد شد', 'success');
+                $('#receiptMethodModal').modal('hide');
+                loadReceiptMethods();
+            } else {
+                showAlert(response.error || 'خطا در ذخیره', 'danger');
+            }
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON?.error || 'خطا در ذخیره';
+            showAlert(error, 'danger');
+        }
+    });
+}
+
+function deleteReceiptMethod(id) {
+    if (!confirm('آیا از حذف این نحوه دریافت اطمینان دارید؟')) return;
+    
+    $.ajax({
+        url: `/api/metadata/receipt-methods/${id}`,
+        method: 'DELETE',
+        success: function(response) {
+            if (response.success) {
+                showAlert('نحوه دریافت با موفقیت حذف شد', 'success');
+                loadReceiptMethods();
+            } else {
+                showAlert(response.error || 'خطا در حذف', 'danger');
+            }
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON?.error || 'خطا در حذف';
+            showAlert(error, 'danger');
+        }
+    });
+}
+
+// Urgencies
+let urgenciesData = [];
+
+function loadUrgencies() {
+    $.ajax({
+        url: '/api/metadata/urgencies',
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                urgenciesData = response.data;
+                renderUrgenciesTable(urgenciesData);
+            }
+        }
+    });
+}
+
+function renderUrgenciesTable(data) {
+    const tbody = $('#urgenciesTable tbody');
+    tbody.empty();
+    data.forEach(item => {
+        const row = `
+            <tr style="font-size: 0.875rem;">
+                <td style="font-size: 0.8125rem;">${item.urgencyCode}</td>
+                <td style="font-size: 0.8125rem;">${item.urgencyName}</td>
+                <td style="font-size: 0.8125rem;">${item.description || '-'}</td>
+                <td style="text-align: center; font-size: 0.8125rem;">${item.displayOrder}</td>
+                <td style="text-align: center;">
+                    <button class="btn btn-sm btn-primary" onclick="editUrgency('${item.id}')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUrgency('${item.id}')" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.append(row);
+    });
+}
+
+function showCreateUrgencyModal() {
+    $('#urgencyModalTitle').text('فوریت جدید');
+    $('#urgencyForm')[0].reset();
+    $('#urgencyId').val('');
+    $('#urgencyModal').modal('show');
+}
+
+function editUrgency(id) {
+    const item = urgenciesData.find(u => u.id === id);
+    if (!item) return;
+    
+    $('#urgencyModalTitle').text('ویرایش فوریت');
+    $('#urgencyId').val(item.id);
+    $('#urgencyCode').val(item.urgencyCode);
+    $('#urgencyName').val(item.urgencyName);
+    $('#urgencyDescription').val(item.description || '');
+    $('#urgencyDisplayOrder').val(item.displayOrder);
+    $('#urgencyModal').modal('show');
+}
+
+function saveUrgency() {
+    const id = $('#urgencyId').val();
+    const data = {
+        urgencyCode: $('#urgencyCode').val(),
+        urgencyName: $('#urgencyName').val(),
+        description: $('#urgencyDescription').val() || null,
+        displayOrder: parseInt($('#urgencyDisplayOrder').val()) || 0
+    };
+    
+    const url = id ? `/api/metadata/urgencies/${id}` : '/api/metadata/urgencies';
+    const method = id ? 'PUT' : 'POST';
+    
+    $.ajax({
+        url: url,
+        method: method,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            if (response.success) {
+                showAlert(id ? 'فوریت با موفقیت به‌روزرسانی شد' : 'فوریت با موفقیت ایجاد شد', 'success');
+                $('#urgencyModal').modal('hide');
+                loadUrgencies();
+            } else {
+                showAlert(response.error || 'خطا در ذخیره', 'danger');
+            }
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON?.error || 'خطا در ذخیره';
+            showAlert(error, 'danger');
+        }
+    });
+}
+
+function deleteUrgency(id) {
+    if (!confirm('آیا از حذف این فوریت اطمینان دارید؟')) return;
+    
+    $.ajax({
+        url: `/api/metadata/urgencies/${id}`,
+        method: 'DELETE',
+        success: function(response) {
+            if (response.success) {
+                showAlert('فوریت با موفقیت حذف شد', 'success');
+                loadUrgencies();
+            } else {
+                showAlert(response.error || 'خطا در حذف', 'danger');
+            }
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON?.error || 'خطا در حذف';
+            showAlert(error, 'danger');
+        }
+    });
+}
+
+function showAlert(message, type) {
+    const alert = `<div class="alert alert-${type} alert-dismissible fade show" role="alert" style="font-size: 0.875rem;">
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>`;
+    $('.container-fluid').prepend(alert);
+    setTimeout(() => $('.alert').fadeOut(), 3000);
+}
+
+$(document).ready(function() {
+    loadDocumentTypes();
+});
+</script>
+

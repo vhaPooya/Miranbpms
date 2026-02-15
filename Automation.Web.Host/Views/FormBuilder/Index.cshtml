@@ -1,0 +1,1391 @@
+@using Automation.Core.Entities
+@using Automation.Web.Controllers
+@{
+    ViewData["Title"] = "طراحی فرم";
+    Layout = "_FormsazLayout";
+    
+    var fieldTypes = ViewBag.FieldTypes as List<FieldType> ?? new List<FieldType>();
+    var categories = ViewBag.Categories as List<FormCategory> ?? new List<FormCategory>();
+    var form = ViewBag.Form as dynamic;
+    var isNew = ViewBag.IsNew as bool? ?? true;
+    
+    var inputTypes = fieldTypes.Where(ft => ft.Category == FieldTypeCategory.Input).ToList();
+    var layoutTypes = fieldTypes.Where(ft => ft.Category == FieldTypeCategory.Layout).ToList();
+    var staticTypes = fieldTypes.Where(ft => ft.Category == FieldTypeCategory.Static).ToList();
+    var actionTypes = fieldTypes.Where(ft => ft.Category == FieldTypeCategory.Action).ToList();
+}
+
+@section Styles {
+    <link href="~/css/site-compact.css" asp-append-version="true" rel="stylesheet" />
+    <link href="~/css/formbuilder.css" asp-append-version="true" rel="stylesheet" />
+    <!-- Persian Date Picker -->
+    <link href="https://unpkg.com/@@minasmart/jalali-date-picker@1.2.0/dist/jalali-date-picker.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <!-- Signature Pad -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.css">
+
+    <style>
+        /* FormBuilder Overrides for Light Theme */
+        body {
+            background-image: none !important;
+            background-color: var(--bg-body) !important;
+        }
+        .fb-navbar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%) !important;
+            box-shadow: var(--shadow-md) !important;
+            border-bottom: none !important;
+        }
+        .fb-brand {
+            color: white !important;
+            text-shadow: none !important;
+        }
+        .fb-brand i {
+            color: rgba(255,255,255,0.8) !important;
+        }
+        .btn-glass {
+            background: rgba(255,255,255,0.1) !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            color: white !important;
+        }
+        .btn-glass:hover {
+            background: rgba(255,255,255,0.2) !important;
+        }
+        .fb-sidebar {
+            background: #fff !important;
+            border-left: 1px solid var(--border-color) !important;
+            box-shadow: none !important;
+        }
+        .fb-sidebar-header {
+            background: #f8fafc !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+        .nav-pills .nav-link {
+            color: var(--text-secondary) !important;
+        }
+        .nav-pills .nav-link:hover {
+            background: var(--bg-hover) !important;
+            color: var(--primary) !important;
+        }
+        .nav-pills .nav-link.active {
+            background: var(--primary) !important;
+            color: white !important;
+        }
+        .fb-component-item {
+            background: #fff !important;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: var(--shadow-sm) !important;
+        }
+        .fb-component-item:hover {
+            border-color: var(--primary) !important;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md) !important;
+        }
+        .fb-component-item span {
+            color: var(--text-primary) !important;
+        }
+        .fb-component-item i {
+            color: var(--primary) !important;
+            filter: none !important;
+        }
+        .accordion-button {
+            color: var(--text-primary) !important;
+        }
+        .accordion-button:not(.collapsed) {
+            background: rgba(30, 58, 95, 0.05) !important;
+            color: var(--primary) !important;
+        }
+        .accordion-button::after {
+            filter: none !important;
+        }
+        .fb-canvas-wrapper {
+            background: #fff !important;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: var(--shadow-lg) !important;
+        }
+        .fb-canvas-content {
+            background-image: radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px) !important;
+        }
+        .glass-modal {
+            background: #fff !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-primary) !important;
+            box-shadow: var(--shadow-lg) !important;
+        }
+        .glass-modal .modal-header {
+            background: #f8fafc !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            color: var(--primary) !important;
+        }
+        .glass-modal .modal-body {
+            color: var(--text-primary) !important;
+        }
+        .glass-modal .form-control, 
+        .glass-modal .form-select {
+            background: #fff !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-primary) !important;
+        }
+        .glass-modal .form-control:focus, 
+        .glass-modal .form-select:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1) !important;
+        }
+    </style>
+}
+
+<div class="form-builder-wrapper">
+    <!-- Navbar / Toolbar -->
+    <nav class="fb-navbar">
+        <div class="fb-navbar-left">
+            <span class="fb-brand"><i class="bi bi-ui-checks-grid me-2"></i>فرمساز پیشرفته</span>
+        </div>
+        <div class="fb-navbar-center">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-glass" id="btn-undo" title="Undo (Ctrl+Z)">
+                    <i class="bi bi-arrow-return-right flip-icon"></i>
+                </button>
+                <button type="button" class="btn btn-glass" id="btn-redo" title="Redo (Ctrl+Y)">
+                    <i class="bi bi-arrow-return-left flip-icon"></i>
+                </button>
+            </div>
+            <div class="vr mx-2 text-white-50"></div>
+            <button type="button" class="btn btn-glass" id="btn-desktop-view" title="Desktop View"><i class="bi bi-display"></i></button>
+            <button type="button" class="btn btn-glass" id="btn-tablet-view" title="Tablet View"><i class="bi bi-tablet"></i></button>
+            <button type="button" class="btn btn-glass" id="btn-mobile-view" title="Mobile View"><i class="bi bi-phone"></i></button>
+        </div>
+        <div class="fb-navbar-right">
+            <button type="button" class="btn btn-glass" id="btn-global-script">
+                <i class="bi bi-code-slash me-1"></i>اسکریپت فرم
+            </button>
+            <button type="button" class="btn btn-glass" id="btn-print-template">
+                <i class="bi bi-printer me-1"></i>قالب چاپ
+            </button>
+            <button type="button" class="btn btn-glass" id="btn-form-settings">
+                <i class="bi bi-sliders me-1"></i>تنظیمات فرم
+            </button>
+            <button type="button" class="btn btn-glass" id="btn-action-buttons">
+                <i class="bi bi-lightning-charge me-1"></i>دکمه‌های عملیاتی
+            </button>
+            <div class="vr mx-2 text-white-50"></div>
+            <button type="button" class="btn btn-danger" id="btn-clear">
+                <i class="bi bi-trash"></i>
+            </button>
+            <button type="button" class="btn btn-success" id="btn-save">
+                <i class="bi bi-save me-1"></i>ذخیره
+            </button>
+            <button type="button" class="btn btn-warning" id="btn-publish">
+                <i class="bi bi-send-check me-1"></i>انتشار فرم
+            </button>
+            <button type="button" class="btn btn-primary" id="btn-preview">
+                <i class="bi bi-eye me-1"></i>پیش‌نمایش
+            </button>
+        </div>
+    </nav>
+
+    <div class="fb-main-content">
+        <!-- Sidebar (Components) -->
+        <aside class="fb-sidebar">
+            <div class="fb-sidebar-header">
+                <ul class="nav nav-tabs nav-fill" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-components">
+                            <i class="bi bi-box-seam"></i> ابزارها
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-structure">
+                            <i class="bi bi-diagram-3"></i> ساختار
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="tab-content fb-sidebar-body">
+                <!-- Components Tab -->
+                <div class="tab-pane fade show active" id="tab-components">
+                    <div class="p-3">
+                        <input type="text" class="form-control form-control-sm fb-search" placeholder="جستجوی ابزار...">
+                    </div>
+                    
+                    <div class="accordion accordion-flush" id="accordionComponents">
+                        <!-- Input Controls -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInputs">
+                                    <i class="bi bi-input-cursor-text me-2"></i>کنترل‌های ورودی
+                                </button>
+                            </h2>
+                            <div id="collapseInputs" class="accordion-collapse collapse show" data-bs-parent="#accordionComponents">
+                                <div class="accordion-body fb-component-grid">
+                                    @foreach (var ft in inputTypes)
+                                    {
+                                        <div class="fb-component-item" draggable="true" data-type="@ft.Name" data-id="@ft.Id">
+                                            <i class="@ft.Icon"></i>
+                                            <span>@ft.DisplayNameFa</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Layout Controls -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLayout">
+                                    <i class="bi bi-layout-split me-2"></i>چیدمان
+                                </button>
+                            </h2>
+                            <div id="collapseLayout" class="accordion-collapse collapse" data-bs-parent="#accordionComponents">
+                                <div class="accordion-body fb-component-grid">
+                                    @foreach (var ft in layoutTypes)
+                                    {
+                                        <div class="fb-component-item" draggable="true" data-type="@ft.Name" data-id="@ft.Id" data-container="@ft.IsContainer.ToString().ToLower()">
+                                            <i class="@ft.Icon"></i>
+                                            <span>@ft.DisplayNameFa</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Static -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStatic">
+                                    <i class="bi bi-type me-2"></i>نمایشی
+                                </button>
+                            </h2>
+                            <div id="collapseStatic" class="accordion-collapse collapse" data-bs-parent="#accordionComponents">
+                                <div class="accordion-body fb-component-grid">
+                                    @foreach (var ft in staticTypes)
+                                    {
+                                        <div class="fb-component-item" draggable="true" data-type="@ft.Name" data-id="@ft.Id">
+                                            <i class="@ft.Icon"></i>
+                                            <span>@ft.DisplayNameFa</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAction">
+                                    <i class="bi bi-lightning-charge me-2"></i>دکمه‌ها
+                                </button>
+                            </h2>
+                            <div id="collapseAction" class="accordion-collapse collapse" data-bs-parent="#accordionComponents">
+                                <div class="accordion-body fb-component-grid">
+                                    @foreach (var ft in actionTypes)
+                                    {
+                                        <div class="fb-component-item" draggable="true" data-type="@ft.Name" data-id="@ft.Id">
+                                            <i class="@ft.Icon"></i>
+                                            <span>@ft.DisplayNameFa</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tree Structure Tab -->
+                <div class="tab-pane fade" id="tab-structure">
+                    <div class="fb-tree-wrapper" id="element-tree">
+                        <!-- Tree generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Canvas Area -->
+        <main class="fb-canvas-area p-4">
+            <div class="fb-canvas-wrapper shadow-lg">
+                <!-- Toolbar for Sub-View (Hidden by default) -->
+                <div id="canvas-sub-header" class="d-none bg-warning p-2 text-dark d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-window me-1"></i> در حال ویرایش: <b id="current-view-name">Modal 1</b></span>
+                    <button class="btn btn-sm btn-outline-dark" id="btn-return-main">بازگشت به فرم اصلی</button>
+                </div>
+
+                <div id="form-canvas" class="fb-canvas-content">
+                    <div class="fb-drop-zone-empty" id="start-drop-zone">
+                        <div class="text-center p-5 text-muted">
+                            <i class="bi bi-plus-square-dotted display-4 mb-3"></i>
+                            <h5>برای شروع کنترل‌ها را به اینجا بکشید</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Component Tray (For Modals, etc.) -->
+            <div id="component-tray-wrapper" class="mt-4">
+                <h6 class="text-muted mb-2"><i class="bi bi-collection me-1"></i>کامپوننت‌ها و مدال‌ها</h6>
+                <div id="component-tray" class="d-flex flex-wrap gap-3 p-3 bg-white border rounded shadow-sm" style="min-height: 80px;">
+                    <!-- Items will be injected here -->
+                    <div class="text-muted small w-100 text-center align-self-center">هنوز کامپوننتی اضافه نشده است</div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- ================= MODALS ================= -->
+
+<!-- 1. Initial/Settings Form Modal -->
+<div class="modal fade" id="modal-form-settings" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content glass-modal">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-gear-fill me-2"></i>تنظیمات فرم</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">نام فارسی فرم <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="setting-name-fa" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">نام انگلیسی فرم (نام سیستمی)</label>
+                        <input type="text" class="form-control" id="setting-name-en" dir="ltr">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">کد فرم (3 رقمی) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="setting-code" min="100" max="999" placeholder="100">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">نوع فرم</label>
+                        <select class="form-select" id="setting-form-type">
+                            @foreach (var item in Html.GetEnumSelectList<FormCategoryType>())
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">دسته‌بندی</label>
+                        <select class="form-select" id="setting-category">
+                            <option value="">انتخاب کنید...</option>
+                            @foreach (var cat in categories)
+                            {
+                                <option value="@cat.Id">@cat.NameFa</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">
+                            قانون شماره‌گذاری
+                            <i class="bi bi-question-circle text-muted ms-1" data-bs-toggle="tooltip" title="مثال: yyyy/MM/dd-#### که #### شمارنده خودکار است"></i>
+                        </label>
+                        <div class="input-group" dir="ltr">
+                            <input type="text" class="form-control" id="setting-numbering-prefix" placeholder="Prefix (e.g. LET)">
+                            <span class="input-group-text">-</span>
+                            <input type="text" class="form-control" id="setting-numbering-rule" placeholder="yyyyMMdd-####">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">اندازه صحنه</label>
+                        <select class="form-select" id="setting-canvas-size">
+                            <option value="auto">خودکار (Auto)</option>
+                            <option value="A4">A4 (210mm x 297mm)</option>
+                            <option value="A5">A5 (148mm x 210mm)</option>
+                            <option value="Letter">Letter</option>
+                            <option value="Custom">سفارشی...</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Custom Size Inputs (shown when Custom is selected) -->
+                    <div class="col-md-6" id="custom-size-inputs" style="display: none;">
+                        <label class="form-label">عرض (Width)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="setting-custom-width" placeholder="مثال: 800" min="100" step="1">
+                            <select class="form-select" id="setting-custom-width-unit" style="max-width: 80px;">
+                                <option value="px">px</option>
+                                <option value="mm">mm</option>
+                                <option value="cm">cm</option>
+                                <option value="in">in</option>
+                                <option value="%">%</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6" id="custom-size-inputs-height" style="display: none;">
+                        <label class="form-label">ارتفاع (Height)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="setting-custom-height" placeholder="مثال: 600" min="100" step="1">
+                            <select class="form-select" id="setting-custom-height-unit" style="max-width: 80px;">
+                                <option value="px">px</option>
+                                <option value="mm">mm</option>
+                                <option value="cm">cm</option>
+                                <option value="in">in</option>
+                                <option value="%">%</option>
+                                <option value="auto">auto</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">رنگ پس‌زمینه</label>
+                        <div class="input-group">
+                            <input type="color" class="form-control form-control-color" id="setting-bg-color" value="#ffffff" title="Choose your color">
+                            <input type="text" class="form-control" id="setting-bg-image" placeholder="آدرس تصویر (URL)" dir="ltr">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                <button type="button" class="btn btn-primary" id="btn-save-settings">تایید و ادامه</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Property Modal - Large Centered Modal with 5 Tabs -->
+<div class="modal fade" id="modal-properties" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content glass-modal">
+            <div class="modal-header bg-gradient-primary text-white py-2">
+                <h5 class="modal-title"><i class="bi bi-gear-fill me-2"></i>تنظیمات کنترل: <span id="prop-control-name">-</span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <!-- Tabs Navigation -->
+            <div class="modal-header bg-light py-1 border-top-0">
+                <ul class="nav nav-tabs nav-fill w-100" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active py-2" data-bs-toggle="tab" data-bs-target="#prop-tab-general">
+                            <i class="bi bi-sliders2 me-1"></i>عمومی
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link py-2" data-bs-toggle="tab" data-bs-target="#prop-tab-specific">
+                            <i class="bi bi-puzzle me-1"></i>اختصاصی
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link py-2" data-bs-toggle="tab" data-bs-target="#prop-tab-validation">
+                            <i class="bi bi-shield-check me-1"></i>اعتبارسنجی
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link py-2" data-bs-toggle="tab" data-bs-target="#prop-tab-database">
+                            <i class="bi bi-database me-1"></i>دیتابیس
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link py-2" data-bs-toggle="tab" data-bs-target="#prop-tab-code">
+                            <i class="bi bi-code-slash me-1"></i>کد سفارشی
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="modal-body p-3" style="max-height: 65vh; overflow-y: auto;">
+                <div class="tab-content">
+                    
+                    <!-- ==================== TAB 1: GENERAL ==================== -->
+                    <div class="tab-pane fade show active" id="prop-tab-general">
+                        
+                        <!-- Section 1: Basic Info (Bordered) -->
+                        <fieldset class="border rounded p-3 mb-3">
+                            <legend class="float-none w-auto px-2 fs-6 fw-bold text-primary">مشخصات اصلی</legend>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label small">نام فارسی</label>
+                                    <input type="text" class="form-control form-control-sm" id="prop_label_fa">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small">نام انگلیسی</label>
+                                    <input type="text" class="form-control form-control-sm" id="prop_label_en" dir="ltr">
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="prop_readonly">
+                                        <label class="form-check-label small" for="prop_readonly">فقط خواندنی (Read-only)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="prop_disabled">
+                                        <label class="form-check-label small" for="prop_disabled">غیرفعال (Disabled)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Section 2: Font Styles (Bordered) -->
+                        <fieldset class="border rounded p-3 mb-3">
+                            <legend class="float-none w-auto px-2 fs-6 fw-bold text-primary">استایل فونت</legend>
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label class="form-label small">نام فونت</label>
+                                    <select class="form-select form-select-sm" id="prop_font_family">
+                                        <option value="inherit">پیش‌فرض</option>
+                                        <option value="IRANSans">ایران سنس</option>
+                                        <option value="Vazirmatn">وزیر متن</option>
+                                        <option value="Yekan">یکان</option>
+                                        <option value="Tahoma">Tahoma</option>
+                                        <option value="Arial">Arial</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">اندازه فونت</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" class="form-control" id="prop_font_size" value="14" min="8" max="72">
+                                        <span class="input-group-text">px</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">ضخامت فونت</label>
+                                    <select class="form-select form-select-sm" id="prop_font_weight">
+                                        <option value="300">سبک (Light)</option>
+                                        <option value="400" selected>معمولی (Normal)</option>
+                                        <option value="500">متوسط (Medium)</option>
+                                        <option value="600">نیمه‌ضخیم (Semi-Bold)</option>
+                                        <option value="700">ضخیم (Bold)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">رنگ فونت</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="color" class="form-control form-control-color" id="prop_font_color" value="#333333">
+                                        <input type="text" class="form-control" id="prop_font_color_text" value="#333333">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">تراز متن</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="prop_text_align" id="align_right" value="right" checked>
+                                        <label class="btn btn-outline-secondary btn-sm" for="align_right"><i class="bi bi-text-right"></i></label>
+                                        
+                                        <input type="radio" class="btn-check" name="prop_text_align" id="align_center" value="center">
+                                        <label class="btn btn-outline-secondary btn-sm" for="align_center"><i class="bi bi-text-center"></i></label>
+                                        
+                                        <input type="radio" class="btn-check" name="prop_text_align" id="align_left" value="left">
+                                        <label class="btn btn-outline-secondary btn-sm" for="align_left"><i class="bi bi-text-left"></i></label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">سبک متن</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="checkbox" class="btn-check" id="prop_underline">
+                                        <label class="btn btn-outline-secondary btn-sm" for="prop_underline"><i class="bi bi-type-underline"></i></label>
+                                        
+                                        <input type="checkbox" class="btn-check" id="prop_italic">
+                                        <label class="btn btn-outline-secondary btn-sm" for="prop_italic"><i class="bi bi-type-italic"></i></label>
+                                        
+                                        <input type="checkbox" class="btn-check" id="prop_bold">
+                                        <label class="btn btn-outline-secondary btn-sm" for="prop_bold"><i class="bi bi-type-bold"></i></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Section 3: Layout & Border (Bordered) -->
+                        <fieldset class="border rounded p-3 mb-3">
+                            <legend class="float-none w-auto px-2 fs-6 fw-bold text-primary">استایل و چیدمان</legend>
+                            
+                            <!-- Margin -->
+                            <div class="row g-2 mb-2">
+                                <div class="col-12"><small class="text-muted">Margin (فاصله بیرونی)</small></div>
+                                <div class="col-3">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text" title="بالا">↑</span>
+                                        <input type="number" class="form-control" id="prop_margin_top" value="0" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text" title="پایین">↓</span>
+                                        <input type="number" class="form-control" id="prop_margin_bottom" value="15" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text" title="چپ">←</span>
+                                        <input type="number" class="form-control" id="prop_margin_left" value="0" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text" title="راست">→</span>
+                                        <input type="number" class="form-control" id="prop_margin_right" value="0" min="0">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Padding -->
+                            <div class="row g-2 mb-2">
+                                <div class="col-12"><small class="text-muted">Padding (فاصله داخلی)</small></div>
+                                <div class="col-3">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text" title="بالا">↑</span>
+                                        <input type="number" class="form-control" id="prop_padding_top" value="8" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text" title="پایین">↓</span>
+                                        <input type="number" class="form-control" id="prop_padding_bottom" value="8" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text" title="چپ">←</span>
+                                        <input type="number" class="form-control" id="prop_padding_left" value="8" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text" title="راست">→</span>
+                                        <input type="number" class="form-control" id="prop_padding_right" value="8" min="0">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Border -->
+                            <div class="row g-2 mb-2">
+                                <div class="col-12"><small class="text-muted">Border (تنظیمات حاشیه)</small></div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">ضخامت</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" class="form-control" id="prop_border_width" value="0" min="0" max="10">
+                                        <span class="input-group-text">px</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">نوع</label>
+                                    <select class="form-select form-select-sm" id="prop_border_style">
+                                        <option value="solid">solid</option>
+                                        <option value="dashed">dashed</option>
+                                        <option value="dotted">dotted</option>
+                                        <option value="double">double</option>
+                                        <option value="none">none</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">رنگ</label>
+                                    <input type="color" class="form-control form-control-color form-control-sm w-100" id="prop_border_color" value="#cccccc">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">گوشه گرد</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" class="form-control" id="prop_border_radius" value="4" min="0">
+                                        <span class="input-group-text">px</span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small">نمایش Border در:</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="checkbox" class="btn-check" id="border_top" checked>
+                                        <label class="btn btn-outline-secondary btn-sm" for="border_top">بالا</label>
+                                        
+                                        <input type="checkbox" class="btn-check" id="border_bottom" checked>
+                                        <label class="btn btn-outline-secondary btn-sm" for="border_bottom">پایین</label>
+                                        
+                                        <input type="checkbox" class="btn-check" id="border_left" checked>
+                                        <label class="btn btn-outline-secondary btn-sm" for="border_left">چپ</label>
+                                        
+                                        <input type="checkbox" class="btn-check" id="border_right" checked>
+                                        <label class="btn btn-outline-secondary btn-sm" for="border_right">راست</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Background, z-index, display -->
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label class="form-label small">رنگ پس‌زمینه</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="color" class="form-control form-control-color" id="prop_bg_color" value="#ffffff">
+                                        <input type="text" class="form-control" id="prop_bg_color_text" value="#ffffff">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">z-index</label>
+                                    <input type="number" class="form-control form-control-sm" id="prop_z_index" value="auto" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">Display</label>
+                                    <select class="form-select form-select-sm" id="prop_display">
+                                        <option value="block">block (نمایش)</option>
+                                        <option value="none">none (مخفی)</option>
+                                        <option value="inline-block">inline-block</option>
+                                        <option value="flex">flex</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Section 4: Tooltip (Bordered) -->
+                        <fieldset class="border rounded p-3 mb-3">
+                            <legend class="float-none w-auto px-2 fs-6 fw-bold text-primary">راهنمای کاربر (Tooltip)</legend>
+                            <div class="row g-2 align-items-center">
+                                <div class="col-auto">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="prop_tooltip_enabled">
+                                        <label class="form-check-label small" for="prop_tooltip_enabled">نمایش Tooltip</label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <input type="text" class="form-control form-control-sm" id="prop_tooltip_text" placeholder="متن راهنما را وارد کنید..." disabled>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!-- ==================== TAB 2: SPECIFIC ==================== -->
+                    <div class="tab-pane fade" id="prop-tab-specific">
+                        <div id="prop-container-specific">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-1"></i>
+                                تنظیمات اختصاصی بر اساس نوع کنترل انتخاب شده نمایش داده می‌شود.
+                            </div>
+                            <!-- Dynamic content based on control type -->
+                        </div>
+                    </div>
+
+                    <!-- ==================== TAB 3: VALIDATIONS ==================== -->
+                    <div class="tab-pane fade" id="prop-tab-validation">
+                        <div class="alert alert-soft-primary mb-3">
+                            <i class="bi bi-info-circle me-1"></i> رویدادها و اعتبارسنجی‌های این کنترل را مدیریت کنید.
+                        </div>
+                        
+                        <!-- List of Validations/Events -->
+                        <div id="validation-list" class="mb-3">
+                            <!-- Dynamically populated -->
+                        </div>
+
+                        <hr>
+                        <h6>افزودن رویداد جدید</h6>
+                        <div class="card bg-light border-0">
+                            <div class="card-body p-2">
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label class="small text-muted">رویداد (Event)</label>
+                                        <select class="form-select form-select-sm" id="new-event-trigger">
+                                            <option value="onClick">کلیک (onClick)</option>
+                                            <option value="onChange">تغییر مقدار (onChange)</option>
+                                            <option value="onBlur">خروج فوکوس (onBlur)</option>
+                                            <option value="onFocus">ورود فوکوس (onFocus)</option>
+                                            <option value="onKeyUp">فشار کلید (onKeyUp)</option>
+                                            <option value="onInit">بارگذاری (onInit)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="small text-muted">نوع عملیات</label>
+                                        <select class="form-select form-select-sm" id="new-event-action-type">
+                                            <option value="message">نمایش پیام</option>
+                                            <option value="script">اجرای اسکریپت</option>
+                                            <option value="validate">اعتبارسنجی داده</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Message Config Section -->
+                                    <div class="col-12 event-config-message">
+                                        <div class="mb-2">
+                                            <label class="small text-muted">متن پیام</label>
+                                            <input type="text" class="form-control form-control-sm" id="new-event-msg-text" placeholder="متن پیام را بنویسید...">
+                                        </div>
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label class="small text-muted">سطح پیام</label>
+                                                <select class="form-select form-select-sm" id="new-event-msg-level">
+                                                    <option value="success">موفقیت (Success)</option>
+                                                    <option value="warning">هشدار (Warning)</option>
+                                                    <option value="error">خطا (Error)</option>
+                                                    <option value="info">اطلاع (Info)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="small text-muted">کامپوننت نمایش</label>
+                                                <select class="form-select form-select-sm" id="new-event-msg-component">
+                                                    <option value="toast">تست (Toast)</option>
+                                                    <option value="swal">پنجره مدال (SweetAlert)</option>
+                                                    <option value="banner">بنر بالای صفحه</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary mt-2 w-100" id="btn-preview-message">
+                                            <i class="bi bi-play-fill"></i> پیش‌نمایش پیام
+                                        </button>
+                                    </div>
+
+                                    <!-- Script Config Section -->
+                                    <div class="col-12 event-config-script d-none">
+                                        <label class="small text-muted">کد JavaScript</label>
+                                        <textarea class="form-control font-monospace" rows="3" id="new-event-script" placeholder="// console.log('Hello');"></textarea>
+                                    </div>
+
+                                    <div class="col-12 mt-2">
+                                        <button class="btn btn-sm btn-success w-100" id="btn-add-event">
+                                            <i class="bi bi-plus-lg"></i> افزودن به لیست
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ==================== TAB 4: DATABASE ==================== -->
+                    <div class="tab-pane fade" id="prop-tab-database">
+                        <fieldset class="border rounded p-3 mb-3">
+                            <legend class="float-none w-auto px-2 fs-6 fw-bold text-primary">تنظیمات فیلد دیتابیس</legend>
+                            
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label small">نام فیلد (از نام انگلیسی)</label>
+                                    <input type="text" class="form-control form-control-sm" id="db_field_name" readonly dir="ltr">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small">نوع داده (خودکار)</label>
+                                    <input type="text" class="form-control form-control-sm" id="db_data_type" readonly dir="ltr">
+                                </div>
+                            </div>
+
+                            <!-- Dynamic Parameters based on DataType -->
+                            <div id="db-dynamic-params" class="row g-2 mt-2">
+                                <!-- Will be populated by JS based on data type -->
+                            </div>
+
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-4">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="db_nullable" checked>
+                                        <label class="form-check-label small" for="db_nullable">Null پذیر</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="db_has_index">
+                                        <label class="form-check-label small" for="db_has_index">ایجاد Index</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="db_is_unique">
+                                        <label class="form-check-label small" for="db_is_unique">Unique Constraint</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="border rounded p-3 mb-3">
+                            <legend class="float-none w-auto px-2 fs-6 fw-bold text-primary">مقدار پیش‌فرض</legend>
+                            
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-8">
+                                    <label class="form-label small">مقدار ثابت</label>
+                                    <input type="text" 
+                                           class="form-control form-control-sm" 
+                                           id="db_default_value" 
+                                           placeholder="مقدار پیش‌فرض ثابت..."
+                                           autocomplete="off">
+                                    <small class="text-muted">در صورت انتخاب تابع، این فیلد غیرفعال می‌شود</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-outline-primary btn-sm w-100" id="btn-select-function">
+                                        <i class="bi bi-function"></i> انتخاب تابع
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="selected-function-display" class="alert alert-success mt-2 d-none py-2">
+                                <small><i class="bi bi-check-circle me-1"></i>تابع انتخاب شده: <strong id="selected-function-name">-</strong></small>
+                                <button type="button" class="btn-close btn-sm float-end" id="btn-clear-function"></button>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="border rounded p-3">
+                            <legend class="float-none w-auto px-2 fs-6 fw-bold text-primary">منبع داده (برای لیست‌ها)</legend>
+                            <select class="form-select form-select-sm" id="db_data_source_type">
+                                <option value="static">دستی (Static)</option>
+                                <option value="url">وب سرویس (URL)</option>
+                                <option value="query">کوئری SQL</option>
+                            </select>
+                        </fieldset>
+                    </div>
+
+                    <!-- ==================== TAB 5: CUSTOM CODE ==================== -->
+                    <div class="tab-pane fade" id="prop-tab-code">
+                        <div class="row h-100">
+                            <!-- CSS Section (Top Half) -->
+                            <div class="col-12 mb-3">
+                                <fieldset class="border rounded p-2 h-100">
+                                    <legend class="float-none w-auto px-2 fs-6 fw-bold text-primary">
+                                        <i class="bi bi-palette me-1"></i>CSS سفارشی (اولویت بالا)
+                                    </legend>
+                                    <textarea class="form-control font-monospace" id="prop_custom_css" rows="6" dir="ltr" style="text-align: left;" placeholder="/* Custom styles for this field */
+.fb-field-{field-id} {
+    /* Your styles here */
+}"></textarea>
+                                    <small class="text-muted d-block mt-1">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        کلاس پیش‌فرض: <code dir="ltr">.fb-field-{field-id}</code>
+                                    </small>
+                                </fieldset>
+                            </div>
+                            
+                            <!-- JS Section (Bottom Half) -->
+                            <div class="col-12">
+                                <fieldset class="border rounded p-2 h-100">
+                                    <legend class="float-none w-auto px-2 fs-6 fw-bold text-primary">
+                                        <i class="bi bi-code-slash me-1"></i>JavaScript سفارشی (اولویت بالا)
+                                    </legend>
+                                    <textarea class="form-control font-monospace" id="prop_custom_js" rows="6" placeholder="// کدهای جاوا اسکریپت سفارشی برای این فیلد
+// این اسکریپت بعد از بارگذاری فرم اجرا می‌شود
+console.log('Field loaded');"></textarea>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>انصراف
+                </button>
+                <button type="button" class="btn btn-primary" id="btn-save-properties">
+                    <i class="bi bi-check-lg me-1"></i>ذخیره تنظیمات
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Function Selection Modal -->
+<div class="modal fade" id="modal-select-function" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light py-2">
+                <h6 class="modal-title"><i class="bi bi-function me-2"></i>انتخاب تابع پیش‌فرض</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info py-2 mb-3">
+                    <i class="bi bi-info-circle me-1"></i>
+                    <small>نوع خروجی تابع باید با نوع داده فیلد (<strong id="function-field-type-display">-</strong>) مطابقت داشته باشد.</small>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <label class="form-label small">توابع موجود</label>
+                        <select class="form-select" id="function-list" size="10">
+                            <!-- Populated by JS -->
+                        </select>
+                        <small class="text-muted">توابع با نوع خروجی مناسب به رنگ سبز نمایش داده می‌شوند</small>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small">تابع انتخاب شده</label>
+                        <div class="border rounded p-2 bg-light" style="min-height: 200px;">
+                            <div id="function-preview">
+                                <p class="text-muted small text-center mt-4">یک تابع انتخاب کنید</p>
+                            </div>
+                        </div>
+                        <div id="function-validation-status" class="mt-2"></div>
+                    </div>
+                </div>
+                <div id="function-error" class="alert alert-danger mt-2 d-none py-2"></div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary btn-sm" id="btn-confirm-function">
+                    <i class="bi bi-check-lg"></i> تأیید انتخاب
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Global Script Modal -->
+<div class="modal fade" id="modal-global-script" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-fullscreen-lg-down">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="bi bi-code-square me-2"></i>کدنویسی پیشرفته (JavaScript / jQuery)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" style="height: calc(100vh - 200px);">
+                <textarea id="global-script-editor" style="width:100%;height:100%;font-family: 'Courier New', monospace;"></textarea>
+            </div>
+            <div class="modal-footer bg-dark border-top-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-success" id="btn-save-script">ذخیره اسکریپت‌ها</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Print Template Modal -->
+<div class="modal fade" id="modal-print-template" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-printer me-2"></i>مدیریت قالب‌های چاپ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-1"></i>
+                    برای ایجاد قالب چاپ، یک فایل Word (.docx) طراحی کنید و نام هر فیلد فرم را به عنوان بوکمارک در آن قرار دهید.
+                    سپس فایل را در اینجا آپلود کنید.
+                </div>
+
+                <!-- Templates List -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6>قالب‌های موجود</h6>
+                        <button type="button" class="btn btn-sm btn-primary" id="btn-add-new-template">
+                            <i class="bi bi-plus-lg me-1"></i>افزودن قالب جدید
+                        </button>
+                    </div>
+                    <div id="print-templates-list-manager" class="list-group">
+                        <!-- Templates will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Add/Edit Template Form -->
+                <div id="print-template-form" class="card border-primary d-none">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0" id="template-form-title">افزودن قالب جدید</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">نام قالب <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="template-name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">ترتیب نمایش</label>
+                                <input type="number" class="form-control" id="template-display-order" value="0">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">توضیحات</label>
+                                <textarea class="form-control" id="template-description" rows="2"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">فایل Word (.docx) <span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" id="template-file" accept=".docx">
+                                <small class="text-muted">فقط فایل‌های Word با فرمت .docx مجاز هستند</small>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="template-is-default">
+                                    <label class="form-check-label" for="template-is-default">
+                                        قالب پیش‌فرض
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-primary" id="btn-save-template">
+                            <i class="bi bi-save me-1"></i>ذخیره
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="btn-cancel-template">انصراف</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 5. Database Connection Modal -->
+<div class="modal fade" id="modal-database-connection" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-database me-2"></i>اتصال به دیتابیس</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" style="height: calc(100vh - 120px);">
+                <div class="row g-0 h-100">
+                    <!-- Left Side: Tables/Views and Functions/Procedures List -->
+                    <div class="col-md-4 border-end bg-light" style="overflow-y: auto;">
+                        <div class="p-3">
+                            <ul class="nav nav-tabs nav-fill mb-3" role="tablist">
+                                <li class="nav-item">
+                                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#db-tab-tables">
+                                        <i class="bi bi-table me-1"></i>جداول و ویوها
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#db-tab-functions">
+                                        <i class="bi bi-function me-1"></i>توابع و پروسیجرها
+                                    </button>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content">
+                                <!-- Tables/Views Tab -->
+                                <div class="tab-pane fade show active" id="db-tab-tables">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                        <input type="text" class="form-control form-control-sm" id="db-search-tables" placeholder="جستجوی جدول...">
+                                    </div>
+                                    <div id="db-tables-list" class="list-group" style="max-height: calc(100vh - 300px); overflow-y: auto;">
+                                        <div class="text-center text-muted py-4">
+                                            <i class="bi bi-hourglass-split"></i> در حال بارگذاری...
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Functions/Procedures Tab -->
+                                <div class="tab-pane fade" id="db-tab-functions">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                        <input type="text" class="form-control form-control-sm" id="db-search-functions" placeholder="جستجوی تابع...">
+                                    </div>
+                                    <div id="db-functions-list" class="list-group" style="max-height: calc(100vh - 300px); overflow-y: auto;">
+                                        <div class="text-center text-muted py-4">
+                                            <i class="bi bi-hourglass-split"></i> در حال بارگذاری...
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Side: Table Diagram -->
+                    <div class="col-md-8" style="overflow-y: auto;">
+                        <div class="p-3">
+                            <div id="db-diagram-container">
+                                <div class="text-center text-muted py-5">
+                                    <i class="bi bi-diagram-3 display-4 d-block mb-3"></i>
+                                    <p>یک جدول، ویو یا تابع را از سمت چپ انتخاب کنید</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" id="btn-confirm-db-selection" disabled>
+                    <i class="bi bi-check-lg me-1"></i>تأیید و انتقال به تب اختصاصی
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 6. Action Buttons Config Modal -->
+<div class="modal fade" id="modal-action-buttons" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-lightning-charge me-2"></i>مدیریت دکمه‌های عملیاتی</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" style="min-height: 500px;">
+                <div class="row g-0 h-100">
+                    <!-- Left Panel: Available Button Types -->
+                    <div class="col-md-3 border-end bg-light" style="max-height: 500px; overflow-y: auto;">
+                        <div class="p-3">
+                            <h6 class="mb-3"><i class="bi bi-list-check me-1"></i>دکمه‌های آماده</h6>
+                            <!-- Category Tabs -->
+                            <ul class="nav nav-pills nav-fill mb-3" id="btntype-category-tabs">
+                                <li class="nav-item">
+                                    <button class="nav-link active btn-sm px-2" data-category="all">همه</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link btn-sm px-2" data-category="document">سندی</button>
+                                </li>
+                                <li class="nav-item">
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link btn-sm px-2" data-category="utility">ابزاری</button>
+                                </li>
+                            </ul>
+                            <div id="available-buttons-list">
+                                <!-- Loaded dynamically -->
+                            </div>
+                            <hr>
+                            <button type="button" class="btn btn-outline-success btn-sm w-100" id="btn-add-process-service">
+                                <i class="bi bi-gear me-1"></i>افزودن سرویس
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Middle Panel: Active Buttons for this Form -->
+                    <div class="col-md-4 border-end" style="max-height: 500px; overflow-y: auto;">
+                        <div class="p-3">
+                            <h6 class="mb-3"><i class="bi bi-check2-square me-1"></i>دکمه‌های فعال فرم</h6>
+                            <div id="active-buttons-list" class="list-group">
+                                <div class="text-center text-muted py-4" id="no-active-buttons">
+                                    <i class="bi bi-arrow-right-circle d-block mb-2" style="font-size: 2rem;"></i>
+                                    از پنل سمت راست دکمه اضافه کنید
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Selected Button Settings -->
+                    <div class="col-md-5" style="max-height: 500px; overflow-y: auto;">
+                        <div class="p-3">
+                            <h6 class="mb-3"><i class="bi bi-gear me-1"></i>تنظیمات دکمه</h6>
+                            <div id="button-settings-panel">
+                                <div class="text-center text-muted py-4" id="no-button-selected">
+                                    <i class="bi bi-hand-index d-block mb-2" style="font-size: 2rem;"></i>
+                                    یک دکمه را از لیست فعال انتخاب کنید
+                                </div>
+                                <div id="button-settings-form" class="d-none">
+                                    <!-- Custom Title -->
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label small">عنوان سفارشی (فارسی)</label>
+                                            <input type="text" class="form-control form-control-sm" id="btn-custom-title-fa" dir="rtl">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small">عنوان سفارشی (انگلیسی)</label>
+                                            <input type="text" class="form-control form-control-sm" id="btn-custom-title-en" dir="ltr">
+                                        </div>
+                                    </div>
+                                    <!-- Display Mode -->
+                                    <div class="mb-3">
+                                        <label class="form-label small">حالت نمایش</label>
+                                        <select class="form-select form-select-sm" id="btn-display-mode">
+                                            <option value="icon_and_title">آیکون + عنوان</option>
+                                            <option value="icon_only">فقط آیکون</option>
+                                            <option value="title_only">فقط عنوان</option>
+                                        </select>
+                                    </div>
+                                    <!-- Icon -->
+                                    <div class="mb-3">
+                                        <label class="form-label small">آیکون سفارشی (کلاس CSS)</label>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text" id="btn-icon-preview"><i class="bi bi-circle"></i></span>
+                                            <input type="text" class="form-control" id="btn-custom-icon" placeholder="مثال: fas fa-paper-plane" dir="ltr">
+                                        </div>
+                                    </div>
+                                    <!-- Style Preset -->
+                                    <div class="mb-3">
+                                        <label class="form-label small">قالب استایل</label>
+                                        <select class="form-select form-select-sm" id="btn-style-preset">
+                                            <option value="">سفارشی</option>
+                                        </select>
+                                    </div>
+                                    <!-- Custom Styles -->
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label small">رنگ متن</label>
+                                            <input type="color" class="form-control form-control-sm form-control-color" id="btn-color" value="#ffffff">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small">رنگ پس‌زمینه</label>
+                                            <input type="color" class="form-control form-control-sm form-control-color" id="btn-bg-color" value="#0d6efd">
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label small">اندازه فونت (px)</label>
+                                            <input type="number" class="form-control form-control-sm" id="btn-font-size" value="14" min="10" max="24">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small">گردی حاشیه (px)</label>
+                                            <input type="number" class="form-control form-control-sm" id="btn-border-radius" value="6" min="0" max="50">
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label small">پدینگ</label>
+                                            <input type="text" class="form-control form-control-sm" id="btn-padding" placeholder="6px 12px" dir="ltr">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small">مارجین</label>
+                                            <input type="text" class="form-control form-control-sm" id="btn-margin" placeholder="0 4px" dir="ltr">
+                                        </div>
+                                    </div>
+                                    <!-- Process Service Section (hidden for predefined buttons) -->
+                                    <div id="process-service-section" class="d-none">
+                                        <hr>
+                                        <h6 class="text-success"><i class="bi bi-gear me-1"></i>تنظیمات فرآیندی</h6>
+                                        <div class="alert alert-light border small py-2">
+                                            فرآیندساز فعلا حذف شده و بعدا دوباره طراحی می‌شود.
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small">وارث خاصیت دکمه</label>
+                                            <select class="form-select form-select-sm" id="btn-inherit-from">
+                                                <option value="">بدون وراثت</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small">زمان اجرا</label>
+                                            <select class="form-select form-select-sm" id="btn-execution-timing">
+                                                <option value="after">بعد از دکمه وارث</option>
+                                                <option value="before">قبل از دکمه وارث</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <!-- Other -->
+                                    <hr>
+                                    <div class="mb-3">
+                                        <label class="form-label small">پیام تایید (قبل از اجرا)</label>
+                                        <input type="text" class="form-control form-control-sm" id="btn-confirmation-msg" dir="rtl" placeholder="آیا مطمئن هستید؟">
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="btn-is-enabled" checked>
+                                        <label class="form-check-label small" for="btn-is-enabled">فعال</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="me-auto">
+                    <label class="form-label small mb-0 me-2">قالب استایل کلی:</label>
+                    <select class="form-select form-select-sm d-inline-block" id="global-button-style-preset" style="width: auto;">
+                        <option value="">پیشفرض</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" id="btn-save-action-buttons">
+                    <i class="bi bi-save me-1"></i>ذخیره دکمه‌ها
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://unpkg.com/@@minasmart/jalali-date-picker@1.2.0/dist/jalali-date-picker.js"></script>
+    <!-- Quill Rich Text Editor -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <!-- Signature Pad -->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
+    <script src="~/js/formbuilder/formbuilder.js" asp-append-version="true"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pass server-side data to JS
+            const config = {
+                formId: '@(form?.Id)',
+                isNew: @(isNew.ToString().ToLower()),
+                formType: '@(form?.FormType)',
+                initialData: @Html.Raw(form?.DesignData ?? "null"),
+                customScripts: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(form?.CustomScripts ?? "")),
+                customStyles: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(form?.CustomStyles ?? "")),
+                fieldTypes: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.FieldTypes))
+            };
+            
+            window.fbEngine = new FormBuilderEngine(config);
+        });
+    </script>
+}

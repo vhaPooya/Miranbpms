@@ -1,0 +1,954 @@
+@* Partial View: گروه های کاربری *@
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+    <h5 class="fw-bold mb-0">
+        <i class="fa-solid fa-users-rectangle me-2 text-primary"></i>
+        گروه های کاربری
+    </h5>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-warning btn-sm" id="btn-group-perms" disabled onclick="openGroupPermPicker()">
+            <i class="fa-solid fa-key me-1"></i>مجوز دادن
+        </button>
+        <button class="btn btn-outline-primary btn-sm" id="btn-group-roles" disabled onclick="openGroupRoleSearch()">
+            <i class="fa-solid fa-user-tie me-1"></i>وارد کردن سمتها
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="openGroupModal()">
+            <i class="fa-solid fa-plus me-1"></i>
+            ایجاد گروه جدید
+        </button>
+    </div>
+</div>
+
+<!-- Breadcrumb -->
+<nav class="mb-3">
+    <ol class="breadcrumb breadcrumb-sm mb-0" id="groups-breadcrumb">
+        <li class="breadcrumb-item active">
+            <i class="fa-solid fa-users-rectangle me-1"></i>گروه ها
+        </li>
+    </ol>
+</nav>
+
+<!-- Tree + Table Layout -->
+<div class="row g-3">
+
+    <!-- Tree Panel -->
+    <div class="col-md-4">
+        <div class="card border rounded-3 h-100">
+            <div class="card-header bg-light py-2">
+                <h6 class="mb-0 fw-semibold small">
+                    <i class="fa-solid fa-diagram-3 me-2 text-primary"></i>
+                    ساختار گروه ها
+                </h6>
+            </div>
+            <div class="card-body p-2" id="groups-tree-container" style="max-height: 420px; overflow: auto;">
+                <div class="text-center py-3 text-muted small">
+                    <i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Panel -->
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small" id="groups-table-header">
+                <i class="fa-solid fa-list me-1"></i>
+                گروه های سطح اول
+            </span>
+            <span class="badge bg-secondary" id="groups-count"></span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-sm" style="font-size:0.85rem;">
+                <thead class="table-light">
+                    <tr>
+                        <th width="40">#</th>
+                        <th width="90">کد گروه</th>
+                        <th>نام گروه</th>
+                        <th width="80" class="text-center">ارجاع</th>
+                        <th width="90" class="text-center">نقش ها</th>
+                        <th width="70" class="text-center">وضعیت</th>
+                        <th width="120" class="text-center">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody id="groups-tbody">
+                    <tr>
+                        <td colspan="7" class="text-center py-3">
+                            <i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Group Modal (Create / Edit) -->
+<div class="modal" id="groupModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title" id="groupModalTitle">
+                    <i class="fa-solid fa-plus me-2"></i>ایجاد گروه جدید
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="text-muted small mb-3 border-bottom pb-2" id="groupModalSubtitle">
+                    ایجاد گروه در سطح اول
+                </div>
+                <form id="groupForm" novalidate>
+                    <input type="hidden" id="group-id">
+                    <input type="hidden" id="group-parent-id">
+
+                    <div class="row g-2">
+                        <div class="col-md-5">
+                            <label class="form-label small">کد گروه <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="group-code" dir="ltr" required maxlength="50">
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label small">نام گروه <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="group-name" required maxlength="200">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small">توضیحات</label>
+                            <textarea class="form-control form-control-sm" id="group-description" rows="2" maxlength="500"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="group-is-active" checked>
+                                <label class="form-check-label small" for="group-is-active">گروه فعال</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="group-use-in-referral">
+                                <label class="form-check-label small" for="group-use-in-referral">استفاده در ارجاع نامه</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark me-1"></i>انصراف
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveGroup()">
+                    <i class="fa-solid fa-save me-1"></i>ذخیره گروه
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Role Picker Modal (inline, from folder icon in table row) -->
+<div class="modal" id="groupRolePicker" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white py-2">
+                <h6 class="modal-title" id="grpRolePickerTitle">
+                    <i class="fa-solid fa-folder-plus me-2"></i>نقش های گروه
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="d-flex gap-2 mb-3">
+                    <select class="form-select form-select-sm flex-grow-1" id="grp-role-select">
+                        <option value="">انتخاب نقش...</option>
+                    </select>
+                    <button class="btn btn-success btn-sm px-3" onclick="addRoleToCurrentGroup()">
+                        <i class="fa-solid fa-plus me-1"></i>اضافه
+                    </button>
+                </div>
+                <div id="grp-roles-list" style="max-height:280px; overflow-y:auto;">
+                    <div class="text-muted text-center small py-3">نقشی اضافه نشده</div>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark me-1"></i>بستن
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Role Search Modal (from "وارد کردن سمتها" button — multi-select) -->
+<div class="modal" id="groupRoleSearchModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title" id="grpRoleSearchTitle">
+                    <i class="fa-solid fa-user-tie me-2"></i>وارد کردن سمتها
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="row g-2 mb-3">
+                    <div class="col-md-5">
+                        <input type="text" class="form-control form-control-sm" id="grprs-name" placeholder="نام سمت">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control form-control-sm" id="grprs-code" placeholder="کد سمت" dir="ltr">
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary btn-sm w-100" onclick="filterRoleSearch()">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i>جستجو
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height:380px; overflow-y:auto;">
+                    <table class="table table-hover table-sm" style="font-size:0.83rem;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th width="34"><input type="checkbox" class="form-check-input form-check-input-sm" id="grprs-select-all" onchange="toggleAllRoleSearch(this)"></th>
+                                <th>کد سمت</th>
+                                <th>نام سمت</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grprs-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="applyRoleSearch()">
+                    <i class="fa-solid fa-check me-1"></i>تأیید
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Permission Picker Modal (from "مجوز دادن" button — 5 tabs) -->
+<div class="modal" id="groupPermPickerModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark py-2">
+                <h6 class="modal-title" id="grpPermTitle">
+                    <i class="fa-solid fa-key me-2"></i>مجوزها
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <ul class="nav nav-tabs nav-sm mb-2" id="grp-perm-tabs">
+                    <li class="nav-item"><a class="nav-link active" id="grppt-general" href="#" onclick="switchGrpPermTab('general')"><i class="fa-solid fa-key me-1"></i>عمومی</a></li>
+                    <li class="nav-item"><a class="nav-link" id="grppt-secretariat" href="#" onclick="switchGrpPermTab('secretariat')"><i class="fa-solid fa-stamp me-1"></i>دبیرخانه</a></li>
+                    <li class="nav-item"><a class="nav-link" id="grppt-formbuilder" href="#" onclick="switchGrpPermTab('formbuilder')"><i class="fa-solid fa-file-lines me-1"></i>فرمساز</a></li>
+                    <li class="nav-item"><a class="nav-link" id="grppt-report" href="#" onclick="switchGrpPermTab('report')"><i class="fa-solid fa-chart-bar me-1"></i>گزارش ساز</a></li>
+                </ul>
+                <div class="table-responsive" style="max-height:360px; overflow-y:auto;">
+                    <table class="table table-hover table-sm" style="font-size:0.83rem;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th width="34"><input type="checkbox" class="form-check-input form-check-input-sm" id="grppt-select-all" onchange="toggleAllGrpPerms(this)"></th>
+                                <th>کد مجوز</th>
+                                <th>نام مجوز</th>
+                                <th>توضیحات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grppt-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-warning btn-sm" onclick="applyGrpPerms()">
+                    <i class="fa-solid fa-check me-1"></i>تأیید
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .groups-tree-header {
+        display: flex;
+        align-items: center;
+        padding: 3px 4px;
+        cursor: pointer;
+        border-radius: 4px;
+        white-space: nowrap;
+        font-size: 0.84rem;
+    }
+    .groups-tree-header:hover { background: rgba(13,110,253,0.07); }
+    .groups-tree-header.selected { background: #cfe2ff; font-weight: 600; }
+    .groups-tree-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        min-width: 16px;
+        font-size: 0.68rem;
+        color: #6c757d;
+    }
+    .groups-tree-toggle.clickable { cursor: pointer; }
+    .groups-tree-toggle.invisible { visibility: hidden; }
+    .groups-tree-children { padding-left: 20px; }
+    #groups-breadcrumb .breadcrumb-item:not(.active) { cursor: pointer; color: #0d6efd; }
+    #groups-breadcrumb .breadcrumb-item:not(.active):hover { text-decoration: underline; }
+    .folder-btn { transition: color 0.15s; }
+    .folder-btn:hover { color: #198754 !important; }
+</style>
+
+<script>
+    // ===== State =====
+    var groupsTreeData = [];
+    var currentParentGroupId = null;
+    var groupBreadcrumb = [];
+    var groupModalInst = null;
+    var rolePickerInst = null;
+    var roleSearchModalInst = null;
+    var permPickerModalInst = null;
+    var editingGroupId = null;
+    var pickerGroupId = null;
+    var pickerCurrentRoles = [];
+    var allRoles = [];
+    var allPermissions = [];
+    var selectedTreeEl = null;
+    var selectedGroupId = null;
+    var selectedGroupName = null;
+    // Role search modal state
+    var grpRoleCurrentIds = [];
+    var grpRoleTempIds = [];
+    var grpRoleFilterName = '';
+    var grpRoleFilterCode = '';
+    // Perm picker state
+    var grpPermCurrentIds = [];
+    var grpPermTempIds = [];
+    var grpPermCategory = 'general';
+
+    // ===== Utility =====
+    function esc(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // ===== Tree Level Colors =====
+    // Level 1 (depth 0): blue, then 4 colors cycle for depth 1+
+    function getIconColor(depth) {
+        if (depth === 0) return '#0d6efd';
+        var colors = ['#ffc107', '#198754', '#fd7e14', '#6f42c1'];
+        return colors[(depth - 1) % 4];
+    }
+
+    // ===== Button State =====
+    function updateGroupButtons() {
+        document.getElementById('btn-group-roles').disabled = !selectedGroupId;
+        document.getElementById('btn-group-perms').disabled = !selectedGroupId;
+    }
+
+    // ===== Tree Loading =====
+    async function loadGroupsTree() {
+        try {
+            var res = await fetch('/api/settings/groups/tree');
+            var result = await res.json();
+            if (result.success) {
+                groupsTreeData = result.data;
+                renderGroupsTree();
+            }
+        } catch (e) {
+            document.getElementById('groups-tree-container').innerHTML =
+                '<div class="text-danger text-center small py-3">خطا در بارگذاری ساختار گروه ها</div>';
+        }
+    }
+
+    function renderGroupsTree() {
+        var container = document.getElementById('groups-tree-container');
+        var roots = groupsTreeData.filter(function(g) { return !g.parentGroupId; });
+        var html = '';
+        roots.forEach(function(g) { html += buildGroupNode(g, 0); });
+        container.innerHTML = html || '<div class="text-muted text-center small py-3">گروهی تعریف نشده</div>';
+    }
+
+    function buildGroupNode(group, depth) {
+        var children = groupsTreeData.filter(function(g) { return g.parentGroupId === group.id; });
+        var hasChildren = children.length > 0;
+        var color = getIconColor(depth);
+        var childrenHtml = '';
+        children.forEach(function(c) { childrenHtml += buildGroupNode(c, depth + 1); });
+
+        return '<div class="groups-tree-node" id="treeGroup_' + group.id + '">' +
+            '<div class="groups-tree-header ' + (group.isActive ? '' : 'text-muted') + '" onclick="selectGroup(\'' + group.id + '\',\'' + esc(group.groupName) + '\')">' +
+                '<span class="groups-tree-toggle ' + (hasChildren ? 'clickable' : 'invisible') + '" onclick="event.stopPropagation();toggleGroupNode(\'treeGroup_' + group.id + '\')">' + (hasChildren ? '▶' : '') + '</span>' +
+                '<i class="fa-solid fa-users-rectangle me-1" style="color:' + color + ';"></i>' +
+                '<span>' + esc(group.groupName) + '</span>' +
+                '<span class="text-muted ms-1" style="font-size:0.74rem">(' + esc(group.groupCode) + ')</span>' +
+            '</div>' +
+            (hasChildren ? '<div class="groups-tree-children" id="treeGroup_' + group.id + '_ch" style="display:none">' + childrenHtml + '</div>' : '') +
+        '</div>';
+    }
+
+    function toggleGroupNode(nodeId) {
+        var ch = document.getElementById(nodeId + '_ch');
+        if (!ch) return;
+        var open = ch.style.display !== 'none';
+        ch.style.display = open ? 'none' : 'block';
+        var el = document.getElementById(nodeId);
+        var toggle = el ? el.querySelector(':scope > .groups-tree-header .groups-tree-toggle') : null;
+        if (toggle) toggle.textContent = open ? '▶' : '▼';
+    }
+
+    function highlightGroupNode(id) {
+        if (selectedTreeEl) selectedTreeEl.classList.remove('selected');
+        var node = document.getElementById('treeGroup_' + id);
+        if (node) {
+            var header = node.querySelector(':scope > .groups-tree-header');
+            if (header) { header.classList.add('selected'); selectedTreeEl = header; }
+        }
+    }
+
+    function expandTreeToGroup(groupId) {
+        var ancestors = [];
+        var cur = groupId;
+        while (cur) {
+            var g = groupsTreeData.find(function(x) { return x.id === cur; });
+            if (!g || !g.parentGroupId) break;
+            ancestors.push(g.parentGroupId);
+            cur = g.parentGroupId;
+        }
+        ancestors.forEach(function(aid) {
+            var ch = document.getElementById('treeGroup_' + aid + '_ch');
+            if (ch && ch.style.display === 'none') {
+                ch.style.display = 'block';
+                var nd = document.getElementById('treeGroup_' + aid);
+                var tgl = nd ? nd.querySelector(':scope > .groups-tree-header .groups-tree-toggle') : null;
+                if (tgl) tgl.textContent = '▼';
+            }
+        });
+    }
+
+    // ===== Navigation =====
+    function selectGroup(groupId, groupName) {
+        currentParentGroupId = groupId;
+        selectedGroupId = groupId;
+        selectedGroupName = groupName;
+        buildGroupBreadcrumb(groupId);
+        highlightGroupNode(groupId);
+        expandTreeToGroup(groupId);
+        loadGroupChildren(groupId);
+        updateGroupButtons();
+    }
+
+    function buildGroupBreadcrumb(groupId) {
+        var path = [];
+        var cur = groupId;
+        while (cur) {
+            var g = groupsTreeData.find(function(x) { return x.id === cur; });
+            if (!g) break;
+            path.unshift({ id: g.id, name: g.groupName });
+            cur = g.parentGroupId;
+        }
+        groupBreadcrumb = path;
+        updateGroupBreadcrumb();
+    }
+
+    function navigateGroupsToRoot() {
+        currentParentGroupId = null;
+        selectedGroupId = null;
+        selectedGroupName = null;
+        groupBreadcrumb = [];
+        if (selectedTreeEl) { selectedTreeEl.classList.remove('selected'); selectedTreeEl = null; }
+        updateGroupBreadcrumb();
+        updateGroupButtons();
+        loadGroupChildren(null);
+    }
+
+    function navigateGroupTo(index) {
+        var item = groupBreadcrumb[index];
+        groupBreadcrumb = groupBreadcrumb.slice(0, index + 1);
+        currentParentGroupId = item.id;
+        selectedGroupId = item.id;
+        selectedGroupName = item.name;
+        updateGroupBreadcrumb();
+        highlightGroupNode(item.id);
+        updateGroupButtons();
+        loadGroupChildren(item.id);
+    }
+
+    function updateGroupBreadcrumb() {
+        var ol = document.getElementById('groups-breadcrumb');
+        var html = '<li class="breadcrumb-item" onclick="navigateGroupsToRoot()"><i class="fa-solid fa-users-rectangle me-1"></i>گروه ها</li>';
+        groupBreadcrumb.forEach(function(item, i) {
+            var isLast = i === groupBreadcrumb.length - 1;
+            html += isLast
+                ? '<li class="breadcrumb-item active">' + esc(item.name) + '</li>'
+                : '<li class="breadcrumb-item" onclick="navigateGroupTo(' + i + ')">' + esc(item.name) + '</li>';
+        });
+        ol.innerHTML = html;
+    }
+
+    // ===== Table =====
+    async function loadGroupChildren(parentGroupId) {
+        var tbody = document.getElementById('groups-tbody');
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...</td></tr>';
+        try {
+            var url = '/api/settings/groups/children?' + (parentGroupId ? 'parentGroupId=' + parentGroupId : '');
+            var res = await fetch(url);
+            var result = await res.json();
+            if (result.success) {
+                renderGroupsTable(result.data);
+                var last = groupBreadcrumb[groupBreadcrumb.length - 1];
+                document.getElementById('groups-table-header').innerHTML =
+                    '<i class="fa-solid fa-list me-1"></i>' + (last ? 'زیرمجموعه: ' + esc(last.name) : 'گروه های سطح اول');
+            }
+        } catch (e) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3 text-danger">خطا در بارگذاری</td></tr>';
+        }
+    }
+
+    function renderGroupsTable(groups) {
+        var tbody = document.getElementById('groups-tbody');
+        document.getElementById('groups-count').textContent = groups.length + ' گروه';
+
+        if (!groups || groups.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">' +
+                '<i class="fa-solid fa-folder-open display-6 d-block mb-2 opacity-50"></i>' +
+                'گروهی در این سطح تعریف نشده</td></tr>';
+            return;
+        }
+        tbody.innerHTML = groups.map(function(g, i) {
+            return '<tr ondblclick="selectGroup(\'' + g.id + '\',\'' + esc(g.groupName) + '\')" style="cursor:pointer;">' +
+                '<td>' + (i + 1) + '</td>' +
+                '<td><code class="small">' + esc(g.groupCode) + '</code></td>' +
+                '<td>' +
+                    '<strong class="small">' + esc(g.groupName) + '</strong>' +
+                    (g.hasChildren ? ' <span class="badge bg-light text-dark ms-1" style="font-size:0.72rem"><i class="fa-solid fa-layer-group"></i> زیرگروه</span>' : '') +
+                '</td>' +
+                '<td class="text-center">' + (g.useInReferral ? '<span class="badge bg-info text-dark">بله</span>' : '<span class="badge bg-secondary text-white">نه</span>') + '</td>' +
+                '<td class="text-center">' +
+                    '<button class="btn btn-sm btn-outline-success folder-btn p-0 px-1 me-1" onclick="event.stopPropagation();openRolePicker(\'' + g.id + '\',\'' + esc(g.groupName) + '\')" title="مدیریت نقش ها">' +
+                        '<i class="fa-solid fa-folder-plus"></i>' +
+                    '</button>' +
+                    '<span class="badge bg-light text-dark">' + g.roleCount + '</span>' +
+                '</td>' +
+                '<td class="text-center">' + (g.isActive ? '<span class="badge bg-success">فعال</span>' : '<span class="badge bg-danger">غیرفعال</span>') + '</td>' +
+                '<td class="text-center">' +
+                    '<button class="btn btn-sm btn-outline-primary me-1" onclick="event.stopPropagation();openGroupModal(\'' + g.id + '\')" title="ویرایش"><i class="fa-solid fa-pen"></i></button>' +
+                    '<button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation();deleteGroup(\'' + g.id + '\',\'' + esc(g.groupName) + '\')" title="حذف"><i class="fa-solid fa-trash"></i></button>' +
+                '</td>' +
+            '</tr>';
+        }).join('');
+    }
+
+    function refreshCurrentTable() {
+        loadGroupChildren(currentParentGroupId);
+    }
+
+    // ===== Load Data =====
+    async function loadAllRoles() {
+        try {
+            var res = await fetch('/api/settings/roles/list');
+            var result = await res.json();
+            if (result.success) allRoles = result.data;
+        } catch (e) { /* silent */ }
+    }
+
+    async function loadAllPermissions() {
+        try {
+            var res = await fetch('/api/settings/permissions/by-category');
+            var result = await res.json();
+            if (result.success) allPermissions = result.data;
+        } catch (e) { /* silent */ }
+    }
+
+    // ===== Inline Role Picker Modal (from folder icon) =====
+    async function openRolePicker(groupId, groupName) {
+        pickerGroupId = groupId;
+        pickerCurrentRoles = [];
+        document.getElementById('grpRolePickerTitle').innerHTML =
+            '<i class="fa-solid fa-folder-plus me-2"></i>نقش های گروه: ' + esc(groupName);
+
+        try {
+            var res = await fetch('/api/settings/groups/' + groupId + '/roles');
+            var result = await res.json();
+            if (result.success) pickerCurrentRoles = result.data;
+        } catch (e) { /* silent */ }
+
+        renderPickerRolesList();
+        populateRoleSelect();
+        rolePickerInst ? rolePickerInst.show() : null;
+    }
+
+    function populateRoleSelect() {
+        var sel = document.getElementById('grp-role-select');
+        var currentIds = pickerCurrentRoles.map(function(r) { return r.roleId; });
+        sel.innerHTML = '<option value="">انتخاب نقش...</option>';
+        allRoles.forEach(function(r) {
+            if (!currentIds.includes(r.id))
+                sel.innerHTML += '<option value="' + r.id + '">' + esc(r.roleName) + ' (' + esc(r.roleCode) + ')</option>';
+        });
+    }
+
+    function renderPickerRolesList() {
+        var container = document.getElementById('grp-roles-list');
+        if (pickerCurrentRoles.length === 0) {
+            container.innerHTML = '<div class="text-muted text-center small py-3">نقشی به این گروه اضافه نشده</div>';
+            return;
+        }
+        container.innerHTML = pickerCurrentRoles.map(function(r) {
+            return '<div class="d-flex justify-content-between align-items-center bg-white border rounded p-2 mb-1">' +
+                '<span class="small">' +
+                    '<i class="fa-solid fa-user-tie me-1 text-primary"></i>' +
+                    '<strong>' + esc(r.roleName) + '</strong>' +
+                    '<span class="text-muted ms-1">(' + esc(r.roleCode) + ')</span>' +
+                '</span>' +
+                '<button class="btn btn-sm btn-link text-danger p-0" onclick="removeRoleFromPicker(\'' + r.roleId + '\')">' +
+                    '<i class="fa-solid fa-trash"></i>' +
+                '</button>' +
+            '</div>';
+        }).join('');
+    }
+
+    async function addRoleToCurrentGroup() {
+        var sel = document.getElementById('grp-role-select');
+        if (!sel.value) return;
+        try {
+            var res = await fetch('/api/settings/groups/' + pickerGroupId + '/roles/' + sel.value, { method: 'POST' });
+            var result = await res.json();
+            if (res.ok && result.success) {
+                var role = allRoles.find(function(r) { return r.id === sel.value; });
+                if (role) pickerCurrentRoles.push({ roleId: role.id, roleName: role.roleName, roleCode: role.roleCode });
+                renderPickerRolesList();
+                populateRoleSelect();
+                sel.value = '';
+                refreshCurrentTable();
+            } else {
+                alert(result.error || 'خطا در اضافه نقش');
+            }
+        } catch (e) { alert('خطا در اتصال به سرور'); }
+    }
+
+    async function removeRoleFromPicker(roleId) {
+        try {
+            var res = await fetch('/api/settings/groups/' + pickerGroupId + '/roles/' + roleId, { method: 'DELETE' });
+            var result = await res.json();
+            if (res.ok && result.success) {
+                pickerCurrentRoles = pickerCurrentRoles.filter(function(r) { return r.roleId !== roleId; });
+                renderPickerRolesList();
+                populateRoleSelect();
+                refreshCurrentTable();
+            }
+        } catch (e) { alert('خطا در اتصال به سرور'); }
+    }
+
+    // ===== Group Modal =====
+    async function openGroupModal(groupId) {
+        groupId = groupId || null;
+        editingGroupId = groupId;
+        document.getElementById('groupForm').reset();
+
+        if (groupId) {
+            document.getElementById('groupModalTitle').innerHTML = '<i class="fa-solid fa-pen me-2"></i>ویرایش گروه';
+            try {
+                var res = await fetch('/api/settings/groups/' + groupId);
+                var result = await res.json();
+                if (result.success) {
+                    var g = result.data;
+                    document.getElementById('group-id').value = g.id;
+                    document.getElementById('group-code').value = g.groupCode;
+                    document.getElementById('group-name').value = g.groupName;
+                    document.getElementById('group-description').value = g.description || '';
+                    document.getElementById('group-is-active').checked = g.isActive !== false;
+                    document.getElementById('group-use-in-referral').checked = !!g.useInReferral;
+
+                    var parentLabel = 'سطح اول';
+                    if (g.parentGroupId) {
+                        var p = groupsTreeData.find(function(x) { return x.id === g.parentGroupId; });
+                        if (p) parentLabel = p.groupName;
+                    }
+                    document.getElementById('groupModalSubtitle').textContent = 'ویرایش گروه در: ' + parentLabel;
+                }
+            } catch (e) { /* silent */ }
+        } else {
+            document.getElementById('groupModalTitle').innerHTML = '<i class="fa-solid fa-plus me-2"></i>ایجاد گروه جدید';
+            document.getElementById('group-id').value = '';
+            document.getElementById('group-parent-id').value = currentParentGroupId || '';
+
+            var last = groupBreadcrumb[groupBreadcrumb.length - 1];
+            document.getElementById('groupModalSubtitle').textContent =
+                last ? 'ایجاد زیرگروه در: ' + last.name : 'ایجاد گروه جدید در سطح اول';
+        }
+
+        groupModalInst ? groupModalInst.show() : null;
+    }
+
+    // ===== Save Group =====
+    async function saveGroup() {
+        var code = document.getElementById('group-code').value.trim();
+        var name = document.getElementById('group-name').value.trim();
+        if (!code || !name) {
+            document.getElementById('group-code').classList.toggle('is-invalid', !code);
+            document.getElementById('group-name').classList.toggle('is-invalid', !name);
+            return;
+        }
+        document.getElementById('group-code').classList.remove('is-invalid');
+        document.getElementById('group-name').classList.remove('is-invalid');
+
+        var id = document.getElementById('group-id').value;
+        var isEdit = !!id;
+
+        var payload = {
+            groupCode: code,
+            groupName: name,
+            description: document.getElementById('group-description').value.trim() || null,
+            isActive: document.getElementById('group-is-active').checked,
+            useInReferral: document.getElementById('group-use-in-referral').checked
+        };
+
+        if (!isEdit) {
+            payload.parentGroupId = currentParentGroupId || null;
+        }
+
+        try {
+            var res = await fetch(
+                isEdit ? '/api/settings/groups/' + id : '/api/settings/groups',
+                {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }
+            );
+            var result = await res.json();
+
+            if (res.ok && result.success) {
+                groupModalInst ? groupModalInst.hide() : null;
+                await loadGroupsTree();
+                loadGroupChildren(currentParentGroupId);
+            } else {
+                alert(result.error || 'خطا در ذخیره گروه');
+            }
+        } catch (e) {
+            alert('خطا در اتصال به سرور');
+        }
+    }
+
+    // ===== Delete Group =====
+    async function deleteGroup(groupId, groupName) {
+        if (!confirm('آیا از حذف گروه "' + groupName + '" اطمینان دارید؟')) return;
+        try {
+            var res = await fetch('/api/settings/groups/' + groupId, { method: 'DELETE' });
+            var result = await res.json();
+            if (res.ok && result.success) {
+                await loadGroupsTree();
+                loadGroupChildren(currentParentGroupId);
+            } else {
+                alert(result.error || 'خطا در حذف گروه');
+            }
+        } catch (e) { alert('خطا در اتصال به سرور'); }
+    }
+
+    // ===== Role Search Modal (multi-select from header button) =====
+    async function openGroupRoleSearch() {
+        if (!selectedGroupId) return;
+        grpRoleFilterName = '';
+        grpRoleFilterCode = '';
+        document.getElementById('grprs-name').value = '';
+        document.getElementById('grprs-code').value = '';
+        document.getElementById('grpRoleSearchTitle').innerHTML =
+            '<i class="fa-solid fa-user-tie me-2"></i>وارد کردن سمتها به: ' + esc(selectedGroupName);
+
+        // Load current roles for this group
+        grpRoleCurrentIds = [];
+        try {
+            var res = await fetch('/api/settings/groups/' + selectedGroupId + '/roles');
+            var result = await res.json();
+            if (result.success) {
+                grpRoleCurrentIds = result.data.map(function(r) { return r.roleId; });
+            }
+        } catch (e) { /* silent */ }
+
+        grpRoleTempIds = grpRoleCurrentIds.slice();
+        renderRoleSearchTable();
+        roleSearchModalInst ? roleSearchModalInst.show() : null;
+    }
+
+    function filterRoleSearch() {
+        grpRoleFilterName = document.getElementById('grprs-name').value.trim().toLowerCase();
+        grpRoleFilterCode = document.getElementById('grprs-code').value.trim().toLowerCase();
+        // Sync checkboxes before re-render
+        syncRoleSearchCheckboxes();
+        renderRoleSearchTable();
+    }
+
+    function syncRoleSearchCheckboxes() {
+        document.querySelectorAll('#grprs-tbody .grprs-cb').forEach(function(cb) {
+            if (cb.checked && !grpRoleTempIds.includes(cb.value)) grpRoleTempIds.push(cb.value);
+            else if (!cb.checked) grpRoleTempIds = grpRoleTempIds.filter(function(id) { return id !== cb.value; });
+        });
+    }
+
+    function getFilteredRoles() {
+        return allRoles.filter(function(r) {
+            if (grpRoleFilterName && !r.roleName.toLowerCase().includes(grpRoleFilterName)) return false;
+            if (grpRoleFilterCode && !r.roleCode.toLowerCase().includes(grpRoleFilterCode)) return false;
+            return true;
+        });
+    }
+
+    function renderRoleSearchTable() {
+        var tbody = document.getElementById('grprs-tbody');
+        var filtered = getFilteredRoles();
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-3">سمتی یافت نشد</td></tr>';
+            document.getElementById('grprs-select-all').checked = false;
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(function(r) {
+            return '<tr>' +
+                '<td><input type="checkbox" class="form-check-input form-check-input-sm grprs-cb" value="' + r.id + '" ' + (grpRoleTempIds.includes(r.id) ? 'checked' : '') + '></td>' +
+                '<td><code class="small">' + esc(r.roleCode) + '</code></td>' +
+                '<td><strong class="small">' + esc(r.roleName) + '</strong></td>' +
+            '</tr>';
+        }).join('');
+
+        var allChecked = filtered.every(function(r) { return grpRoleTempIds.includes(r.id); });
+        document.getElementById('grprs-select-all').checked = allChecked;
+    }
+
+    function toggleAllRoleSearch(master) {
+        var filtered = getFilteredRoles();
+        var checked = master.checked;
+        document.querySelectorAll('#grprs-tbody .grprs-cb').forEach(function(cb) { cb.checked = checked; });
+        filtered.forEach(function(r) {
+            if (checked && !grpRoleTempIds.includes(r.id)) grpRoleTempIds.push(r.id);
+            else if (!checked) grpRoleTempIds = grpRoleTempIds.filter(function(id) { return id !== r.id; });
+        });
+    }
+
+    async function applyRoleSearch() {
+        syncRoleSearchCheckboxes();
+
+        var toAdd = grpRoleTempIds.filter(function(id) { return !grpRoleCurrentIds.includes(id); });
+        var toRemove = grpRoleCurrentIds.filter(function(id) { return !grpRoleTempIds.includes(id); });
+
+        try {
+            for (var i = 0; i < toAdd.length; i++) {
+                await fetch('/api/settings/groups/' + selectedGroupId + '/roles/' + toAdd[i], { method: 'POST' });
+            }
+            for (var i = 0; i < toRemove.length; i++) {
+                await fetch('/api/settings/groups/' + selectedGroupId + '/roles/' + toRemove[i], { method: 'DELETE' });
+            }
+            roleSearchModalInst ? roleSearchModalInst.hide() : null;
+            refreshCurrentTable();
+        } catch (e) {
+            alert('خطا در اتصال به سرور');
+        }
+    }
+
+    // ===== Permission Picker Modal (5 tabs, from "مجوز دادن" button) =====
+    async function openGroupPermPicker() {
+        if (!selectedGroupId) return;
+        grpPermCategory = 'general';
+        document.getElementById('grpPermTitle').innerHTML =
+            '<i class="fa-solid fa-key me-2"></i>مجوزها برای: ' + esc(selectedGroupName);
+
+        // Reset tabs
+        document.querySelectorAll('#grp-perm-tabs .nav-link').forEach(function(a) { a.classList.remove('active'); });
+        var genTab = document.getElementById('grppt-general');
+        if (genTab) genTab.classList.add('active');
+
+        // Load current permissions for this group
+        grpPermCurrentIds = [];
+        try {
+            var res = await fetch('/api/settings/groups/' + selectedGroupId + '/permissions');
+            var result = await res.json();
+            if (result.success) {
+                grpPermCurrentIds = result.data.map(function(p) { return p.permissionId; });
+            }
+        } catch (e) { /* silent */ }
+
+        grpPermTempIds = grpPermCurrentIds.slice();
+        renderGrpPermTable();
+        permPickerModalInst ? permPickerModalInst.show() : null;
+    }
+
+    function switchGrpPermTab(cat) {
+        syncGrpPermCheckboxes();
+        grpPermCategory = cat;
+        document.querySelectorAll('#grp-perm-tabs .nav-link').forEach(function(a) { a.classList.remove('active'); });
+        var tabEl = document.getElementById('grppt-' + cat);
+        if (tabEl) tabEl.classList.add('active');
+        renderGrpPermTable();
+    }
+
+    function syncGrpPermCheckboxes() {
+        document.querySelectorAll('#grppt-tbody .grppt-cb').forEach(function(cb) {
+            if (cb.checked && !grpPermTempIds.includes(cb.value)) grpPermTempIds.push(cb.value);
+            else if (!cb.checked) grpPermTempIds = grpPermTempIds.filter(function(id) { return id !== cb.value; });
+        });
+    }
+
+    function renderGrpPermTable() {
+        var tbody = document.getElementById('grppt-tbody');
+        var filtered = allPermissions.filter(function(p) { return (p.category || 'general').toLowerCase() === grpPermCategory; });
+        document.getElementById('grppt-select-all').checked = false;
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">مجوزی در این دسته نیست</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(function(p) {
+            return '<tr>' +
+                '<td><input type="checkbox" class="form-check-input form-check-input-sm grppt-cb" value="' + p.id + '" ' + (grpPermTempIds.includes(p.id) ? 'checked' : '') + '></td>' +
+                '<td><code class="small">' + esc(p.permissionCode) + '</code></td>' +
+                '<td>' + esc(p.permissionName) + '</td>' +
+                '<td class="text-muted small">' + (p.description ? esc(p.description) : '-') + '</td>' +
+            '</tr>';
+        }).join('');
+
+        var allChecked = filtered.every(function(p) { return grpPermTempIds.includes(p.id); });
+        document.getElementById('grppt-select-all').checked = allChecked;
+    }
+
+    function toggleAllGrpPerms(master) {
+        var filtered = allPermissions.filter(function(p) { return (p.category || 'general').toLowerCase() === grpPermCategory; });
+        var checked = master.checked;
+        document.querySelectorAll('#grppt-tbody .grppt-cb').forEach(function(cb) { cb.checked = checked; });
+        filtered.forEach(function(p) {
+            if (checked && !grpPermTempIds.includes(p.id)) grpPermTempIds.push(p.id);
+            else if (!checked) grpPermTempIds = grpPermTempIds.filter(function(id) { return id !== p.id; });
+        });
+    }
+
+    async function applyGrpPerms() {
+        syncGrpPermCheckboxes();
+
+        var toAdd = grpPermTempIds.filter(function(id) { return !grpPermCurrentIds.includes(id); });
+        var toRemove = grpPermCurrentIds.filter(function(id) { return !grpPermTempIds.includes(id); });
+
+        try {
+            for (var i = 0; i < toAdd.length; i++) {
+                await fetch('/api/settings/permissions/' + toAdd[i] + '/assign-group/' + selectedGroupId, { method: 'POST' });
+            }
+            for (var i = 0; i < toRemove.length; i++) {
+                await fetch('/api/settings/permissions/' + toRemove[i] + '/group/' + selectedGroupId, { method: 'DELETE' });
+            }
+            permPickerModalInst ? permPickerModalInst.hide() : null;
+        } catch (e) {
+            alert('خطا در اتصال به سرور');
+        }
+    }
+
+    // ===== Auto-init =====
+    (function () {
+        var el;
+        el = document.getElementById('groupModal');
+        if (el) groupModalInst = new bootstrap.Modal(el);
+        el = document.getElementById('groupRolePicker');
+        if (el) rolePickerInst = new bootstrap.Modal(el);
+        el = document.getElementById('groupRoleSearchModal');
+        if (el) roleSearchModalInst = new bootstrap.Modal(el);
+        el = document.getElementById('groupPermPickerModal');
+        if (el) permPickerModalInst = new bootstrap.Modal(el);
+
+        loadGroupsTree();
+        loadAllRoles();
+        loadAllPermissions();
+        loadGroupChildren(null);  // load root groups in table
+        updateGroupButtons();
+    })();
+</script>

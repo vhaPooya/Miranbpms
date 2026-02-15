@@ -1,0 +1,273 @@
+@{
+    var formId = ViewBag.FormId as int? ?? 0;
+    var documentId = ViewBag.DocumentId as int?;
+}
+
+<!-- Modal برای عطف اسناد -->
+<div class="modal fade" id="referenceModal" tabindex="-1" aria-labelledby="referenceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="referenceModalLabel">
+                    <i class="bi bi-link-45deg me-2"></i>عطف کردن سند
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="referenceForm">
+                    <input type="hidden" name="formId" value="@formId" />
+                    <input type="hidden" name="documentId" value="@(documentId?.ToString() ?? "")" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label">نوع عطف</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="referenceType" id="refTypeExternal" value="external" checked>
+                            <label class="btn btn-outline-primary" for="refTypeExternal">سند خارجی</label>
+                            
+                            <input type="radio" class="btn-check" name="referenceType" id="refTypeInternal" value="internal">
+                            <label class="btn btn-outline-primary" for="refTypeInternal">سند داخلی</label>
+                        </div>
+                    </div>
+                    
+                    <!-- External Reference -->
+                    <div id="externalReferenceSection">
+                        <div class="mb-3">
+                            <label for="refFile" class="form-label">انتخاب فایل</label>
+                            <input type="file" class="form-control" id="refFile" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="refExternalNumber" class="form-label">شماره سند خارجی</label>
+                            <input type="text" class="form-control" id="refExternalNumber" name="externalNumber">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="refExternalDate" class="form-label">تاریخ سند خارجی</label>
+                            <input type="date" class="form-control" id="refExternalDate" name="externalDate">
+                        </div>
+                    </div>
+                    
+                    <!-- Internal Reference -->
+                    <div id="internalReferenceSection" style="display: none;">
+                        <div class="mb-3">
+                            <label for="refFormId" class="form-label">فرم</label>
+                            <select class="form-select" id="refFormId" name="refFormId">
+                                <option value="">انتخاب فرم...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="refDocumentId" class="form-label">سند</label>
+                            <select class="form-select" id="refDocumentId" name="refDocumentId" disabled>
+                                <option value="">ابتدا فرم را انتخاب کنید</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-info" id="btn-search-document">
+                                <i class="bi bi-search me-1"></i>جستجوی سند
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="refDescription" class="form-label">توضیحات</label>
+                        <textarea class="form-control" id="refDescription" name="description" rows="3"></textarea>
+                    </div>
+                    
+                    <div id="referenceProgress" class="progress d-none mb-3">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    
+                    <div id="referenceList" class="mt-3">
+                        <h6>عطف‌های ثبت شده:</h6>
+                        <div id="referencesContainer" class="list-group">
+                            <!-- عطف‌های ثبت شده اینجا نمایش داده می‌شوند -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" id="btn-save-reference">
+                    <i class="bi bi-save me-1"></i>ذخیره عطف
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        var formId = '@formId';
+        var documentId = '@(documentId?.ToString() ?? "")';
+        
+        // Load existing references
+        if (documentId) {
+            loadReferences();
+            loadForms();
+        }
+        
+        // Toggle between external and internal reference
+        $('input[name="referenceType"]').on('change', function() {
+            if ($(this).val() === 'external') {
+                $('#externalReferenceSection').show();
+                $('#internalReferenceSection').hide();
+            } else {
+                $('#externalReferenceSection').hide();
+                $('#internalReferenceSection').show();
+            }
+        });
+        
+        // Load documents when form is selected
+        $('#refFormId').on('change', function() {
+            var selectedFormId = $(this).val();
+            if (selectedFormId) {
+                loadDocuments(selectedFormId);
+                $('#refDocumentId').prop('disabled', false);
+            } else {
+                $('#refDocumentId').prop('disabled', true);
+                $('#refDocumentId').html('<option value="">ابتدا فرم را انتخاب کنید</option>');
+            }
+        });
+        
+        $('#btn-save-reference').on('click', function() {
+            saveReference();
+        });
+        
+        function loadForms() {
+            $.ajax({
+                url: '/api/forms',
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.data) {
+                        var select = $('#refFormId');
+                        select.empty();
+                        select.append('<option value="">انتخاب فرم...</option>');
+                        response.data.forEach(function(form) {
+                            select.append(`<option value="${form.id}">${form.nameFa || form.nameEn}</option>`);
+                        });
+                    }
+                }
+            });
+        }
+        
+        function loadDocuments(formId) {
+            $.ajax({
+                url: `/api/forms/${formId}/data?pageSize=100`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.data) {
+                        var select = $('#refDocumentId');
+                        select.empty();
+                        select.append('<option value="">انتخاب سند...</option>');
+                        response.data.forEach(function(doc) {
+                            var displayText = doc.subject || doc.documentNumber || doc.id;
+                            select.append(`<option value="${doc.id}">${displayText}</option>`);
+                        });
+                    }
+                }
+            });
+        }
+        
+        function saveReference() {
+            var referenceType = $('input[name="referenceType"]:checked').val();
+            var formData = new FormData();
+            
+            if (referenceType === 'external') {
+                var fileInput = $('#refFile')[0];
+                if (fileInput.files && fileInput.files[0]) {
+                    formData.append('file', fileInput.files[0]);
+                }
+                formData.append('externalNumber', $('#refExternalNumber').val());
+                formData.append('externalDate', $('#refExternalDate').val());
+            } else {
+                formData.append('referencedDocumentId', $('#refDocumentId').val());
+                formData.append('referencedFormId', $('#refFormId').val());
+            }
+            
+            formData.append('description', $('#refDescription').val());
+            formData.append('isReference', 'true');
+            
+            $('#referenceProgress').removeClass('d-none');
+            $('#btn-save-reference').prop('disabled', true);
+            
+            $.ajax({
+                url: `/api/documents/${documentId || 'new'}/attachments`,
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success('عطف با موفقیت ثبت شد');
+                        $('#referenceForm')[0].reset();
+                        loadReferences();
+                    } else {
+                        toastr.error(response.error || 'خطا در ثبت عطف');
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error('خطا در ارتباط با سرور');
+                },
+                complete: function() {
+                    $('#referenceProgress').addClass('d-none');
+                    $('.progress-bar').css('width', '0%');
+                    $('#btn-save-reference').prop('disabled', false);
+                }
+            });
+        }
+        
+        function loadReferences() {
+            if (!documentId) return;
+            
+            $.ajax({
+                url: `/api/documents/${documentId}/attachments?isReference=true`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.data) {
+                        var container = $('#referencesContainer');
+                        container.empty();
+                        
+                        response.data.forEach(function(reference) {
+                            var item = $(`
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-link-45deg me-2"></i>
+                                            <strong>${reference.fileName || 'سند داخلی'}</strong>
+                                            ${reference.description ? '<br><small class="text-muted">' + reference.description + '</small>' : ''}
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteReference('${reference.id}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `);
+                            container.append(item);
+                        });
+                    }
+                }
+            });
+        }
+        
+        window.deleteReference = function(referenceId) {
+            if (!confirm('آیا از حذف این عطف اطمینان دارید؟')) return;
+            
+            $.ajax({
+                url: `/api/documents/attachments/${referenceId}`,
+                method: 'DELETE',
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success('عطف با موفقیت حذف شد');
+                        loadReferences();
+                    } else {
+                        toastr.error(response.error || 'خطا در حذف عطف');
+                    }
+                }
+            });
+        };
+    });
+</script>
+
+

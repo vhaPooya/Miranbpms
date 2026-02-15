@@ -1,0 +1,104 @@
+@model Automation.Core.DTOs.ReferralModalDto
+
+<form id="referralForm">
+    <input type="hidden" id="DocumentId" value="@Model.DocumentId" />
+    
+    <div class="form-group">
+        <label for="recipientSearch">جستجوی گیرندگان:</label>
+        <input type="text" class="form-control" id="recipientSearch" placeholder="نام، سمت یا دپارتمان را جستجو کنید...">
+    </div>
+    
+    <div class="form-group">
+        <label>گیرندگان انتخاب شده:</label>
+        <div id="selectedRecipients" class="border rounded p-2 mb-2" style="min-height: 60px;">
+            <small class="text-muted">هیچ گیرنده‌ای انتخاب نشده است</small>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary" id="selectRecipientsBtn">
+            <i class="fas fa-users"></i> انتخاب گیرنده از جدول
+        </button>
+    </div>
+    
+    <div class="form-group">
+        <label for="actionType">نوع عمل:</label>
+        <select class="form-control" id="actionType">
+            <option value="REFER">ارجاع</option>
+            <option value="APPROVE">تائید</option>
+            <option value="REVIEW">بررسی</option>
+            <option value="COMMENT">نظر</option>
+            <option value="ACTION">اقدام</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="dueDate">تاریخ موعد مقرر:</label>
+        <input type="date" class="form-control" id="dueDate" />
+    </div>
+    
+    <div class="form-group">
+        <label for="notes">توضیحات:</label>
+        <textarea class="form-control" id="notes" rows="3" placeholder="توضیحات ارجاع..."></textarea>
+    </div>
+    
+    <div class="alert alert-info">
+        <small>
+            <i class="fas fa-info-circle"></i> در صورت تعیین تاریخ موعد مقرر، در صورت عدم اقدام تا آن تاریخ، سند به صورت خودکار به شما بازگشت داده می‌شود.
+        </small>
+    </div>
+</form>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">انصراف</button>
+    <button type="button" class="btn btn-primary" id="sendReferralBtn">ارجاع</button>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#selectRecipientsBtn').click(function() {
+            // Open user selection modal
+            openUserSelectionModal();
+        });
+        
+        $('#sendReferralBtn').click(function() {
+            sendReferral();
+        });
+    });
+    
+    function openUserSelectionModal() {
+        // This would open a modal with a searchable user table
+        alert('این قسمت نیاز به پیاده‌سازی جدول کاربران دارد');
+    }
+    
+    function sendReferral() {
+        var documentId = $('#DocumentId').val();
+        var recipientIds = []; // Should collect selected recipient IDs
+        var actionType = $('#actionType').val();
+        var dueDate = $('#dueDate').val();
+        var notes = $('#notes').val();
+        
+        var dto = {
+            documentId: documentId,
+            recipientIds: recipientIds,
+            actionType: actionType,
+            dueDate: dueDate,
+            notes: notes
+        };
+        
+        $.ajax({
+            url: '/workflow/refer',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(dto),
+            success: function(result) {
+                if (result.success) {
+                    $('#referralModal').modal('hide');
+                    location.reload();
+                } else {
+                    alert('خطا در ارجاع: ' + result.errorMessage);
+                }
+            },
+            error: function() {
+                alert('خطا در ارسال ارجاع');
+            }
+        });
+    }
+</script>

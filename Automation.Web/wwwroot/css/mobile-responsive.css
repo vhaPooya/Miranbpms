@@ -1,0 +1,435 @@
+/* Mobile Responsive Design for EBPMS */
+@media (max-width: 768px) {
+    /* General Layout Adjustments */
+    .top-navbar {
+        padding: 0.5rem !important;
+    }
+    
+    .ribbon-container {
+        flex-wrap: wrap;
+        padding: 0.5rem !important;
+    }
+    
+    .ribbon-link {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem !important;
+        margin: 0.125rem;
+        flex: 1 0 30%;
+        text-align: center;
+    }
+    
+    .ribbon-link span {
+        display: none;
+    }
+    
+    .ribbon-link i {
+        font-size: 1.25rem;
+    }
+    
+    /* Dashboard Cards */
+    .card-stat {
+        margin-bottom: 1rem;
+    }
+    
+    .card-stat .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    .card-stat h3 {
+        font-size: 1.25rem;
+    }
+    
+    .card-stat small {
+        font-size: 0.75rem;
+    }
+    
+    /* Tables */
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .table th, .table td {
+        padding: 0.5rem !important;
+    }
+    
+    /* Buttons */
+    .btn-group .btn {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Forms */
+    .form-control, .form-select {
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .form-label {
+        font-size: 0.875rem;
+    }
+    
+    /* Modals */
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+    
+    .modal-content {
+        font-size: 0.875rem;
+    }
+    
+    /* Navigation */
+    .navbar-nav .nav-link {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Cards */
+    .card {
+        margin-bottom: 0.75rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem !important;
+    }
+    
+    .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    /* Alerts */
+    .alert {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Badges */
+    .badge {
+        font-size: 0.75rem;
+    }
+    
+    /* Icons */
+    .fa-lg {
+        font-size: 1.25em !important;
+    }
+    
+    .fa-2x {
+        font-size: 1.5em !important;
+    }
+    
+    .fa-3x {
+        font-size: 2em !important;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Extra small devices */
+    .container, .container-fluid {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+    
+    .row {
+        margin-left: -0.5rem !important;
+        margin-right: -0.5rem !important;
+    }
+    
+    [class*="col-"] {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+    
+    /* Hide non-essential elements */
+    .d-sm-none {
+        display: none !important;
+    }
+    
+    /* Simplify complex layouts */
+    .ribbon-link {
+        flex: 1 0 22%;
+    }
+    
+    /* Reduce padding further */
+    .p-3 {
+        padding: 0.5rem !important;
+    }
+    
+    .pt-3, .py-3 {
+        padding-top: 0.5rem !important;
+    }
+    
+    .pb-3, .py-3 {
+        padding-bottom: 0.5rem !important;
+    }
+    
+    .pl-3, .px-3 {
+        padding-left: 0.5rem !important;
+    }
+    
+    .pr-3, .px-3 {
+        padding-right: 0.5rem !important;
+    }
+    
+    /* Adjust card headers */
+    .card-header h5, .card-header h6 {
+        font-size: 1rem !important;
+    }
+    
+    /* Simplify button groups */
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Reduce form element sizes */
+    .form-control, .form-select {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .input-group-text {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* Touch-friendly adjustments */
+@media (hover: none) and (pointer: coarse) {
+    /* Increase touch targets */
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .form-control, .form-select {
+        min-height: 44px;
+    }
+    
+    .nav-link {
+        min-height: 44px;
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+    
+    /* Improve tap feedback */
+    .btn:not(.btn-link):not(.btn-icon) {
+        transition: background-color 0.2s ease;
+    }
+    
+    .btn:not(.btn-link):not(.btn-icon):active {
+        transform: scale(0.98);
+    }
+    
+    /* Larger hit areas for interactive elements */
+    .form-check-input {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-top: 0.125rem;
+    }
+    
+    .form-check-label {
+        padding: 0.5rem 0;
+    }
+    
+    /* Improve select dropdowns for touch */
+    .form-select {
+        background-position: left 0.5rem center;
+        padding-left: 2.5rem;
+        padding-right: 0.75rem;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid #000;
+    }
+    
+    .btn-primary {
+        background-color: #000;
+        border-color: #000;
+        color: #fff;
+    }
+    
+    .btn-success {
+        background-color: #006400;
+        border-color: #006400;
+        color: #fff;
+    }
+    
+    .btn-danger {
+        background-color: #800000;
+        border-color: #800000;
+        color: #fff;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .btn:not(.btn-link):not(.btn-icon):active {
+        transform: none;
+    }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+    
+    .card {
+        background-color: #1e1e1e;
+        border-color: #333;
+    }
+    
+    .table {
+        --bs-table-color: #e0e0e0;
+        --bs-table-bg: #1e1e1e;
+        --bs-table-border-color: #333;
+    }
+    
+    .form-control, .form-select {
+        background-color: #2d2d2d;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #66afe9;
+        box-shadow: 0 0 0 0.2rem rgba(102, 175, 233, 0.25);
+    }
+    
+    .btn-outline-primary {
+        color: #3395ff;
+        border-color: #3395ff;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #3395ff;
+        color: #000;
+    }
+}
+
+/* Orientation changes */
+@media (orientation: landscape) and (max-height: 500px) {
+    .modal-dialog {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+}
+
+/* Print styles */
+@media print {
+    .top-navbar, .ribbon-container, .btn {
+        display: none !important;
+    }
+    
+    .card {
+        border: none;
+        box-shadow: none;
+    }
+    
+    body {
+        background: #fff;
+        color: #000;
+    }
+    
+    .table {
+        border: 1px solid #000;
+    }
+    
+    .table th, .table td {
+        border: 1px solid #000;
+    }
+}
+
+/* Accessibility improvements */
+.screen-reader-text {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.focusable:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Skip to main content link */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: #000;
+    color: #fff;
+    padding: 8px;
+    text-decoration: none;
+    z-index: 1000;
+}
+
+.skip-link:focus {
+    top: 6px;
+}
+
+/* Responsive navigation */
+.offcanvas-navigation {
+    width: 280px;
+}
+
+/* Fluid typography */
+html {
+    font-size: 16px;
+}
+
+@media (min-width: 1200px) {
+    html {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 576px) {
+    html {
+        font-size: 14px;
+    }
+}
+
+/* Flexible grid adjustments */
+.grid-gap-sm {
+    gap: 0.5rem;
+}
+
+.grid-gap-md {
+    gap: 1rem;
+}
+
+.grid-gap-lg {
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .grid-gap-sm {
+        gap: 0.25rem;
+    }
+    
+    .grid-gap-md {
+        gap: 0.5rem;
+    }
+    
+    .grid-gap-lg {
+        gap: 1rem;
+    }
+}

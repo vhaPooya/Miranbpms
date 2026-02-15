@@ -1,0 +1,1104 @@
+﻿@* Partial View: نقش های سازمانی *@
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+    <h5 class="fw-bold mb-0">
+        <i class="fa-solid fa-user-tie me-2 text-primary"></i>
+        نقش های سازمانی
+    </h5>
+    <button class="btn btn-primary btn-sm" onclick="openRoleModal()">
+        <i class="fa-solid fa-plus me-1"></i>
+        ایجاد نقش جدید
+    </button>
+</div>
+
+<!-- Breadcrumb -->
+<nav class="mb-3">
+    <ol class="breadcrumb breadcrumb-sm mb-0" id="roles-breadcrumb">
+        <li class="breadcrumb-item" style="cursor:pointer;" onclick="navigateToRoot()">
+            <i class="fa-solid fa-layer-group me-1"></i>نقش ها
+        </li>
+    </ol>
+</nav>
+
+<!-- Tree + Table Layout -->
+<div class="row g-3">
+
+    <!-- Tree Panel -->
+    <div class="col-md-4">
+        <div class="card border rounded-3 h-100">
+            <div class="card-header bg-light py-2">
+                <h6 class="mb-0 fw-semibold small">
+                    <i class="fa-solid fa-diagram-3 me-2 text-primary"></i>
+                    ساختار سازمانی
+                </h6>
+            </div>
+            <div class="card-body p-2" id="roles-tree-container" style="max-height: 400px; overflow-y: auto;">
+                <div class="text-center py-3 text-muted small">
+                    <i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Panel -->
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small" id="roles-table-header">
+                <i class="fa-solid fa-list me-1"></i>
+                نقش های سطح اول
+            </span>
+            <span class="badge bg-secondary" id="roles-count"></span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-sm" style="font-size:0.85rem;">
+                <thead class="table-light">
+                    <tr>
+                        <th width="40">#</th>
+                        <th width="90">کد نقش</th>
+                        <th>نام نقش</th>
+                        <th>توضیحات</th>
+                        <th width="70" class="text-center">کاربران</th>
+                        <th width="70" class="text-center">وضعیت</th>
+                        <th width="100" class="text-center">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody id="roles-tbody">
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Role Modal -->
+<div class="modal" id="roleModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title" id="roleModalTitle">
+                    <i class="fa-solid fa-plus me-2"></i>ایجاد نقش جدید
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="text-muted small mb-3 border-bottom pb-2" id="roleModalSubtitle">
+                    ایجاد نقش جدید در سطح اول
+                </div>
+
+                <div class="row g-3">
+                    <!-- Left: Groups + Permissions Panels -->
+                    <div class="col-md-5">
+                        <!-- Groups Panel -->
+                        <div class="card border rounded-3 mb-2">
+                            <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold small">
+                                    <i class="fa-solid fa-users me-1 text-primary"></i>گروه های کاربری
+                                </span>
+                                <button class="btn btn-outline-primary btn-sm p-0 px-1" onclick="toggleGroupPicker()" title="اضافه گروه">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+                            <div class="p-2 border-bottom" id="group-picker-wrap" style="display:none;">
+                                <select class="form-select form-select-sm" id="group-picker-select">
+                                    <option value="">انتخاب گروه...</option>
+                                </select>
+                                <button class="btn btn-success btn-sm w-100 mt-1" onclick="addSelectedGroup()">
+                                    <i class="fa-solid fa-plus me-1"></i>اضافه
+                                </button>
+                            </div>
+                            <div class="card-body p-2" id="assigned-groups-list" style="min-height:80px; max-height:150px; overflow-y:auto;">
+                                <div class="text-muted text-center small py-2">گروهی اضافه نشده</div>
+                            </div>
+                        </div>
+
+                        <!-- Permissions Panel -->
+                        <div class="card border rounded-3">
+                            <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold small">
+                                    <i class="fa-solid fa-key me-1 text-warning"></i>مجوزها
+                                </span>
+                                <button class="btn btn-outline-warning btn-sm p-0 px-1" onclick="openPermPickerModal()" title="مدیریت مجوزها">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                            </div>
+                            <div class="card-body p-2" id="assigned-perms-list" style="min-height:80px; max-height:150px; overflow-y:auto;">
+                                <div class="text-muted text-center small py-2">مجوزی اضافه نشده</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Role Form -->
+                    <div class="col-md-7">
+                        <form id="roleForm" novalidate>
+                            <input type="hidden" id="role-id">
+                            <input type="hidden" id="role-parent-id">
+
+                            <div class="row g-2">
+                                <div class="col-md-5">
+                                    <label class="form-label small">کد نقش <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" id="role-code" dir="ltr" required maxlength="50">
+                                </div>
+                                <div class="col-md-7">
+                                    <label class="form-label small">نام نقش <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" id="role-name" required maxlength="200">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small">سازمان</label>
+                                    <select class="form-select form-select-sm" id="role-org-select">
+                                        <option value="">--</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small">عنوان مکاتباتی</label>
+                                    <input type="text" class="form-control form-control-sm" id="role-correspondence-title" maxlength="200">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small">عنوان نمایشی</label>
+                                    <input type="text" class="form-control form-control-sm" id="role-display-title" maxlength="200">
+                                </div>
+                                <!-- User Picker -->
+                                <div class="col-md-6">
+                                    <label class="form-label small">پرسنل</label>
+                                    <input type="hidden" id="role-personnel-user-id">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" id="role-personnel-user-name" readonly placeholder="انتخاب کنید...">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="openUserPicker()" title="جستجو پرسنل">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" type="button" onclick="clearUserPicker()" title="حذف">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Dept Picker -->
+                                <div class="col-md-6">
+                                    <label class="form-label small">واحد سازمانی</label>
+                                    <input type="hidden" id="role-department-id">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" id="role-department-name" readonly placeholder="انتخاب کنید...">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="openDeptPicker()" title="جستجو واحد">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" type="button" onclick="clearDeptPicker()" title="حذف">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small">توضیحات</label>
+                                    <textarea class="form-control form-control-sm" id="role-description" rows="2" maxlength="500"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="role-is-active" checked>
+                                        <label class="form-check-label small" for="role-is-active">نقش فعال</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark me-1"></i>انصراف
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveRole()">
+                    <i class="fa-solid fa-save me-1"></i>ذخیره نقش
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Picker Modal -->
+<div class="modal" id="userPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white py-2">
+                <h6 class="modal-title"><i class="fa-solid fa-user me-2"></i>جستجو پرسنل</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="row g-2 mb-3">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control form-control-sm" id="up-name" placeholder="نام">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control form-control-sm" id="up-username" placeholder="نام کاربری" dir="ltr">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class="form-control form-control-sm" id="up-national-id" placeholder="کد ملی" dir="ltr">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class="form-control form-control-sm" id="up-personnel-no" placeholder="شماره پرسنلی" dir="ltr">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary btn-sm w-100" onclick="searchUsers()">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i>جستجو
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height:320px; overflow-y:auto;">
+                    <table class="table table-hover table-sm" style="font-size:0.82rem;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>#</th>
+                                <th>نام</th>
+                                <th>نام کاربری</th>
+                                <th>کد ملی</th>
+                                <th>واحد</th>
+                            </tr>
+                        </thead>
+                        <tbody id="up-results">
+                            <tr><td colspan="5" class="text-center text-muted py-3">جستجو کنید...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span class="text-muted small" id="up-count"></span>
+                    <div id="up-pagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Department Picker Modal -->
+<div class="modal" id="deptPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white py-2">
+                <h6 class="modal-title"><i class="fa-solid fa-sitemap me-2"></i>جستجو واحد سازمانی</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="row g-2 mb-3">
+                    <div class="col-md-5">
+                        <input type="text" class="form-control form-control-sm" id="dp-name" placeholder="نام واحد">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control form-control-sm" id="dp-code" placeholder="کد واحد" dir="ltr">
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary btn-sm w-100" onclick="searchDepts()">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i>جستجو
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height:280px; overflow-y:auto;">
+                    <table class="table table-hover table-sm" style="font-size:0.82rem;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>#</th>
+                                <th>نام واحد</th>
+                                <th>کد واحد</th>
+                                <th>سازمان</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dp-results">
+                            <tr><td colspan="4" class="text-center text-muted py-3">جستجو کنید...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span class="text-muted small" id="dp-count"></span>
+                    <div id="dp-pagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Permission Picker Modal (5 tabs) -->
+<div class="modal" id="permPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark py-2">
+                <h6 class="modal-title"><i class="fa-solid fa-key me-2"></i>انتخاب مجوزها</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <ul class="nav nav-tabs nav-sm mb-2" id="pp-tabs">
+                    <li class="nav-item"><a class="nav-link active" id="pp-tab-general" href="#" onclick="switchPermPicker('general')"><i class="fa-solid fa-key me-1"></i>عمومی</a></li>
+                    <li class="nav-item"><a class="nav-link" id="pp-tab-secretariat" href="#" onclick="switchPermPicker('secretariat')"><i class="fa-solid fa-stamp me-1"></i>دبیرخانه</a></li>
+                    <li class="nav-item"><a class="nav-link" id="pp-tab-formbuilder" href="#" onclick="switchPermPicker('formbuilder')"><i class="fa-solid fa-file-lines me-1"></i>فرمساز</a></li>
+                    <li class="nav-item"><a class="nav-link" id="pp-tab-report" href="#" onclick="switchPermPicker('report')"><i class="fa-solid fa-chart-bar me-1"></i>گزارش ساز</a></li>
+                </ul>
+                <div class="table-responsive" style="max-height:340px; overflow-y:auto;">
+                    <table class="table table-hover table-sm" style="font-size:0.82rem;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th width="34"><input type="checkbox" class="form-check-input form-check-input-sm" id="pp-select-all" onchange="toggleAllPerms(this)"></th>
+                                <th>کد</th>
+                                <th>نام مجوز</th>
+                                <th>توضیحات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pp-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-warning btn-sm" onclick="applyPermPicker()">
+                    <i class="fa-solid fa-check me-1"></i>تأیید
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .roles-tree-header {
+        display: flex;
+        align-items: center;
+        padding: 3px 4px;
+        cursor: pointer;
+        border-radius: 4px;
+        white-space: nowrap;
+        font-size: 0.84rem;
+        transition: background 0.15s;
+    }
+    .roles-tree-header:hover { background: rgba(13,110,253,0.07); }
+    .roles-tree-header.selected { background: #cfe2ff; font-weight: 600; }
+    .roles-tree-header.org-header { font-weight: 600; }
+    .roles-tree-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        min-width: 16px;
+        font-size: 0.68rem;
+        color: #6c757d;
+    }
+    .roles-tree-toggle.clickable { cursor: pointer; }
+    .roles-tree-toggle.invisible { visibility: hidden; }
+    .roles-tree-children { padding-left: 16px; }
+    #roles-breadcrumb .breadcrumb-item:not(.active) { cursor: pointer; color: #0d6efd; }
+    #roles-breadcrumb .breadcrumb-item:not(.active):hover { text-decoration: underline; }
+</style>
+
+<script>
+    // ===== State =====
+    var rolesTreeData = null;
+    var currentOrgId = null;
+    var currentParentRoleId = null;
+    var roleBreadcrumb = [];
+    var roleModalInst = null;
+    var userPickerInst = null;
+    var deptPickerInst = null;
+    var permPickerInst = null;
+    var editingRoleId = null;
+    var assignedGroupIds = [];
+    var assignedPermIds = [];
+    var availableGroups = [];
+    var allPermissions = [];
+    var permPickerCategory = 'general';
+    var permPickerTempIds = [];
+    var upPage = 1, upTotal = 0;
+    var dpPage = 1, dpTotal = 0;
+    var selectedTreeEl = null;
+
+    // ===== Init =====
+    (function () {
+        const modalEl = document.getElementById('roleModal');
+        if (modalEl) roleModalInst = new bootstrap.Modal(modalEl);
+        const upEl = document.getElementById('userPickerModal');
+        if (upEl) userPickerInst = new bootstrap.Modal(upEl);
+        const dpEl = document.getElementById('deptPickerModal');
+        if (dpEl) deptPickerInst = new bootstrap.Modal(dpEl);
+        const ppEl = document.getElementById('permPickerModal');
+        if (ppEl) permPickerInst = new bootstrap.Modal(ppEl);
+        loadRolesTree();
+        loadAvailableGroups();
+        loadAllPermissions();
+        loadRoleChildren(null, null);
+    })();
+
+    // ===== Tree Loading & Render =====
+    async function loadRolesTree() {
+        try {
+            const res = await fetch('/api/settings/roles/tree');
+            const result = await res.json();
+            if (result.success) {
+                rolesTreeData = result;
+                renderTree();
+            }
+        } catch (e) {
+            document.getElementById('roles-tree-container').innerHTML =
+                '<div class="text-danger text-center small py-3">خطا در بارگذاری ساختار سازمانی</div>';
+        }
+    }
+
+    function renderTree() {
+        const container = document.getElementById('roles-tree-container');
+        if (!rolesTreeData) {
+            container.innerHTML = '<div class="text-muted text-center small py-3">داده‌ای یافت نشد</div>';
+            return;
+        }
+        let html = '';
+        rolesTreeData.organizations.forEach(org => { html += buildOrgNode(org); });
+
+        // Orphan roles (no organization, no parent)
+        rolesTreeData.roles
+            .filter(r => !r.organizationId && !r.parentRoleId)
+            .forEach(r => { html += buildRoleNode(r); });
+
+        container.innerHTML = html || '<div class="text-muted text-center small py-3">سازمانی تعریف نشده</div>';
+    }
+
+    function buildOrgNode(org) {
+        const topRoles = rolesTreeData.roles.filter(r => r.organizationId === org.id && !r.parentRoleId);
+        const hasChildren = topRoles.length > 0;
+        let childrenHtml = '';
+        topRoles.forEach(r => { childrenHtml += buildRoleNode(r); });
+
+        return `<div class="roles-tree-node" id="treeOrg_${org.id}">
+            <div class="roles-tree-header org-header" onclick="selectOrganization('${org.id}','${esc(org.organizationName)}')">
+                <span class="roles-tree-toggle ${hasChildren ? 'clickable' : 'invisible'}" onclick="event.stopPropagation();toggleNode('treeOrg_${org.id}')">${hasChildren ? '▶' : ''}</span>
+                <i class="fa-solid fa-building me-1 text-primary"></i>
+                <span>${esc(org.organizationName)}</span>
+            </div>
+            ${hasChildren ? `<div class="roles-tree-children" id="treeOrg_${org.id}_ch" style="display:none">${childrenHtml}</div>` : ''}
+        </div>`;
+    }
+
+    function buildRoleNode(role) {
+        const children = rolesTreeData.roles.filter(r => r.parentRoleId === role.id);
+        const hasChildren = children.length > 0;
+        let childrenHtml = '';
+        children.forEach(c => { childrenHtml += buildRoleNode(c); });
+
+        return `<div class="roles-tree-node" id="treeRole_${role.id}">
+            <div class="roles-tree-header ${role.isActive ? '' : 'text-muted'}" onclick="selectRole('${role.id}','${esc(role.roleName)}')">
+                <span class="roles-tree-toggle ${hasChildren ? 'clickable' : 'invisible'}" onclick="event.stopPropagation();toggleNode('treeRole_${role.id}')">${hasChildren ? '▶' : ''}</span>
+                <i class="fa-solid fa-user-tie me-1 ${role.isActive ? 'text-primary' : 'text-secondary'}"></i>
+                <span>${esc(role.roleName)}</span>
+                <span class="text-muted ms-1" style="font-size:0.74rem">(${esc(role.roleCode)})</span>
+            </div>
+            ${hasChildren ? `<div class="roles-tree-children" id="treeRole_${role.id}_ch" style="display:none">${childrenHtml}</div>` : ''}
+        </div>`;
+    }
+
+    function toggleNode(nodeId) {
+        const ch = document.getElementById(nodeId + '_ch');
+        if (!ch) return;
+        const open = ch.style.display !== 'none';
+        ch.style.display = open ? 'none' : 'block';
+        const el = document.getElementById(nodeId);
+        const toggle = el?.querySelector(':scope > .roles-tree-header .roles-tree-toggle');
+        if (toggle) toggle.textContent = open ? '▶' : '▼';
+    }
+
+    function highlightNode(type, id) {
+        if (selectedTreeEl) selectedTreeEl.classList.remove('selected');
+        const prefix = type === 'org' ? 'treeOrg_' : 'treeRole_';
+        const node = document.getElementById(prefix + id);
+        if (node) {
+            const header = node.querySelector(':scope > .roles-tree-header');
+            if (header) { header.classList.add('selected'); selectedTreeEl = header; }
+        }
+    }
+
+    function expandTreeTo(roleId) {
+        const ancestors = [];
+        let cur = roleId;
+        while (cur) {
+            const r = rolesTreeData?.roles.find(x => x.id === cur);
+            if (!r) break;
+            if (r.parentRoleId) ancestors.push({ type: 'role', id: r.parentRoleId });
+            else if (r.organizationId) ancestors.push({ type: 'org', id: r.organizationId });
+            cur = r.parentRoleId;
+        }
+        ancestors.forEach(a => {
+            const prefix = a.type === 'org' ? 'treeOrg_' : 'treeRole_';
+            const ch = document.getElementById(prefix + a.id + '_ch');
+            if (ch && ch.style.display === 'none') {
+                ch.style.display = 'block';
+                const nd = document.getElementById(prefix + a.id);
+                const tgl = nd?.querySelector(':scope > .roles-tree-header .roles-tree-toggle');
+                if (tgl) tgl.textContent = '▼';
+            }
+        });
+    }
+
+    // ===== Navigation =====
+    function selectOrganization(orgId, orgName) {
+        currentOrgId = orgId;
+        currentParentRoleId = null;
+        roleBreadcrumb = [{ type: 'org', id: orgId, name: orgName }];
+        updateBreadcrumb();
+        highlightNode('org', orgId);
+        loadRoleChildren(null, orgId);
+    }
+
+    function selectRole(roleId, roleName) {
+        currentParentRoleId = roleId;
+        buildBreadcrumbPath(roleId);
+        highlightNode('role', roleId);
+        expandTreeTo(roleId);
+        loadRoleChildren(roleId, null);
+    }
+
+    function buildBreadcrumbPath(roleId) {
+        const path = [];
+        let cur = roleId;
+        while (cur) {
+            const r = rolesTreeData?.roles.find(x => x.id === cur);
+            if (!r) break;
+            path.unshift({ type: 'role', id: r.id, name: r.roleName });
+            if (!r.parentRoleId) {
+                if (r.organizationId) {
+                    const org = rolesTreeData?.organizations.find(o => o.id === r.organizationId);
+                    if (org) {
+                        currentOrgId = org.id;
+                        path.unshift({ type: 'org', id: org.id, name: org.organizationName });
+                    }
+                }
+                break;
+            }
+            cur = r.parentRoleId;
+        }
+        roleBreadcrumb = path;
+    }
+
+    function navigateToRoot() {
+        currentOrgId = null;
+        currentParentRoleId = null;
+        roleBreadcrumb = [];
+        if (selectedTreeEl) { selectedTreeEl.classList.remove('selected'); selectedTreeEl = null; }
+        updateBreadcrumb();
+        loadRoleChildren(null, null);
+    }
+
+    function navigateTo(index) {
+        const item = roleBreadcrumb[index];
+        roleBreadcrumb = roleBreadcrumb.slice(0, index + 1);
+        updateBreadcrumb();
+        if (item.type === 'org') {
+            currentOrgId = item.id;
+            currentParentRoleId = null;
+            highlightNode('org', item.id);
+            loadRoleChildren(null, item.id);
+        } else {
+            currentParentRoleId = item.id;
+            highlightNode('role', item.id);
+            loadRoleChildren(item.id, null);
+        }
+    }
+
+    function updateBreadcrumb() {
+        const ol = document.getElementById('roles-breadcrumb');
+        let html = `<li class="breadcrumb-item" onclick="navigateToRoot()"><i class="fa-solid fa-layer-group me-1"></i>نقش ها</li>`;
+        roleBreadcrumb.forEach((item, i) => {
+            const isLast = i === roleBreadcrumb.length - 1;
+            html += isLast
+                ? `<li class="breadcrumb-item active">${esc(item.name)}</li>`
+                : `<li class="breadcrumb-item" onclick="navigateTo(${i})">${esc(item.name)}</li>`;
+        });
+        ol.innerHTML = html;
+    }
+
+    // ===== Table =====
+    async function loadRoleChildren(parentRoleId, organizationId) {
+        const tbody = document.getElementById('roles-tbody');
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>در حال بارگذاری...</td></tr>';
+        try {
+            let url = '/api/settings/roles/children?';
+            if (parentRoleId) url += 'parentRoleId=' + parentRoleId;
+            else if (organizationId) url += 'organizationId=' + organizationId;
+
+            const res = await fetch(url);
+            const result = await res.json();
+            if (result.success) {
+                renderRolesTable(result.data);
+                const last = roleBreadcrumb[roleBreadcrumb.length - 1];
+                document.getElementById('roles-table-header').innerHTML =
+                    `<i class="fa-solid fa-list me-1"></i>${last ? 'زیرمجموعه: ' + esc(last.name) : 'نقش های سطح اول'}`;
+            }
+        } catch (e) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3 text-danger">خطا در بارگذاری</td></tr>';
+        }
+    }
+
+    function renderRolesTable(roles) {
+        const tbody = document.getElementById('roles-tbody');
+        document.getElementById('roles-count').textContent = roles.length + ' نقش';
+
+        if (!roles || roles.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">
+                <i class="fa-solid fa-folder-open display-6 d-block mb-2 opacity-50"></i>
+                نقشی در این سطح تعریف نشده</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = roles.map((role, i) => `
+            <tr ondblclick="selectRole('${role.id}','${esc(role.roleName)}')" style="cursor:pointer;">
+                <td>${i + 1}</td>
+                <td><code class="small">${esc(role.roleCode)}</code></td>
+                <td>
+                    <strong class="small">${esc(role.roleName)}</strong>
+                    ${role.hasChildren ? '<span class="badge bg-light text-dark ms-1" style="font-size:0.72rem"><i class="fa-solid fa-layer-group"></i> زیرنقش</span>' : ''}
+                </td>
+                <td class="text-muted small">${role.description ? esc(role.description) : '-'}</td>
+                <td class="text-center"><span class="badge bg-light text-dark">${role.userCount}</span></td>
+                <td class="text-center">${role.isActive ? '<span class="badge bg-success">فعال</span>' : '<span class="badge bg-danger">غیرفعال</span>'}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="event.stopPropagation();openRoleModal('${role.id}')" title="ویرایش"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation();deleteRole('${role.id}','${esc(role.roleName)}')" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>`).join('');
+    }
+
+    // ===== Groups (Modal helpers) =====
+    async function loadAvailableGroups() {
+        try {
+            const res = await fetch('/api/settings/groups');
+            const result = await res.json();
+            if (result.success) availableGroups = result.data;
+        } catch (e) { /* silent */ }
+    }
+
+    function toggleGroupPicker() {
+        const wrap = document.getElementById('group-picker-wrap');
+        wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+        populateGroupPicker();
+    }
+
+    function populateGroupPicker() {
+        const sel = document.getElementById('group-picker-select');
+        sel.innerHTML = '<option value="">انتخاب گروه...</option>';
+        availableGroups.forEach(g => {
+            if (!assignedGroupIds.includes(g.id)) {
+                sel.innerHTML += `<option value="${g.id}">${g.groupName} (${g.groupCode})</option>`;
+            }
+        });
+    }
+
+    function addSelectedGroup() {
+        const sel = document.getElementById('group-picker-select');
+        if (!sel.value || assignedGroupIds.includes(sel.value)) return;
+        assignedGroupIds.push(sel.value);
+        renderAssignedGroups();
+        populateGroupPicker();
+        sel.value = '';
+    }
+
+    function removeGroup(groupId) {
+        assignedGroupIds = assignedGroupIds.filter(id => id !== groupId);
+        renderAssignedGroups();
+    }
+
+    function renderAssignedGroups() {
+        const container = document.getElementById('assigned-groups-list');
+        if (assignedGroupIds.length === 0) {
+            container.innerHTML = '<div class="text-muted text-center small py-3">گروهی اضافه نشده</div>';
+            return;
+        }
+        container.innerHTML = assignedGroupIds.map(gId => {
+            const grp = availableGroups.find(g => g.id === gId);
+            if (!grp) return '';
+            return `<div class="d-flex justify-content-between align-items-center bg-white border rounded p-1 mb-1">
+                <span class="small"><i class="fa-solid fa-users me-1 text-primary"></i>${esc(grp.groupName)} <span class="text-muted">(${esc(grp.groupCode)})</span></span>
+                <button class="btn btn-sm btn-link text-danger p-0" onclick="removeGroup('${gId}')"><i class="fa-solid fa-xmark"></i></button>
+            </div>`;
+        }).join('');
+    }
+
+    // ===== Modal =====
+    async function openRoleModal(roleId = null) {
+        editingRoleId = roleId;
+        assignedGroupIds = [];
+        assignedPermIds = [];
+        document.getElementById('roleForm').reset();
+        document.getElementById('group-picker-wrap').style.display = 'none';
+        document.getElementById('role-personnel-user-id').value = '';
+        document.getElementById('role-personnel-user-name').value = '';
+        document.getElementById('role-department-id').value = '';
+        document.getElementById('role-department-name').value = '';
+
+        const orgSel = document.getElementById('role-org-select');
+        orgSel.innerHTML = '<option value="">--</option>';
+        (rolesTreeData?.organizations || []).forEach(org => {
+            orgSel.innerHTML += `<option value="${org.id}" ${currentOrgId === org.id ? 'selected' : ''}>${org.organizationName}</option>`;
+        });
+
+        if (roleId) {
+            document.getElementById('roleModalTitle').innerHTML = '<i class="fa-solid fa-pen me-2"></i>ویرایش نقش';
+            try {
+                const res = await fetch('/api/settings/roles/' + roleId);
+                const result = await res.json();
+                if (result.success) {
+                    const r = result.data;
+                    document.getElementById('role-id').value = r.id;
+                    document.getElementById('role-code').value = r.roleCode;
+                    document.getElementById('role-name').value = r.roleName;
+                    document.getElementById('role-description').value = r.description || '';
+                    document.getElementById('role-is-active').checked = r.isActive !== false;
+                    if (r.organizationId) orgSel.value = r.organizationId;
+                    document.getElementById('role-correspondence-title').value = r.correspondenceTitle || '';
+                    document.getElementById('role-display-title').value = r.displayTitle || '';
+
+                    if (r.personnelUserId) {
+                        document.getElementById('role-personnel-user-id').value = r.personnelUserId;
+                        document.getElementById('role-personnel-user-name').value = r.personnelUserName || '';
+                    }
+                    if (r.departmentId) {
+                        document.getElementById('role-department-id').value = r.departmentId;
+                        document.getElementById('role-department-name').value = r.departmentName || '';
+                    }
+
+                    let parentLabel = 'سطح اول';
+                    if (r.parentRoleId) {
+                        const p = rolesTreeData?.roles.find(x => x.id === r.parentRoleId);
+                        if (p) parentLabel = p.roleName;
+                    }
+                    document.getElementById('roleModalSubtitle').textContent = 'ویرایش نقش در: ' + parentLabel;
+
+                    assignedGroupIds = r.groupIds || [];
+                    assignedPermIds = r.permissions || [];
+                }
+            } catch (e) { /* silent */ }
+        } else {
+            document.getElementById('roleModalTitle').innerHTML = '<i class="fa-solid fa-plus me-2"></i>ایجاد نقش جدید';
+            document.getElementById('role-id').value = '';
+            document.getElementById('role-parent-id').value = currentParentRoleId || '';
+            if (currentOrgId) orgSel.value = currentOrgId;
+
+            const last = roleBreadcrumb[roleBreadcrumb.length - 1];
+            document.getElementById('roleModalSubtitle').textContent =
+                last ? 'ایجاد زیرنقش در: ' + last.name : 'ایجاد نقش جدید در سطح اول';
+        }
+
+        renderAssignedGroups();
+        renderAssignedPerms();
+        populateGroupPicker();
+        roleModalInst?.show();
+    }
+
+    // ===== Save =====
+    async function saveRole() {
+        const code = document.getElementById('role-code').value.trim();
+        const name = document.getElementById('role-name').value.trim();
+        if (!code || !name) {
+            document.getElementById('role-code').classList.toggle('is-invalid', !code);
+            document.getElementById('role-name').classList.toggle('is-invalid', !name);
+            return;
+        }
+        document.getElementById('role-code').classList.remove('is-invalid');
+        document.getElementById('role-name').classList.remove('is-invalid');
+
+        const id = document.getElementById('role-id').value;
+        const isEdit = !!id;
+        const orgId = document.getElementById('role-org-select').value;
+        const description = document.getElementById('role-description').value.trim();
+        const isActive = document.getElementById('role-is-active').checked;
+
+        const payload = {
+            roleCode: code,
+            roleName: name,
+            description: description || null,
+            organizationId: orgId || null,
+            isActive: isActive,
+            correspondenceTitle: document.getElementById('role-correspondence-title').value.trim() || null,
+            displayTitle: document.getElementById('role-display-title').value.trim() || null,
+            personnelUserId: document.getElementById('role-personnel-user-id').value || null,
+            departmentId: document.getElementById('role-department-id').value || null,
+            groupIds: assignedGroupIds,
+            permissionIds: assignedPermIds
+        };
+
+        if (!isEdit) {
+            payload.parentRoleId = currentParentRoleId || null;
+        }
+
+        try {
+            const res = await fetch(
+                isEdit ? '/api/settings/roles/' + id : '/api/settings/roles',
+                {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }
+            );
+            const result = await res.json();
+
+            if (res.ok && result.success) {
+                roleModalInst?.hide();
+                await loadRolesTree();
+                await loadRoleChildren(currentParentRoleId, currentParentRoleId ? null : currentOrgId);
+            } else {
+                alert(result.error || 'خطا در ذخیره نقش');
+            }
+        } catch (e) {
+            alert('خطا در اتصال به سرور');
+        }
+    }
+
+    // ===== Delete =====
+    async function deleteRole(roleId, roleName) {
+        if (!confirm('آیا از حذف نقش "' + roleName + '" اطمینان دارید؟')) return;
+        try {
+            const res = await fetch('/api/settings/roles/' + roleId, { method: 'DELETE' });
+            const result = await res.json();
+            if (res.ok && result.success) {
+                await loadRolesTree();
+                await loadRoleChildren(currentParentRoleId, currentParentRoleId ? null : currentOrgId);
+            } else {
+                alert(result.error || 'خطا در حذف نقش');
+            }
+        } catch (e) {
+            alert('خطا در اتصال به سرور');
+        }
+    }
+
+    // ===== Permissions (assigned list in role modal) =====
+    async function loadAllPermissions() {
+        try {
+            const res = await fetch('/api/settings/permissions/by-category');
+            const result = await res.json();
+            if (result.success) allPermissions = result.data;
+        } catch (e) { /* silent */ }
+    }
+
+    function renderAssignedPerms() {
+        const container = document.getElementById('assigned-perms-list');
+        if (assignedPermIds.length === 0) {
+            container.innerHTML = '<div class="text-muted text-center small py-2">مجوزی اضافه نشده</div>';
+            return;
+        }
+        container.innerHTML = assignedPermIds.map(pId => {
+            const p = allPermissions.find(x => x.id === pId);
+            if (!p) return '';
+            return `<div class="d-flex justify-content-between align-items-center bg-white border rounded p-1 mb-1">
+                <span class="small"><i class="fa-solid fa-key me-1 text-warning"></i>${esc(p.permissionName)}</span>
+                <button class="btn btn-sm btn-link text-danger p-0" onclick="removeAssignedPerm('${pId}')"><i class="fa-solid fa-xmark"></i></button>
+            </div>`;
+        }).join('');
+    }
+
+    function removeAssignedPerm(permId) {
+        assignedPermIds = assignedPermIds.filter(id => id !== permId);
+        renderAssignedPerms();
+    }
+
+    // ===== Perm Picker Modal =====
+    function openPermPickerModal() {
+        permPickerTempIds = [...assignedPermIds];
+        permPickerCategory = 'general';
+        document.querySelectorAll('#pp-tabs .nav-link').forEach(a => a.classList.remove('active'));
+        document.getElementById('pp-tab-general')?.classList.add('active');
+        renderPermPicker();
+        permPickerInst?.show();
+    }
+
+    function switchPermPicker(cat) {
+        permPickerCategory = cat;
+        document.querySelectorAll('#pp-tabs .nav-link').forEach(a => a.classList.remove('active'));
+        document.getElementById('pp-tab-' + cat)?.classList.add('active');
+        renderPermPicker();
+    }
+
+    function renderPermPicker() {
+        const tbody = document.getElementById('pp-tbody');
+        const filtered = allPermissions.filter(p => (p.category || 'general').toLowerCase() === permPickerCategory);
+        document.getElementById('pp-select-all').checked = false;
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">مجوزی در این دسته نیست</td></tr>';
+            return;
+        }
+        tbody.innerHTML = filtered.map(p => `
+            <tr>
+                <td><input type="checkbox" class="form-check-input form-check-input-sm pp-cb" value="${p.id}" ${permPickerTempIds.includes(p.id) ? 'checked' : ''}></td>
+                <td><code class="small">${esc(p.permissionCode)}</code></td>
+                <td>${esc(p.permissionName)}</td>
+                <td class="text-muted small">${p.description ? esc(p.description) : '-'}</td>
+            </tr>`).join('');
+
+        const allChecked = filtered.every(p => permPickerTempIds.includes(p.id));
+        document.getElementById('pp-select-all').checked = allChecked;
+    }
+
+    function toggleAllPerms(master) {
+        const filtered = allPermissions.filter(p => (p.category || 'general').toLowerCase() === permPickerCategory);
+        const checked = master.checked;
+        document.querySelectorAll('#pp-tbody .pp-cb').forEach(cb => { cb.checked = checked; });
+        filtered.forEach(p => {
+            if (checked && !permPickerTempIds.includes(p.id)) permPickerTempIds.push(p.id);
+            else if (!checked) permPickerTempIds = permPickerTempIds.filter(id => id !== p.id);
+        });
+    }
+
+    function applyPermPicker() {
+        // Collect current state from all checkboxes across tabs
+        document.querySelectorAll('#pp-tbody .pp-cb').forEach(cb => {
+            if (cb.checked && !permPickerTempIds.includes(cb.value)) permPickerTempIds.push(cb.value);
+            else if (!cb.checked) permPickerTempIds = permPickerTempIds.filter(id => id !== cb.value);
+        });
+        assignedPermIds = [...permPickerTempIds];
+        renderAssignedPerms();
+        permPickerInst?.hide();
+    }
+
+    // ===== User Picker =====
+    function openUserPicker() {
+        document.getElementById('up-name').value = '';
+        document.getElementById('up-username').value = '';
+        document.getElementById('up-national-id').value = '';
+        document.getElementById('up-personnel-no').value = '';
+        document.getElementById('up-results').innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">جستجو کنید...</td></tr>';
+        document.getElementById('up-count').textContent = '';
+        upPage = 1;
+        userPickerInst?.show();
+    }
+
+    async function searchUsers(page = 1) {
+        upPage = page;
+        const name = document.getElementById('up-name').value.trim();
+        const username = document.getElementById('up-username').value.trim();
+        const nationalId = document.getElementById('up-national-id').value.trim();
+        const personnelNo = document.getElementById('up-personnel-no').value.trim();
+
+        let url = `/api/settings/users/search?page=${page}&pageSize=10`;
+        if (name) url += '&name=' + encodeURIComponent(name);
+        if (username) url += '&username=' + encodeURIComponent(username);
+        if (nationalId) url += '&nationalId=' + encodeURIComponent(nationalId);
+        if (personnelNo) url += '&personnelNumber=' + encodeURIComponent(personnelNo);
+
+        try {
+            const res = await fetch(url);
+            const result = await res.json();
+            if (result.success) {
+                upTotal = result.totalCount;
+                renderUserResults(result.data);
+                renderUpPagination(result.totalCount, page);
+            }
+        } catch (e) {
+            document.getElementById('up-results').innerHTML = '<tr><td colspan="5" class="text-center text-danger py-3">خطا</td></tr>';
+        }
+    }
+
+    function renderUserResults(users) {
+        const tbody = document.getElementById('up-results');
+        document.getElementById('up-count').textContent = upTotal + ' کاربر';
+        if (!users || users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">نتیجه‌ای یافت نشد</td></tr>';
+            return;
+        }
+        tbody.innerHTML = users.map((u, i) => `
+            <tr style="cursor:pointer;" onclick="selectUser('${u.id}','${esc(u.fullName)}')">
+                <td>${(upPage - 1) * 10 + i + 1}</td>
+                <td><strong>${esc(u.fullName)}</strong></td>
+                <td class="small">${esc(u.username)}</td>
+                <td class="small">${u.nationalId ? esc(u.nationalId) : '-'}</td>
+                <td class="small">${u.departmentName ? esc(u.departmentName) : '-'}</td>
+            </tr>`).join('');
+    }
+
+    function renderUpPagination(total, current) {
+        const container = document.getElementById('up-pagination');
+        const totalPages = Math.ceil(total / 10);
+        if (totalPages <= 1) { container.innerHTML = ''; return; }
+        let html = '<div class="btn-group btn-group-sm">';
+        for (let i = 1; i <= totalPages && i <= 10; i++) {
+            html += `<button class="btn ${i === current ? 'btn-primary' : 'btn-outline-secondary'}" onclick="searchUsers(${i})">${i}</button>`;
+        }
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function selectUser(userId, fullName) {
+        document.getElementById('role-personnel-user-id').value = userId;
+        document.getElementById('role-personnel-user-name').value = fullName;
+        userPickerInst?.hide();
+    }
+
+    function clearUserPicker() {
+        document.getElementById('role-personnel-user-id').value = '';
+        document.getElementById('role-personnel-user-name').value = '';
+    }
+
+    // ===== Department Picker =====
+    function openDeptPicker() {
+        document.getElementById('dp-name').value = '';
+        document.getElementById('dp-code').value = '';
+        document.getElementById('dp-results').innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">جستجو کنید...</td></tr>';
+        document.getElementById('dp-count').textContent = '';
+        dpPage = 1;
+        deptPickerInst?.show();
+    }
+
+    async function searchDepts(page = 1) {
+        dpPage = page;
+        const name = document.getElementById('dp-name').value.trim();
+        const code = document.getElementById('dp-code').value.trim();
+
+        let url = `/api/settings/departments/search?page=${page}&pageSize=10`;
+        if (name) url += '&name=' + encodeURIComponent(name);
+        if (code) url += '&code=' + encodeURIComponent(code);
+
+        try {
+            const res = await fetch(url);
+            const result = await res.json();
+            if (result.success) {
+                dpTotal = result.totalCount;
+                renderDeptResults(result.data);
+                renderDpPagination(result.totalCount, page);
+            }
+        } catch (e) {
+            document.getElementById('dp-results').innerHTML = '<tr><td colspan="4" class="text-center text-danger py-3">خطا</td></tr>';
+        }
+    }
+
+    function renderDeptResults(depts) {
+        const tbody = document.getElementById('dp-results');
+        document.getElementById('dp-count').textContent = dpTotal + ' واحد';
+        if (!depts || depts.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">نتیجه‌ای یافت نشد</td></tr>';
+            return;
+        }
+        tbody.innerHTML = depts.map((d, i) => `
+            <tr style="cursor:pointer;" onclick="selectDept('${d.id}','${esc(d.departmentName)}')">
+                <td>${(dpPage - 1) * 10 + i + 1}</td>
+                <td><strong>${esc(d.departmentName)}</strong></td>
+                <td class="small">${esc(d.departmentCode)}</td>
+                <td class="small">${d.organizationName ? esc(d.organizationName) : '-'}</td>
+            </tr>`).join('');
+    }
+
+    function renderDpPagination(total, current) {
+        const container = document.getElementById('dp-pagination');
+        const totalPages = Math.ceil(total / 10);
+        if (totalPages <= 1) { container.innerHTML = ''; return; }
+        let html = '<div class="btn-group btn-group-sm">';
+        for (let i = 1; i <= totalPages && i <= 10; i++) {
+            html += `<button class="btn ${i === current ? 'btn-primary' : 'btn-outline-secondary'}" onclick="searchDepts(${i})">${i}</button>`;
+        }
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function selectDept(deptId, deptName) {
+        document.getElementById('role-department-id').value = deptId;
+        document.getElementById('role-department-name').value = deptName;
+        deptPickerInst?.hide();
+    }
+
+    function clearDeptPicker() {
+        document.getElementById('role-department-id').value = '';
+        document.getElementById('role-department-name').value = '';
+    }
+
+    // ===== Utility =====
+    function esc(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+</script>
+

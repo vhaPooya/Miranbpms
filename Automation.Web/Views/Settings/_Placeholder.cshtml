@@ -1,0 +1,15 @@
+@* Partial View: Placeholder برای بخش‌هایی که هنوز پیاده‌سازی نشده *@
+@{
+    var title = ViewBag.Title ?? "این بخش";
+    var icon = ViewBag.Icon ?? "fa-solid fa-cog";
+}
+
+<h5 class="fw-bold border-bottom pb-3 mb-4">
+    <i class="@icon me-2 text-primary"></i>
+    @title
+</h5>
+
+<div class="text-center py-5">
+    <i class="fa-solid fa-tools fa-3x text-muted mb-3"></i>
+    <p class="text-muted">محتوای این بخش بعداً اضافه می‌شود...</p>
+</div>

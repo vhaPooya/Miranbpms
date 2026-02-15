@@ -1,0 +1,324 @@
+@* Partial View: جستجوی پیشرفته *@
+@{
+    Layout = null;
+}
+
+<div class="card border-0 custom-shadow rounded-4 mb-4 search-card">
+    <div class="card-body p-4">
+        <h6 class="fw-bold border-bottom pb-2 mb-3 text-secondary">
+            <i class="fa-solid fa-filter me-2 text-primary"></i>پارامترهای جستجو
+        </h6>
+
+        <div class="row g-3 justify-content-center mb-3">
+            <div class="col-md-4 col-lg-3">
+                <label class="form-label-sm">نوع مدرک</label>
+                <select class="form-select form-select-sm" id="search-docType" onchange="showSearchCriteria()">
+                    <option value="" selected disabled>انتخاب کنید...</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row g-3 justify-content-center align-items-end d-none-custom animate-fade-in" id="search-row-criteria">
+            <div class="col-md-4 col-lg-3">
+                <label class="form-label-sm">جستجو براساس</label>
+                <select class="form-select form-select-sm" id="search-searchCriteria" onchange="toggleSearchFields()">
+                    <option value="" selected disabled>انتخاب کنید...</option>
+                    <option value="subject">موضوع / متن نامه</option>
+                    <option value="date">تاریخ مدرک</option>
+                    <option value="daterange">بازه ای از تاریخ</option>
+                    <option value="user">فرستنده / گیرنده</option>
+                    <option value="number">شماره (صادره/وارده/داخلی)</option>
+                </select>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div id="search-field-subject" class="d-none-custom animate-fade-in">
+                    <label class="form-label-sm">عبارت جستجو</label>
+                    <input type="text" class="form-control form-control-sm" id="search-subject-input" placeholder="بخشی از متن...">
+                </div>
+
+                <div id="search-field-date" class="d-none-custom animate-fade-in">
+                    <label class="form-label-sm">تاریخ مدرک</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" id="search-date-input" placeholder="۱۴۰۴/۰۱/۰۱">
+                        <span class="input-group-text"><i class="fa-regular fa-calendar"></i></span>
+                    </div>
+                </div>
+
+                <div id="search-field-daterange" class="d-none-custom animate-fade-in">
+                    <div class="d-flex gap-2">
+                        <div class="flex-grow-1">
+                            <label class="form-label-sm">از تاریخ</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" id="search-from-date">
+                                <span class="input-group-text"><i class="fa-regular fa-calendar"></i></span>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <label class="form-label-sm">تا تاریخ</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" id="search-to-date">
+                                <span class="input-group-text"><i class="fa-regular fa-calendar"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="search-field-user" class="d-none-custom animate-fade-in">
+                    <label class="form-label-sm">طرف مکاتبه</label>
+                    <div class="input-group input-group-sm cursor-pointer" onclick="openSearchUserModal()">
+                        <input type="text" id="search-userInput" class="form-control bg-white" placeholder="انتخاب کنید..." readonly>
+                        <span class="input-group-text"><i class="fa-solid fa-user-tag"></i></span>
+                    </div>
+                </div>
+
+                <div id="search-field-number" class="d-none-custom animate-fade-in">
+                    <label class="form-label-sm">شماره مدرک</label>
+                    <input type="text" class="form-control form-control-sm" id="search-number-input" placeholder="شماره...">
+                </div>
+            </div>
+
+            <div class="col-md-2 d-none-custom animate-fade-in" id="search-row-search-btn">
+                <button class="btn btn-primary btn-sm w-100" onclick="executeSearch()">
+                    <i class="fa-solid fa-magnifying-glass me-1"></i> جستجو
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 custom-shadow rounded-4">
+    <div class="card-body p-0">
+        <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white rounded-top-4">
+            <h6 class="m-0 fw-bold text-dark">نتیجه جستجو</h6>
+            <span class="badge bg-light text-secondary border rounded-pill" id="search-result-count">0 مورد یافت شد</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-custom table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width:50px">ردیف</th>
+                        <th>تاریخ مدرک</th>
+                        <th>فرستنده / گیرنده</th>
+                        <th>موضوع</th>
+                        <th>شماره</th>
+                        <th class="text-center" style="width:100px">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody id="search-results-tbody">
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">لطفاً پارامترهای جستجو را وارد کنید</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="p-3 border-top d-flex justify-content-between align-items-center bg-white rounded-bottom-4" id="search-pagination-container" style="display: none !important;">
+            <small class="text-muted" id="search-pagination-info">نمایش 0 تا 0 از 0 مورد</small>
+            <nav>
+                <ul class="pagination pagination-sm mb-0" id="search-pagination"></ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script>
+    let searchCurrentPage = 1;
+    const searchPageSize = 10;
+    let searchSelectedUserId = null;
+
+    // Initialize immediately (loaded via AJAX, DOMContentLoaded already fired)
+    (function() {
+        loadDocumentTypes();
+    })();
+
+    // Load document types
+    async function loadDocumentTypes() {
+        try {
+            const response = await fetch('/api/search/document-types');
+            const result = await response.json();
+
+            if (result.success) {
+                const select = document.getElementById('search-docType');
+                result.data.forEach(dt => {
+                    const option = document.createElement('option');
+                    option.value = dt.documentTypeId;
+                    option.textContent = dt.documentTypeName;
+                    select.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading document types:', error);
+        }
+    }
+
+    // Show criteria row
+    function showSearchCriteria() {
+        const rowCriteria = document.getElementById('search-row-criteria');
+        if (rowCriteria) {
+            rowCriteria.classList.remove('d-none-custom');
+            rowCriteria.classList.add('d-flex-custom');
+        }
+    }
+
+    // Toggle search fields based on criteria
+    function toggleSearchFields() {
+        const criteria = document.getElementById('search-searchCriteria').value;
+        const fields = ['subject', 'date', 'daterange', 'user', 'number'];
+
+        fields.forEach(field => {
+            const el = document.getElementById(`search-field-${field}`);
+            if (el) {
+                if (field === criteria) {
+                    el.classList.remove('d-none-custom');
+                    el.classList.add('d-flex-custom');
+                } else {
+                    el.classList.add('d-none-custom');
+                    el.classList.remove('d-flex-custom');
+                }
+            }
+        });
+
+        // Show search button
+        const searchBtn = document.getElementById('search-row-search-btn');
+        if (searchBtn) {
+            searchBtn.classList.remove('d-none-custom');
+            searchBtn.classList.add('d-flex-custom');
+        }
+    }
+
+    // Execute search
+    async function executeSearch(page = 1) {
+        searchCurrentPage = page;
+        const tbody = document.getElementById('search-results-tbody');
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>در حال جستجو...</td></tr>';
+
+        try {
+            const documentTypeId = document.getElementById('search-docType').value;
+            const criteria = document.getElementById('search-searchCriteria').value;
+
+            let params = new URLSearchParams({
+                page: page,
+                pageSize: searchPageSize
+            });
+
+            if (documentTypeId) params.append('documentTypeId', documentTypeId);
+
+            switch (criteria) {
+                case 'subject':
+                    const subject = document.getElementById('search-subject-input').value;
+                    if (subject) params.append('subject', subject);
+                    break;
+                case 'date':
+                    const date = document.getElementById('search-date-input').value;
+                    if (date) {
+                        params.append('fromDate', date);
+                        params.append('toDate', date);
+                    }
+                    break;
+                case 'daterange':
+                    const fromDate = document.getElementById('search-from-date').value;
+                    const toDate = document.getElementById('search-to-date').value;
+                    if (fromDate) params.append('fromDate', fromDate);
+                    if (toDate) params.append('toDate', toDate);
+                    break;
+                case 'user':
+                    if (searchSelectedUserId) params.append('userId', searchSelectedUserId);
+                    break;
+                case 'number':
+                    const docNumber = document.getElementById('search-number-input').value;
+                    if (docNumber) params.append('documentNumber', docNumber);
+                    break;
+            }
+
+            const response = await fetch(`/api/search/documents?${params.toString()}`);
+            const result = await response.json();
+
+            if (result.success) {
+                renderSearchResults(result.data, result.totalCount);
+            } else {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">${result.error || 'خطا در جستجو'}</td></tr>`;
+            }
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-danger">خطا در اتصال به سرور</td></tr>';
+        }
+    }
+
+    // Render search results
+    function renderSearchResults(items, totalCount) {
+        const tbody = document.getElementById('search-results-tbody');
+        const paginationContainer = document.getElementById('search-pagination-container');
+
+        document.getElementById('search-result-count').textContent = `${totalCount} مورد یافت شد`;
+
+        if (!items || items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">موردی یافت نشد</td></tr>';
+            paginationContainer.style.display = 'none';
+            return;
+        }
+
+        tbody.innerHTML = items.map((item, index) => {
+            const rowNum = (searchCurrentPage - 1) * searchPageSize + index + 1;
+            const docDate = item.documentDate ? new Date(item.documentDate).toLocaleDateString('fa-IR') : '-';
+
+            return `
+                <tr data-document-id="${item.documentId}">
+                    <td class="text-center">${rowNum}</td>
+                    <td>${docDate}</td>
+                    <td>${item.senderName || '-'}</td>
+                    <td class="fw-bold text-dark">${item.subject}</td>
+                    <td>${item.documentNumber}</td>
+                    <td class="text-center">
+                        <div class="dropdown">
+                            <button class="btn-action" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 fs-7">
+                                <li><a class="dropdown-item small" href="#"><i class="fa-regular fa-eye me-2"></i>مشاهده</a></li>
+                                <li><a class="dropdown-item small" href="#"><i class="fa-solid fa-pen me-2"></i>ویرایش</a></li>
+                                <li><a class="dropdown-item small" href="#"><i class="fa-solid fa-print me-2"></i>چاپ</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>`;
+        }).join('');
+
+        // Update pagination
+        const start = (searchCurrentPage - 1) * searchPageSize + 1;
+        const end = Math.min(searchCurrentPage * searchPageSize, totalCount);
+        document.getElementById('search-pagination-info').textContent = `نمایش ${start} تا ${end} از ${totalCount} مورد`;
+
+        renderSearchPagination(totalCount);
+        paginationContainer.style.display = totalCount > 0 ? 'flex' : 'none';
+    }
+
+    // Render pagination
+    function renderSearchPagination(totalCount) {
+        const totalPages = Math.ceil(totalCount / searchPageSize);
+        const pagination = document.getElementById('search-pagination');
+        let html = '';
+
+        if (searchCurrentPage > 1) {
+            html += `<li class="page-item"><a class="page-link" href="#" onclick="executeSearch(${searchCurrentPage - 1}); return false;"><i class="fa-solid fa-chevron-right"></i></a></li>`;
+        } else {
+            html += `<li class="page-item disabled"><a class="page-link" href="#"><i class="fa-solid fa-chevron-right"></i></a></li>`;
+        }
+
+        for (let i = Math.max(1, searchCurrentPage - 2); i <= Math.min(searchCurrentPage + 2, totalPages); i++) {
+            html += `<li class="page-item ${i === searchCurrentPage ? 'active' : ''}"><a class="page-link" href="#" onclick="executeSearch(${i}); return false;">${i}</a></li>`;
+        }
+
+        if (searchCurrentPage < totalPages) {
+            html += `<li class="page-item"><a class="page-link" href="#" onclick="executeSearch(${searchCurrentPage + 1}); return false;"><i class="fa-solid fa-chevron-left"></i></a></li>`;
+        } else {
+            html += `<li class="page-item disabled"><a class="page-link" href="#"><i class="fa-solid fa-chevron-left"></i></a></li>`;
+        }
+
+        pagination.innerHTML = html;
+    }
+
+    // Open user selection modal (placeholder)
+    function openSearchUserModal() {
+        alert('انتخاب کاربر در حال توسعه است');
+    }
+</script>

@@ -1,0 +1,690 @@
+/* 
+   Form Builder V2.1 - Premium Theme 
+   Glassmorphism & Modern UI 
+*/
+
+:root {
+  --primary-color: #3b82f6;
+  --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  --secondary-color: #64748b;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+  --warning-color: #f59e0b;
+
+  --glass-bg: rgba(30, 41, 59, 0.5);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  --glass-modal: rgba(15, 23, 42, 0.95);
+
+  --bg-dark: #0f1221;
+  --text-white: #ffffff;
+  --text-gray: #94a3b8;
+  --border-light: rgba(255, 255, 255, 0.1);
+
+  --sidebar-width: 280px;
+  --header-height: 60px;
+}
+
+body {
+  background-color: var(--bg-dark);
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
+  background-attachment: fixed;
+  overflow: hidden;
+  color: var(--text-white);
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* ================= LAYOUT ================= */
+
+.form-builder-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Navbar */
+.fb-navbar {
+  height: var(--header-height);
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.fb-brand {
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: -0.5px;
+  color: var(--text-white);
+  display: flex;
+  align-items: center;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+.fb-brand i {
+  font-size: 1.4rem;
+  color: var(--primary-color);
+  margin-left: 8px;
+}
+
+/* Buttons */
+.btn-glass {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-light);
+  color: var(--text-gray);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+}
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-white);
+}
+
+.btn-glass-primary {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  font-weight: 600;
+}
+.btn-glass-primary:hover {
+  filter: brightness(1.1);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5);
+}
+
+/* Main Content */
+.fb-main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.fb-sidebar {
+  width: var(--sidebar-width);
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-left: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  z-index: 900;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+}
+
+.fb-sidebar-header {
+  padding: 15px;
+  border-bottom: 1px solid var(--border-light);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.nav-pills .nav-link {
+  color: var(--text-gray);
+  background: transparent;
+  border: 1px solid transparent;
+}
+.nav-pills .nav-link:hover {
+  color: var(--text-white);
+  background: rgba(255, 255, 255, 0.05);
+}
+.nav-pills .nav-link.active {
+  background: var(--primary-gradient);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.fb-sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 0;
+}
+
+/* Component Items */
+.fb-component-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 10px 15px;
+}
+
+.fb-component-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 15px 10px;
+  text-align: center;
+  cursor: grab;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.fb-component-item:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.fb-component-item i {
+  font-size: 1.6rem;
+  color: var(--primary-color);
+  margin-bottom: 4px;
+  filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.5));
+}
+
+.fb-component-item span {
+  font-size: 0.85rem;
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+/* Accordion Customization */
+.accordion-button {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-gray);
+  background: transparent;
+  box-shadow: none !important;
+  padding: 1rem 1.25rem;
+}
+.accordion-button:not(.collapsed) {
+  color: var(--text-white);
+  background: rgba(59, 130, 246, 0.1);
+}
+.accordion-button::after {
+  background-size: 1rem;
+  filter: brightness(0) invert(1);
+}
+
+/* Canvas Area */
+.fb-canvas-area {
+  flex: 1;
+  background: transparent; /* allow body gradient */
+  overflow: auto;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+}
+
+.fb-canvas-wrapper {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  width: 210mm;
+  min-height: 297mm;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  margin-bottom: 50px;
+  transition: width 0.3s;
+  position: relative;
+  border-radius: 8px;
+}
+
+.fb-canvas-content {
+  min-height: 100%;
+  position: relative;
+  padding: 15mm; /* Reduced padding to minimize margins */
+  background: #fff;
+  /* Grid background for alignment help - subtle */
+  background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* ================= DRAG & DROP VISUALS ================= */
+
+.dragging {
+  opacity: 0.5;
+}
+
+.fb-drop-target-active {
+  box-shadow: 0 0 0 2px var(--primary-color), 0 0 20px rgba(79, 70, 229, 0.3);
+  border-radius: 8px;
+  background: rgba(79, 70, 229, 0.02);
+  transition: all 0.2s;
+}
+
+.fb-shrink-preview {
+  transform: scale(0.98);
+  filter: opacity(0.8);
+  transition: transform 0.2s;
+}
+
+/* Horizontal Line Placeholder */
+.fb-drop-placeholder {
+  height: 4px;
+  background: var(--primary-color);
+  border-radius: 2px;
+  margin: 5px 0;
+  position: relative;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+.fb-drop-placeholder::before,
+.fb-drop-placeholder::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  width: 10px;
+  height: 10px;
+  background: var(--primary-color);
+  border-radius: 50%;
+}
+.fb-drop-placeholder::before {
+  left: -5px;
+}
+.fb-drop-placeholder::after {
+  right: -5px;
+}
+
+/* Vertical Split Indicator */
+.fb-drop-indicator-side {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--success-color);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  z-index: 10;
+}
+.fb-drop-indicator-side.left {
+  left: 0;
+}
+.fb-drop-indicator-side.right {
+  right: 0;
+}
+
+/* ================= CONTROLS ON CANVAS ================= */
+
+.fb-control-wrapper {
+  position: relative;
+  padding: 4px; /* Reduced padding to match theme */
+  margin: 2px 0; /* Minimal margin */
+  border: 1px dashed transparent; /* Transparent dash by default */
+  transition: all 0.2s;
+  border-radius: 4px;
+}
+
+.fb-control-wrapper:hover {
+  /* Dashed Blue Border on Hover */
+  border: 1px dashed var(--primary-color);
+  background: rgba(59, 130, 246, 0.1);
+  cursor: pointer;
+  z-index: 10;
+}
+
+.fb-control-wrapper.selected {
+  /* Solid Blue Border on Selection */
+  border: 2px solid var(--primary-color) !important;
+  background: rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+  z-index: 20; /* Bring to front */
+}
+
+/* Parent Row Selection Style (controlled by JS) */
+.fb-control-wrapper.child-selected {
+  border: 2px solid var(--primary-color) !important;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+/* Container Visuals */
+.fb-layout-container {
+  /* Base styles for containers are applied via inline styles mostly, 
+       but we add this for visual aid in design mode */
+  min-height: 50px;
+}
+
+/* ================= MODALS ================= */
+
+.glass-modal {
+  background: var(--glass-modal);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  color: var(--text-white);
+}
+
+.glass-modal .modal-header {
+  border-bottom: 1px solid var(--border-light);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text-white);
+}
+
+.glass-modal .modal-body {
+  color: var(--text-white);
+}
+
+.glass-modal .form-control,
+.glass-modal .form-select {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-light);
+  color: var(--text-white);
+}
+
+.glass-modal .form-control:focus,
+.glass-modal .form-select:focus {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: var(--primary-color);
+  color: var(--text-white);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.glass-modal .form-control::placeholder {
+  color: var(--text-gray);
+}
+
+.modal-dialog-sidebar-right {
+  position: absolute;
+  right: 0;
+  margin: 0;
+  height: 100%;
+  width: 400px;
+  max-width: 100%;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* Apple-like easing */
+}
+
+.modal.show .modal-dialog-sidebar-right {
+  transform: translateX(0);
+}
+
+.modal-dialog-sidebar-right .modal-content {
+  height: 100%;
+  border-radius: 0;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+}
+
+/* ================= UTILS ================= */
+.flip-icon {
+  transform: scaleX(-1);
+}
+
+.btn-glass-danger {
+  background: rgba(254, 226, 226, 0.5);
+  color: var(--danger-color);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.btn-glass-danger:hover {
+  background: var(--danger-color);
+  color: white;
+  border-color: var(--danger-color);
+}
+
+.btn-glass-success {
+  background: rgba(209, 250, 229, 0.5);
+  color: var(--success-color);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.btn-glass-success:hover {
+  background: var(--success-color);
+  color: white;
+  border-color: var(--success-color);
+}
+
+/* ================= NEW MODAL STYLES ================= */
+.bg-gradient-primary {
+  background: var(--primary-gradient) !important;
+}
+
+/* Modal Properties - Large Centered */
+#modal-properties .modal-xl {
+  max-width: 1100px;
+}
+
+#modal-properties .nav-pills .nav-link {
+  color: #64748b;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s;
+}
+
+#modal-properties .nav-pills .nav-link:hover {
+  background: rgba(79, 70, 229, 0.1);
+  color: var(--primary-color);
+}
+
+#modal-properties .nav-pills .nav-link.active {
+  background: var(--primary-gradient);
+  color: white;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+/* Fieldset styling */
+#modal-properties fieldset {
+  background: rgba(248, 250, 252, 0.8);
+  transition: all 0.2s;
+}
+
+#modal-properties fieldset:hover {
+  background: rgba(248, 250, 252, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+#modal-properties fieldset legend {
+  font-size: 0.85rem;
+  margin-bottom: 0;
+  background: inherit;
+}
+
+/* Function Selection Modal */
+#modal-select-function .form-select {
+  font-size: 0.9rem;
+}
+
+#modal-select-function .form-select option {
+  padding: 8px;
+}
+
+/* Alert styles */
+.alert-soft-primary {
+  background: rgba(79, 70, 229, 0.1);
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  color: #3730a3;
+}
+
+.alert-soft-success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #047857;
+}
+
+/* Form control enhancements */
+#modal-properties .form-control:focus,
+#modal-properties .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Button check styling */
+#modal-properties .btn-check:checked + .btn-outline-secondary {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+/* Custom Code Textarea */
+#prop_custom_css,
+#prop_custom_js {
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 0.85rem;
+  background: #1e293b;
+  color: #e2e8f0;
+  border: none;
+  border-radius: 8px;
+}
+
+#prop_custom_css:focus,
+#prop_custom_js:focus {
+  background: #0f172a;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+}
+
+/* Slider preview images */
+#slider_images_preview img {
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+#slider_images_preview img:hover {
+  border-color: var(--primary-color);
+  transform: scale(1.05);
+}
+
+/* Row/Container Hover and Selection */
+.fb-control-wrapper.child-selected {
+  border: 2px solid var(--success-color) !important;
+}
+
+/* Auto-wrap fieldset in drop */
+.fb-auto-fieldset {
+  border: 1px dashed var(--border-light);
+  border-radius: 8px;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.fb-auto-fieldset legend {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-white);
+  padding: 0 0.5rem;
+  background: var(--glass-bg);
+}
+
+/* Form Controls - Matching Site Theme - Reduced Size */
+.fb-canvas-content .form-control,
+.fb-canvas-content .form-select {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  color: #212529;
+  font-size: 0.75rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  line-height: 1.4;
+}
+
+.fb-canvas-content .form-control:focus,
+.fb-canvas-content .form-select:focus {
+  background: #fff;
+  border-color: var(--primary-color);
+  color: #212529;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+  outline: 0;
+}
+
+.fb-canvas-content .form-control::placeholder {
+  color: #6c757d;
+}
+
+.fb-canvas-content .form-label {
+  color: #212529;
+  font-weight: 500;
+  margin-bottom: 0.375rem;
+  font-size: 0.75rem;
+}
+
+.fb-canvas-content .form-check-label {
+  color: #212529;
+  font-size: 0.875rem;
+}
+
+.fb-canvas-content .input-group-text {
+  background: #e9ecef;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.fb-canvas-content .btn {
+  background: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+}
+
+.fb-canvas-content .btn:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.fb-canvas-content .btn-secondary {
+  background: #6c757d;
+  border-color: #6c757d;
+}
+
+.fb-canvas-content .btn-secondary:hover {
+  background: #5a6268;
+  border-color: #545b62;
+}
+
+/* Delete Button Controls - Smaller and Better Positioned */
+.fb-elem-controls {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.2s;
+  display: flex;
+  gap: 4px;
+}
+
+.fb-control-wrapper:hover .fb-elem-controls {
+  opacity: 1;
+}
+
+.fb-elem-controls .btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.9) !important;
+  border: 1px solid rgba(239, 68, 68, 1) !important;
+  color: white !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.fb-elem-controls .btn:hover {
+  background: rgba(239, 68, 68, 1) !important;
+  transform: scale(1.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.fb-elem-controls .btn i {
+  font-size: 0.7rem;
+  margin: 0;
+}
+

@@ -1,0 +1,112 @@
+@{
+    ViewData["Title"] = "مدیریت گروه‌ها";
+    Layout = "_LayoutGlass";
+}
+
+<div class="page-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; text-align: right; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">مدیریت گروه‌ها</div>
+
+<div class="filter-toolbar" style="background: var(--glass-bg-base); border: 1px solid var(--border-light); backdrop-filter: blur(12px); border-radius: 16px; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px; flex-direction: row-reverse;">
+    <div class="tools-left" style="display: flex; gap: 10px;">
+        <div class="search-box" style="display: flex; align-items: center; background: rgba(0,0,0,0.2); padding: 0 10px; border-radius: 10px; border: 1px solid var(--border-light);">
+            <input type="text" id="searchInput" placeholder="جستجو..." style="background: transparent; border: none; padding: 8px; color: white; outline: none; width: 250px; font-family: inherit;">
+            <i class="fa-solid fa-magnifying-glass" style="color: var(--text-gray);"></i>
+        </div>
+    </div>
+    <button class="btn-large btn-save-send" onclick="showGroupModal()" style="padding: 8px 15px; font-size: 0.85rem;">
+        <i class="fa-solid fa-plus" style="margin-left: 5px;"></i>افزودن گروه
+    </button>
+</div>
+
+<div class="table-scroll-wrapper" style="flex-grow: 1; overflow-y: auto; border-radius: 18px; background: var(--glass-bg-base); border: 1px solid var(--border-light); backdrop-filter: blur(10px); padding: 5px; min-height: 400px;">
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>کد گروه</th>
+                <th>نام گروه</th>
+                <th>تعداد اعضا</th>
+                <th>توضیحات</th>
+                <th>وضعیت</th>
+                <th style="width: 100px;">عملیات</th>
+            </tr>
+        </thead>
+        <tbody id="groupsTableBody">
+            <tr><td colspan="6" class="text-center" style="color: var(--text-gray);">در حال بارگذاری...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    async function loadGroups() {
+        try {
+            const search = document.getElementById('searchInput').value;
+            const response = await fetch(`/api/group/list?search=${encodeURIComponent(search || '')}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                renderGroups(result.data || []);
+            }
+        } catch (error) {
+            console.error('Error loading groups:', error);
+        }
+    }
+
+    function renderGroups(groups) {
+        const tbody = document.getElementById('groupsTableBody');
+        if (groups.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color: var(--text-gray);">گروهی یافت نشد</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = groups.map(group => `
+            <tr>
+                <td>${group.groupCode || '-'}</td>
+                <td>${group.groupName || '-'}</td>
+                <td>${group.memberCount || 0}</td>
+                <td>${group.description || '-'}</td>
+                <td>
+                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; background: ${group.isActive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}; color: ${group.isActive ? '#10b981' : '#ef4444'};">
+                        ${group.isActive ? 'فعال' : 'غیرفعال'}
+                    </span>
+                </td>
+                <td>
+                    <div class="actions-cell" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                        <div class="action-btn-small" style="width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; color: var(--text-gray); cursor: pointer; transition: 0.3s; font-size: 0.8rem;" onclick="editGroup('${group.id}')" title="ویرایش">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                        </div>
+                        <div class="action-btn-small" style="width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; color: var(--text-gray); cursor: pointer; transition: 0.3s; font-size: 0.8rem;" onclick="deleteGroup('${group.id}')" title="حذف">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function showGroupModal() {
+        alert('مدال افزودن گروه - در حال توسعه');
+    }
+
+    function editGroup(id) {
+        alert('ویرایش گروه - در حال توسعه');
+    }
+
+    function deleteGroup(id) {
+        if (confirm('آیا از حذف این گروه مطمئن هستید؟')) {
+            fetch(`/api/group/${id}`, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(result => {
+                    if (result.success) {
+                        loadGroups();
+                    }
+                });
+        }
+    }
+
+    document.getElementById('searchInput').addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') loadGroups();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadGroups();
+    });
+</script>

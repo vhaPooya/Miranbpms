@@ -1,0 +1,34 @@
+﻿@using Automation.Web.Models
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "خطا";
+    Layout = "_LayoutGlass";
+}
+
+<div class="card" style="text-align: center; padding: 50px;">
+    <div style="font-size: 4rem; color: #ef4444; margin-bottom: 20px;">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    <h1 style="color: #ef4444; margin-bottom: 15px;">خطا</h1>
+    <h2 style="color: var(--text-gray); margin-bottom: 30px;">در پردازش درخواست شما خطایی رخ داد</h2>
+
+    @if (Model.ShowRequestId)
+    {
+        <p style="color: var(--text-gray);">
+            <strong>شناسه درخواست:</strong> <code style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 5px;">@Model.RequestId</code>
+        </p>
+    }
+
+    <div style="margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 10px; text-align: right;">
+        <h3 style="color: var(--text-white); margin-bottom: 15px;">حالت توسعه</h3>
+        <p style="color: var(--text-gray); line-height: 1.8;">
+            تغییر به محیط <strong>Development</strong> اطلاعات جزئی‌تری درباره خطای رخ داده نمایش می‌دهد.
+        </p>
+        <p style="color: var(--text-gray); line-height: 1.8; margin-top: 15px;">
+            <strong>محیط Development نباید برای برنامه‌های مستقر شده فعال باشد.</strong>
+            این می‌تواند منجر به نمایش اطلاعات حساس از استثناها به کاربران نهایی شود.
+            برای دیباگ محلی، محیط <strong>Development</strong> را با تنظیم متغیر محیطی <strong>ASPNETCORE_ENVIRONMENT</strong> به <strong>Development</strong> فعال کنید
+            و برنامه را مجدداً راه‌اندازی کنید.
+        </p>
+    </div>
+</div>

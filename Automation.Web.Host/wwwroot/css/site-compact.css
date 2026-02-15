@@ -1,0 +1,530 @@
+/* ============================================
+   Site Compact CSS - Office Automation System
+   Bootstrap-based Compact Theme with Ribbon Navigation
+   ============================================ */
+
+/* ============================================
+   1. CSS Variables & Base Settings
+   ============================================ */
+:root {
+    /* Font Sizes - Adjusted (User Feedback: slightly larger) */
+    --font-xs: 10px;
+    --font-sm: 11px;
+    --font-base: 12.5px; /* Was 11px */
+    --font-md: 13.5px;
+    --font-lg: 15px;
+    --font-xl: 17px;
+
+    /* Control Heights - Adjusted (User Feedback: slightly larger) */
+    --input-height: 32px; /* Was 28px */
+    --input-height-sm: 28px;
+    --input-height-lg: 38px;
+    --btn-height: 32px; /* Was 28px */
+    --btn-height-sm: 28px;
+
+    /* Spacing */
+    --spacing-xs: 5px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 20px;
+
+    /* Colors - Professional Light Theme */
+    --primary: #1e3a5f;
+    --primary-light: #2c5282;
+    --primary-dark: #1a365d;
+    --accent: #3182ce;
+    --accent-light: #4299e1;
+    --success: #38a169;
+    --warning: #d69e2e;
+    --danger: #e53e3e;
+    --info: #00b5d8;
+
+    /* Backgrounds */
+    --bg-body: #f1f5f9; /* Slightly darker than pure white for contrast */
+    --bg-card: #ffffff;
+    --bg-input: #ffffff;
+    --bg-hover: #e2e8f0;
+
+    /* Borders - Adjusted (User Feedback: more visible) */
+    --border-color: #cbd5e1; /* Darker than previous #e2e8f0 */
+    --border-focus: #3182ce;
+    --border-strong: #94a3b8; /* For headers/separators */
+
+    /* Text Colors */
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+    /* Import Custom Font */
+    @import url('../fonts/IRANSansStyle.css');
+}
+
+/* ============================================
+   2. Base Resets
+   ============================================ */
+body {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    font-size: var(--font-base);
+    background: var(--bg-body);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* Typography Headings (User Feedback: IRANSans & Smaller) */
+h1, h2, h3, h4, h5, h6, .page-title {
+    font-family: 'IRANSans', 'Vazirmatn', sans-serif !important;
+    font-weight: 500;
+}
+
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.15rem; }
+h5 { font-size: 1.05rem; }
+h6 { font-size: 0.95rem; }
+
+.page-title {
+    font-size: 1.35rem; /* Reduced from var(--font-xl) which was vague */
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0;
+}
+
+/* ============================================
+   3. Ribbon Navigation
+   ============================================ */
+.ribbon-container {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    padding: 0;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.ribbon-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+.ribbon-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.ribbon-brand-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.ribbon-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ribbon-icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.ribbon-icon-btn:hover {
+    background: rgba(255,255,255,0.25);
+    color: white;
+}
+
+.ribbon-nav {
+    display: flex;
+    gap: 4px;
+    padding: 0 12px;
+    overflow-x: auto;
+    background: rgba(0,0,0,0.1);
+}
+
+.ribbon-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    font-size: var(--font-sm);
+    min-width: 70px;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.2s;
+    position: relative;
+    border: 1px solid transparent;
+    border-bottom: none;
+}
+
+.ribbon-link i {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.ribbon-link span {
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.ribbon-link:hover {
+    color: white;
+    background: rgba(255,255,255,0.15);
+}
+
+.ribbon-link.active {
+    color: var(--primary);
+    background: var(--bg-body);
+    font-weight: 700;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.ribbon-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--bg-body);
+    z-index: 2;
+}
+
+.ribbon-link.active i {
+    color: var(--primary);
+}
+
+/* ============================================
+   4. Form Controls - Compact
+   ============================================ */
+
+/* Labels */
+.form-label,
+.compact-label {
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* Inputs & Selects */
+.form-control,
+.form-select,
+.compact-input,
+.compact-select {
+    height: var(--input-height);
+    font-size: var(--font-base);
+    padding: 0 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    transition: all 0.2s;
+    /* User feedback: make controls distinct */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+}
+
+.form-control:focus,
+.form-select:focus,
+.compact-input:focus,
+.compact-select:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+    outline: none;
+    background: #fff;
+}
+
+.form-control:hover,
+.form-select:hover,
+.compact-input:hover,
+.compact-select:hover {
+    border-color: #94a3b8;
+}
+
+/* Textarea */
+.form-control-textarea,
+.compact-textarea {
+    height: auto;
+    min-height: 80px;
+    padding: 10px;
+    resize: vertical;
+}
+
+/* Input Groups */
+.compact-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: var(--spacing-md);
+}
+
+/* ============================================
+   5. Buttons - Compact
+   ============================================ */
+.btn,
+.compact-btn {
+    height: var(--btn-height);
+    font-size: var(--font-base);
+    padding: 0 14px;
+    border-radius: 6px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 1px solid transparent;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn-sm,
+.compact-btn-sm {
+    height: var(--btn-height-sm);
+    font-size: var(--font-sm);
+    padding: 0 10px;
+}
+
+.btn-primary,
+.compact-btn-primary {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-dark));
+    color: white;
+    border: 1px solid var(--primary-dark);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.btn-outline-secondary {
+    background: #fff;
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.btn-outline-secondary:hover {
+    background: var(--bg-hover);
+    border-color: var(--text-muted);
+}
+
+/* ============================================
+   6. Cards - Compact
+   ============================================ */
+.compact-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: var(--spacing-md);
+}
+
+.compact-card-header {
+    background: #f8fafc;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--font-md);
+    font-weight: 700;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.compact-card-body {
+    padding: 16px;
+}
+
+.compact-card-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border-color);
+    background: #f8fafc;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* ============================================
+   7. Tables - Compact
+   ============================================ */
+.compact-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: var(--font-base);
+}
+
+.compact-table th {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: var(--font-sm);
+    text-transform: uppercase;
+    padding: 10px 12px;
+    text-align: right;
+    border-bottom: 2px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.compact-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+    color: var(--text-primary);
+}
+
+.compact-table tr:last-child td {
+    border-bottom: none;
+}
+
+.compact-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+/* ============================================
+   9. Action Cards for Dashboard
+   ============================================ */
+.action-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--shadow-sm);
+}
+
+.action-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+    background: #fff;
+}
+
+/* ============================================
+   10. Widget Cards
+   ============================================ */
+.widget-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+/* ============================================
+   11. Tabs - Compact
+   ============================================ */
+.compact-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-lg);
+}
+
+.compact-tab {
+    padding: 10px 16px;
+    font-size: var(--font-base);
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+
+.compact-tab:hover {
+    color: var(--primary);
+    background: rgba(0,0,0,0.02);
+}
+
+.compact-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* ============================================
+   14. Utility Updates
+   ============================================ */
+/* Helpers for form grids */
+.form-grid {
+    display: grid;
+    gap: 16px; /* Increased gap */
+}
+
+.form-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.form-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.form-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 992px) {
+    .form-grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .form-grid-2, .form-grid-3, .form-grid-4 { grid-template-columns: 1fr; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ============================================
+   15. Page Layout
+   ============================================ */
+.page-container {
+    padding: 24px 32px;
+    margin: 20px auto;
+    max-width: 96%;
+    width: 1600px;
+}
+

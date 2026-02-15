@@ -1,0 +1,344 @@
+@{
+    ViewData["Title"] = "فرآیندساز";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Toolbar -->
+        <div class="col-12 mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">طراحی فرآیند جدید</h4>
+                <div class="btn-group" role="group">
+                    <button class="btn btn-primary" id="saveWorkflowBtn">
+                        <i class="fas fa-save"></i> ذخیره فرآیند
+                    </button>
+                    <button class="btn btn-success" id="previewWorkflowBtn">
+                        <i class="fas fa-eye"></i> پیش‌نمایش
+                    </button>
+                    <button class="btn btn-info" id="publishWorkflowBtn">
+                        <i class="fas fa-paper-plane"></i> انتشار
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Palette -->
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">جعبه ابزار</h6>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Tasks -->
+                    <div class="border-bottom">
+                        <div class="p-2 bg-light">
+                            <strong><i class="fas fa-tasks"></i> وظایف</strong>
+                        </div>
+                        <div class="p-2" id="taskElements">
+                            <div class="palette-item draggable" data-type="Task">
+                                <i class="fas fa-square"></i> وظیفه
+                            </div>
+                            <div class="palette-item draggable" data-type="UserTask">
+                                <i class="fas fa-user"></i> وظیفه کاربر
+                            </div>
+                            <div class="palette-item draggable" data-type="ServiceTask">
+                                <i class="fas fa-cogs"></i> وظیفه سرویس
+                            </div>
+                            <div class="palette-item draggable" data-type="ScriptTask">
+                                <i class="fas fa-code"></i> وظیفه اسکریپت
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gateways -->
+                    <div class="border-bottom">
+                        <div class="p-2 bg-light">
+                            <strong><i class="fas fa-random"></i> دروازه‌ها</strong>
+                        </div>
+                        <div class="p-2" id="gatewayElements">
+                            <div class="palette-item draggable" data-type="ExclusiveGateway">
+                                <i class="fas fa-code-branch"></i> دروازه انحصاری
+                            </div>
+                            <div class="palette-item draggable" data-type="ParallelGateway">
+                                <i class="fas fa-project-diagram"></i> دروازه موازی
+                            </div>
+                            <div class="palette-item draggable" data-type="InclusiveGateway">
+                                <i class="fas fa-vector-square"></i> دروازه فراگیر
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Events -->
+                    <div class="border-bottom">
+                        <div class="p-2 bg-light">
+                            <strong><i class="fas fa-bell"></i> رویدادها</strong>
+                        </div>
+                        <div class="p-2" id="eventElements">
+                            <div class="palette-item draggable" data-type="StartEvent">
+                                <i class="fas fa-play-circle"></i> شروع
+                            </div>
+                            <div class="palette-item draggable" data-type="EndEvent">
+                                <i class="fas fa-stop-circle"></i> پایان
+                            </div>
+                            <div class="palette-item draggable" data-type="IntermediateEvent">
+                                <i class="fas fa-circle"></i> میانی
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Connectors -->
+                    <div>
+                        <div class="p-2 bg-light">
+                            <strong><i class="fas fa-link"></i> اتصال‌دهنده‌ها</strong>
+                        </div>
+                        <div class="p-2" id="connectorElements">
+                            <div class="palette-item draggable" data-type="SequenceFlow">
+                                <i class="fas fa-arrow-right"></i> جریان توالی
+                            </div>
+                            <div class="palette-item draggable" data-type="MessageFlow">
+                                <i class="fas fa-envelope"></i> جریان پیام
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagram Canvas -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">نمودار فرآیند</h6>
+                    <span class="badge bg-light text-dark">فرآیند جدید</span>
+                </div>
+                <div class="card-body p-3">
+                    <div id="workflowCanvas" class="border rounded p-3 bg-light" style="min-height: 600px; position: relative;">
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-project-diagram fa-3x mb-3"></i>
+                            <p>عناصر فرآیند را از جعبه ابزار به اینجا بکشید</p>
+                        </div>
+                        <!-- Workflow elements will be dropped here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Properties Panel -->
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">ویژگی‌ها</h6>
+                </div>
+                <div class="card-body" id="propertiesPanel">
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-sliders-h fa-3x mb-3"></i>
+                        <p>یک عنصر را برای تنظیم ویژگی‌ها انتخاب کنید</p>
+                    </div>
+                    <!-- Properties will be shown here -->
+                </div>
+            </div>
+
+            <!-- Workflow Settings -->
+            <div class="card mt-3">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">تنظیمات فرآیند</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">نام فرآیند</label>
+                        <input type="text" class="form-control" id="workflowName" value="فرآیند جدید">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">کد فرآیند</label>
+                        <input type="text" class="form-control" id="workflowCode" value="WF_001">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">دسته‌بندی</label>
+                        <select class="form-select" id="workflowCategory">
+                            <option>اداری</option>
+                            <option>منابع انسانی</option>
+                            <option>مالی</option>
+                            <option>فناوری اطلاعات</option>
+                        </select>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="enableNotifications">
+                        <label class="form-check-label" for="enableNotifications">
+                            فعال‌سازی اعلان‌ها
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enableVersioning" checked>
+                        <label class="form-check-label" for="enableVersioning">
+                            فعال‌سازی نسخه‌بندی
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.palette-item {
+    cursor: grab;
+    padding: 8px 12px;
+    margin: 4px 0;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+.palette-item:hover {
+    background-color: #e9ecef;
+    transform: translateX(5px);
+}
+.palette-item i {
+    margin-left: 8px;
+}
+.draggable {
+    user-select: none;
+}
+.workflow-element {
+    border: 1px dashed #ccc;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    position: absolute;
+    min-width: 120px;
+    text-align: center;
+}
+.workflow-element.selected {
+    border: 2px solid #007bff;
+    background-color: #e3f2fd;
+}
+.connector {
+    stroke: #333;
+    stroke-width: 2;
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    // Make palette items draggable
+    $('.draggable').draggable({
+        helper: 'clone',
+        cursor: 'move'
+    });
+
+    // Make canvas droppable
+    $('#workflowCanvas').droppable({
+        accept: '.draggable',
+        drop: function(event, ui) {
+            const elementType = ui.draggable.data('type');
+            addElementToCanvas(elementType, event.pageX - $(this).offset().left, event.pageY - $(this).offset().top);
+        }
+    });
+
+    // Add element to canvas
+    function addElementToCanvas(elementType, x, y) {
+        const elementId = 'element_' + Date.now();
+        let elementHtml = '';
+        let icon = '';
+        let label = '';
+
+        switch(elementType) {
+            case 'StartEvent':
+                icon = '<i class="fas fa-play-circle text-success fa-2x"></i>';
+                label = 'شروع';
+                break;
+            case 'EndEvent':
+                icon = '<i class="fas fa-stop-circle text-danger fa-2x"></i>';
+                label = 'پایان';
+                break;
+            case 'Task':
+                icon = '<i class="fas fa-square text-primary"></i>';
+                label = 'وظیفه';
+                break;
+            case 'UserTask':
+                icon = '<i class="fas fa-user text-info"></i>';
+                label = 'وظیفه کاربر';
+                break;
+            case 'ServiceTask':
+                icon = '<i class="fas fa-cogs text-warning"></i>';
+                label = 'وظیفه سرویس';
+                break;
+            case 'ExclusiveGateway':
+                icon = '<i class="fas fa-code-branch text-purple"></i>';
+                label = 'دروازه انحصاری';
+                break;
+            default:
+                icon = '<i class="fas fa-square"></i>';
+                label = elementType;
+        }
+
+        elementHtml = `
+            <div class="workflow-element" id="${elementId}" style="left: ${x}px; top: ${y}px;">
+                <div>${icon}</div>
+                <div>${label}</div>
+            </div>`;
+
+        $('#workflowCanvas').append(elementHtml);
+        
+        // Make elements selectable
+        $('.workflow-element').off('click').on('click', function(e) {
+            e.stopPropagation();
+            $('.workflow-element').removeClass('selected');
+            $(this).addClass('selected');
+            showPropertiesPanel($(this));
+        });
+    }
+
+    // Show properties panel
+    function showPropertiesPanel(element) {
+        const elementType = element.find('div:last').text();
+        $('#propertiesPanel').html(`
+            <h6>ویژگی‌های ${elementType}</h6>
+            <div class="mb-3">
+                <label class="form-label">نام عنصر</label>
+                <input type="text" class="form-control" value="${elementType}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">توضیحات</label>
+                <textarea class="form-control" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">نقش مسئول</label>
+                <select class="form-select">
+                    <option>مدیر</option>
+                    <option>کارمند</option>
+                    <option>سرپرست</option>
+                </select>
+            </div>
+            <button class="btn btn-sm btn-danger w-100">
+                <i class="fas fa-trash"></i> حذف
+            </button>
+        `);
+    }
+
+    // Canvas click to deselect
+    $('#workflowCanvas').on('click', function() {
+        $('.workflow-element').removeClass('selected');
+        $('#propertiesPanel').html(`
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-sliders-h fa-3x mb-3"></i>
+                <p>یک عنصر را برای تنظیم ویژگی‌ها انتخاب کنید</p>
+            </div>
+        `);
+    });
+
+    // Button handlers
+    $('#saveWorkflowBtn').click(function() {
+        alert('فرآیند ذخیره شد!');
+    });
+
+    $('#previewWorkflowBtn').click(function() {
+        alert('پیش‌نمایش فرآیند');
+    });
+
+    $('#publishWorkflowBtn').click(function() {
+        alert('فرآیند منتشر شد!');
+    });
+});
+</script>

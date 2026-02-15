@@ -1,0 +1,81 @@
+@using Automation.Core.Entities
+@using Automation.Core.DTOs
+@{
+    var formId = ViewBag.FormId as int? ?? 0;
+    var documentId = ViewBag.DocumentId as int?;
+    var formDataId = ViewBag.FormDataId as int?;
+    var buttonConfig = ViewBag.ButtonConfig as FormButtonConfigDto;
+    var buttons = buttonConfig?.Buttons?.Where(b => b.IsEnabled).OrderBy(b => b.DisplayOrder).ToList() ?? new List<FormButtonDto>();
+    var buttonBarSettings = buttonConfig?.ButtonBarSettings ?? "{}";
+}
+
+<div class="form-action-buttons d-flex gap-2 flex-wrap justify-content-end p-3 border-top bg-light" data-form-id="@formId" data-document-id="@(documentId?.ToString() ?? "")">
+    @if (buttons.Any())
+    {
+        @foreach (var btn in buttons)
+        {
+            var title = btn.CustomTitleFa ?? btn.ButtonTypeName ?? "دکمه";
+            var icon = btn.CustomIcon ?? btn.ButtonTypeIcon ?? "";
+            var actionHandler = btn.ButtonTypeActionHandler ?? "";
+            var modalId = btn.ButtonTypeModalId ?? "";
+            var isProcessService = btn.IsProcessServiceButton;
+
+            var styles = new Dictionary<string, string>();
+            try {
+                var styleSettings = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(btn.StyleSettings ?? "{}");
+                if (styleSettings != null)
+                {
+                    foreach (var kvp in styleSettings)
+                    {
+                        styles[kvp.Key] = kvp.Value?.ToString() ?? "";
+                    }
+                }
+            } catch { }
+
+            var styleAttr = string.Join("; ", styles.Select(kvp => $"{ConvertCamelToKebab(kvp.Key)}: {kvp.Value}"));
+
+            var displayMode = btn.DisplayMode ?? "icon_and_title";
+            var showIcon = displayMode == "icon_and_title" || displayMode == "icon_only";
+            var showTitle = displayMode == "icon_and_title" || displayMode == "title_only";
+
+            <button type="button"
+                    class="btn btn-action-button"
+                    data-button-id="@btn.Id"
+                    data-action="@actionHandler"
+                    data-modal="@modalId"
+                    data-is-process="@isProcessService.ToString().ToLower()"
+                    data-inherit-from="@btn.InheritFromButtonTypeId"
+                    data-execution-timing="@btn.ExecutionTiming"
+                    data-confirmation="@btn.ConfirmationMessage"
+                    style="@styleAttr">
+                @if (showIcon && !string.IsNullOrEmpty(icon))
+                {
+                    <i class="@icon @(showTitle ? "me-1" : "")"></i>
+                }
+                @if (showTitle)
+                {
+                    @title
+                }
+            </button>
+        }
+    }
+    else
+    {
+        <!-- Fallback to default buttons if no configuration -->
+        <button type="button" class="btn btn-primary btn-action-button" data-action="save">
+            <i class="bi bi-save me-1"></i>ذخیره
+        </button>
+        <button type="button" class="btn btn-outline-danger btn-action-button" data-action="close">
+            <i class="bi bi-x-lg me-1"></i>بستن
+        </button>
+    }
+</div>
+
+@functions {
+    string ConvertCamelToKebab(string input)
+    {
+        return System.Text.RegularExpressions.Regex.Replace(input, "([a-z])([A-Z])", "$1-$2").ToLower();
+    }
+}
+
+

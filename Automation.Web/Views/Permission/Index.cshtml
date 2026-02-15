@@ -1,0 +1,105 @@
+@{
+    ViewData["Title"] = "مدیریت مجوزها";
+    Layout = "_LayoutGlass";
+}
+
+<div class="page-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; text-align: right; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">مدیریت مجوزها</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">ساختار درختی مجوزها</div>
+            <button class="btn-large btn-save" style="padding: 6px 12px; font-size: 0.8rem;" onclick="loadPermissionTree()">
+                <i class="fa-solid fa-arrow-rotate-right" style="margin-left: 5px;"></i>بارگذاری مجدد
+            </button>
+        </div>
+        <div class="card-body" style="max-height: 600px; overflow-y: auto; padding: 15px;">
+            <div id="permissionTree" style="display: flex; flex-direction: column; gap: 5px;">
+                <div class="text-center" style="color: var(--text-gray); padding: 20px;">در حال بارگذاری...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">جزئیات مجوز</div>
+        </div>
+        <div class="card-body" id="permissionDetails" style="padding: 15px;">
+            <div class="text-center" style="color: var(--text-gray); padding: 40px;">
+                <i class="fa-solid fa-hand-pointer" style="font-size: 2rem; margin-bottom: 15px; display: block; opacity: 0.5;"></i>
+                برای مشاهده جزئیات، یک مجوز را از درخت انتخاب کنید
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadPermissionTree() {
+        try {
+            const response = await fetch('/api/permission/tree');
+            const result = await response.json();
+            
+            if (result.success) {
+                renderPermissionTree(result.data || []);
+            }
+        } catch (error) {
+            console.error('Error loading permission tree:', error);
+        }
+    }
+
+    function renderPermissionTree(items, container = null, level = 0) {
+        if (!container) {
+            container = document.getElementById('permissionTree');
+            container.innerHTML = '';
+        }
+
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.style.paddingRight = (level * 20) + 'px';
+            div.style.padding = '8px';
+            div.style.borderRadius = '8px';
+            div.style.cursor = 'pointer';
+            div.style.transition = '0.2s';
+            div.className = 'permission-item';
+            
+            div.innerHTML = `
+                <i class="fa-solid fa-${item.icon || 'shield'}" style="margin-left: 8px; color: var(--accent-blue);"></i>
+                <span>${item.name}</span>
+            `;
+            
+            div.onclick = () => showPermissionDetails(item);
+            div.onmouseenter = () => div.style.background = 'rgba(255,255,255,0.05)';
+            div.onmouseleave = () => div.style.background = 'transparent';
+            
+            container.appendChild(div);
+            
+            if (item.children && item.children.length > 0) {
+                renderPermissionTree(item.children, container, level + 1);
+            }
+        });
+    }
+
+    function showPermissionDetails(permission) {
+        const details = document.getElementById('permissionDetails');
+        details.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-gray); display: block; margin-bottom: 5px;">نام مجوز</label>
+                    <div style="font-size: 1rem; font-weight: 700;">${permission.name}</div>
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-gray); display: block; margin-bottom: 5px;">کد</label>
+                    <div style="font-size: 0.9rem;">${permission.code || '-'}</div>
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: var(--text-gray); display: block; margin-bottom: 5px;">توضیحات</label>
+                    <div style="font-size: 0.9rem; color: var(--text-gray);">${permission.description || '-'}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadPermissionTree();
+    });
+</script>

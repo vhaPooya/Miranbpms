@@ -1,0 +1,159 @@
+@{
+    ViewData["Title"] = "جستجوی دبیرخانه";
+    Layout = "_LayoutGlass";
+}
+
+<div class="page-header">
+    <h1 class="page-title">جستجوی دبیرخانه</h1>
+</div>
+
+<!-- Search Form -->
+<div class="compact-card mb-3">
+    <div class="compact-card-header">
+        <span><i class="bi bi-search me-2"></i>فیلترهای جستجو</span>
+    </div>
+    <div class="compact-card-body">
+        <div class="form-grid form-grid-4 mb-3">
+            <div class="compact-input-group">
+                <label class="compact-label">نوع مدرک</label>
+                <select class="compact-select" id="docType">
+                    <option value="">همه</option>
+                    <option value="INCOMING">وارده</option>
+                    <option value="OUTGOING">صادره</option>
+                    <option value="INTERNAL">داخلی</option>
+                </select>
+            </div>
+            <div class="compact-input-group">
+                <label class="compact-label">شماره مدرک</label>
+                <input type="text" class="compact-input" id="docNumber" placeholder="شماره...">
+            </div>
+            <div class="compact-input-group">
+                <label class="compact-label">از تاریخ</label>
+                <input type="text" class="compact-input" id="fromDate" placeholder="۱۴۰۴/۰۱/۰۱">
+            </div>
+            <div class="compact-input-group">
+                <label class="compact-label">تا تاریخ</label>
+                <input type="text" class="compact-input" id="toDate" placeholder="۱۴۰۴/۱۲/۲۹">
+            </div>
+        </div>
+        <div class="form-grid form-grid-4 mb-3">
+            <div class="compact-input-group" style="grid-column: span 2;">
+                <label class="compact-label">موضوع / متن</label>
+                <input type="text" class="compact-input" id="subject" placeholder="کلمات کلیدی...">
+            </div>
+            <div class="compact-input-group">
+                <label class="compact-label">فرستنده / گیرنده</label>
+                <input type="text" class="compact-input" id="correspondent" placeholder="نام...">
+            </div>
+            <div class="compact-input-group">
+                <label class="compact-label">طبقه‌بندی</label>
+                <select class="compact-select" id="classification">
+                    <option value="">همه</option>
+                    <option value="normal">عادی</option>
+                    <option value="confidential">محرمانه</option>
+                    <option value="secret">سری</option>
+                </select>
+            </div>
+        </div>
+        <div class="d-flex gap-2 justify-end">
+            <button class="btn btn-outline-secondary btn-sm" onclick="clearFilters()">
+                <i class="bi bi-x-lg me-1"></i>پاک کردن
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="performSearch()">
+                <i class="bi bi-search me-1"></i>جستجو
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="compact-card">
+    <div class="compact-card-header">
+        <span>نتایج جستجو</span>
+        <span class="text-muted" id="resultCount">۰ مورد یافت شد</span>
+    </div>
+    <div class="compact-card-body p-0">
+        <div style="max-height: 400px; overflow-y: auto;">
+            <table class="compact-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;">ردیف</th>
+                        <th style="width: 60px;">نوع</th>
+                        <th>شماره</th>
+                        <th>موضوع</th>
+                        <th>فرستنده/گیرنده</th>
+                        <th>تاریخ</th>
+                        <th style="width: 80px;">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody id="searchResults">
+                    <tr>
+                        <td colspan="7" class="text-center text-muted p-3">
+                            برای شروع جستجو، فیلترهای مورد نظر را وارد کنید
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function performSearch() {
+        const searchDto = {
+            documentType: document.getElementById('docType').value,
+            documentNumber: document.getElementById('docNumber').value,
+            fromDate: document.getElementById('fromDate').value,
+            toDate: document.getElementById('toDate').value,
+            subject: document.getElementById('subject').value,
+            correspondent: document.getElementById('correspondent').value,
+            classification: document.getElementById('classification').value
+        };
+
+        try {
+            const response = await fetch('/api/archive/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(searchDto)
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                renderResults(result.data || []);
+                document.getElementById('resultCount').textContent = `${result.data?.length || 0} مورد یافت شد`;
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+        }
+    }
+
+    function renderResults(items) {
+        const tbody = document.getElementById('searchResults');
+        if (!items.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted p-3">نتیجه‌ای یافت نشد</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = items.map((item, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td><span class="compact-badge compact-badge-${item.documentType === 'INCOMING' ? 'primary' : 'success'}">${item.documentType === 'INCOMING' ? 'وارده' : 'صادره'}</span></td>
+                <td>${item.documentNumber || '-'}</td>
+                <td>${item.subject || '-'}</td>
+                <td>${item.senderName || item.recipientName || '-'}</td>
+                <td>${item.documentDate || '-'}</td>
+                <td>
+                    <button class="btn btn-icon btn-icon-sm btn-outline-secondary" title="مشاهده">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function clearFilters() {
+        document.querySelectorAll('.compact-input, .compact-select').forEach(el => el.value = '');
+        document.getElementById('searchResults').innerHTML = '<tr><td colspan="7" class="text-center text-muted p-3">برای شروع جستجو، فیلترهای مورد نظر را وارد کنید</td></tr>';
+        document.getElementById('resultCount').textContent = '۰ مورد یافت شد';
+    }
+</script>

@@ -1,0 +1,202 @@
+@{
+    ViewData["Title"] = "ثبت وارده جدید";
+    Layout = "_LayoutGlass";
+}
+
+<div class="page-header">
+    <h1 class="page-title">ثبت وارده جدید</h1>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-right me-1"></i>بازگشت
+        </a>
+    </div>
+</div>
+
+<div class="compact-card">
+    <div class="compact-card-header">
+        <span><i class="bi bi-file-earmark-arrow-down me-2"></i>اطلاعات نامه وارده</span>
+    </div>
+    <div class="compact-card-body">
+        <!-- Row 1 -->
+        <div class="form-grid form-grid-4 mb-3">
+            <div class="compact-input-group">
+                <label class="compact-label">نوع مدرک</label>
+                <select class="compact-select" id="documentType">
+                    <option>اصل</option>
+                    <option>کپی</option>
+                    <option>فکس</option>
+                </select>
+            </div>
+            <div class="compact-input-group">
+                <label class="compact-label">طبقه بندی</label>
+                <select class="compact-select" id="classification">
+                    <option>عادی</option>
+                    <option>محرمانه</option>
+                    <option>خیلی محرمانه</option>
+                </select>
+            </div>
+            <div class="compact-input-group">
+                <label class="compact-label">نحوه دریافت</label>
+                <select class="compact-select" id="receiptMethod">
+                    <option>پست</option>
+                    <option>ارباب رجوع</option>
+                    <option>ایمیل</option>
+                    <option>فکس</option>
+                </select>
+            </div>
+            <div class="compact-input-group">
+                <label class="compact-label">فوریت</label>
+                <select class="compact-select" id="urgency">
+                    <option>عادی</option>
+                    <option>فوری</option>
+                    <option>خیلی فوری</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="form-grid form-grid-4 mb-3">
+            <div class="compact-input-group">
+                <label class="compact-label">تاریخ مدرک</label>
+                <input type="text" class="compact-input" id="documentDate" value="@DateTime.Now.ToString("yyyy/MM/dd")">
+            </div>
+            <div class="compact-input-group">
+                <label class="compact-label">تاریخ وارده</label>
+                <input type="text" class="compact-input" id="incomingDate" value="@DateTime.Now.ToString("yyyy/MM/dd")">
+            </div>
+            <div class="compact-input-group">
+                <label class="compact-label">شماره اولیه</label>
+                <input type="text" class="compact-input" id="initialNumber">
+            </div>
+            <div class="compact-input-group">
+                <label class="compact-label">شماره وارده</label>
+                <div class="d-flex gap-1">
+                    <input type="text" class="compact-input" id="incomingNo" placeholder="---" style="flex: 1;">
+                    <button class="btn btn-icon btn-outline-secondary" title="انتخاب شماره رزرو" onclick="openReserveModal()">
+                        <i class="bi bi-list-ol"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="form-grid mb-3" style="grid-template-columns: 1fr 3fr;">
+            <div></div>
+            <div class="compact-input-group">
+                <label class="compact-label">فرستنده</label>
+                <input type="text" class="compact-input" id="senderName" placeholder="نام فرستنده...">
+            </div>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="form-grid mb-3" style="grid-template-columns: 3fr 1fr;">
+            <div class="compact-input-group">
+                <label class="compact-label">آدرس</label>
+                <input type="text" class="compact-input" id="senderAddress" placeholder="آدرس پستی فرستنده">
+            </div>
+            <div class="compact-input-group">
+                <label class="compact-label">شماره همراه</label>
+                <input type="text" class="compact-input" id="senderMobile" placeholder="0912...">
+            </div>
+        </div>
+
+        <!-- Row 5 -->
+        <div class="compact-input-group mb-3">
+            <label class="compact-label">موضوع</label>
+            <input type="text" class="compact-input" id="subject" placeholder="موضوع نامه...">
+        </div>
+
+        <!-- Row 6: Editor -->
+        <div class="compact-input-group mb-3">
+            <label class="compact-label">متن نامه / اسکن</label>
+            <div style="border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden;">
+                <div style="background: var(--bg-hover); padding: 4px 8px; border-bottom: 1px solid var(--border-color); display: flex; gap: 6px;">
+                    <button class="btn btn-icon btn-icon-sm btn-outline-secondary"><i class="bi bi-type-bold"></i></button>
+                    <button class="btn btn-icon btn-icon-sm btn-outline-secondary"><i class="bi bi-type-italic"></i></button>
+                    <button class="btn btn-icon btn-icon-sm btn-outline-secondary"><i class="bi bi-type-underline"></i></button>
+                    <span style="width: 1px; background: var(--border-color);"></span>
+                    <button class="btn btn-icon btn-icon-sm btn-outline-secondary"><i class="bi bi-image"></i></button>
+                </div>
+                <div contenteditable="true" id="editorContent" style="min-height: 150px; padding: 8px; outline: none; font-size: var(--font-base);">
+                    <p style="color: var(--text-muted); text-align: center; padding-top: 50px;">
+                        <i class="bi bi-file-image" style="font-size: 1.5rem; display: block; margin-bottom: 8px;"></i>
+                        تصویر نامه اسکن شده یا متن را اینجا وارد کنید
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 7: Attachments -->
+        <div class="compact-input-group mb-3">
+            <label class="compact-label">ضمائم</label>
+            <div style="border: 1px dashed var(--border-color); border-radius: 4px; padding: 8px; display: flex; align-items: center; gap: 10px;">
+                <button class="btn btn-outline-secondary btn-sm" onclick="openAttachmentsModal()">
+                    <i class="bi bi-paperclip me-1"></i>افزودن ضمیمه
+                </button>
+                <span id="attachmentsPreview" class="text-muted">هیچ فایلی انتخاب نشده</span>
+            </div>
+        </div>
+
+        <!-- Row 8: Keywords -->
+        <div class="compact-input-group mb-3">
+            <label class="compact-label">کلیدواژه</label>
+            <input type="text" class="compact-input" id="keywords" placeholder="کلمات کلیدی را با اینتر جدا کنید...">
+        </div>
+    </div>
+    <div class="compact-card-footer">
+        <button class="btn btn-outline-secondary btn-sm" onclick="window.history.back()">انصراف</button>
+        <button class="btn btn-primary btn-sm" onclick="saveDocument(false)">
+            <i class="bi bi-save me-1"></i>ذخیره
+        </button>
+        <button class="btn btn-success btn-sm" onclick="saveDocument(true)">
+            <i class="bi bi-send me-1"></i>ذخیره و ارسال
+        </button>
+    </div>
+</div>
+
+<script>
+    async function saveDocument(send = false) {
+        const data = {
+            documentTypeId: document.getElementById('documentType').value,
+            classificationId: document.getElementById('classification').value,
+            receiptMethodId: document.getElementById('receiptMethod').value,
+            urgencyId: document.getElementById('urgency').value,
+            documentDate: document.getElementById('documentDate').value,
+            incomingDate: document.getElementById('incomingDate').value,
+            initialNumber: document.getElementById('initialNumber').value,
+            incomingNumber: document.getElementById('incomingNo').value,
+            senderName: document.getElementById('senderName').value,
+            senderAddress: document.getElementById('senderAddress').value,
+            senderMobile: document.getElementById('senderMobile').value,
+            subject: document.getElementById('subject').value,
+            content: document.getElementById('editorContent').innerHTML,
+            keywords: document.getElementById('keywords').value
+        };
+
+        try {
+            const response = await fetch('/api/archive/incoming/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert('نامه با موفقیت ثبت شد');
+                window.location.href = '/Archive';
+            } else {
+                alert('خطا: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('خطا در ثبت نامه');
+        }
+    }
+
+    function openReserveModal() {
+        alert('مودال شماره رزرو');
+    }
+
+    function openAttachmentsModal() {
+        alert('مودال ضمائم');
+    }
+</script>

@@ -1,0 +1,74 @@
+/* Alternate theme: warm sand + deep teal */
+html[data-app-theme="alt"] {
+    --app-bg: #f6f1eb;
+    --app-surface: #ffffff;
+    --app-text: #1f2328;
+    --app-primary: #0f766e;
+    --app-primary-700: #0b5f58;
+    --app-accent: #d97706;
+    --app-muted: #6b7280;
+    --app-border: #e7dfd6;
+}
+
+html[data-app-theme="alt"] body {
+    background-color: var(--app-bg);
+    color: var(--app-text);
+}
+
+html[data-app-theme="alt"] .top-navbar {
+    background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+html[data-app-theme="alt"] .ribbon-container {
+    background: #f0e6da;
+    border-bottom: 1px solid var(--app-border);
+}
+
+html[data-app-theme="alt"] .ribbon-link {
+    color: #20312d;
+}
+
+html[data-app-theme="alt"] .ribbon-link.active {
+    background: #0f766e;
+    color: #fff;
+}
+
+html[data-app-theme="alt"] .card {
+    background-color: var(--app-surface);
+    border-color: var(--app-border) !important;
+    box-shadow: 0 6px 16px rgba(31, 35, 40, 0.08);
+}
+
+html[data-app-theme="alt"] .btn-primary {
+    background-color: var(--app-primary);
+    border-color: var(--app-primary);
+}
+
+html[data-app-theme="alt"] .btn-primary:hover {
+    background-color: var(--app-primary-700);
+    border-color: var(--app-primary-700);
+}
+
+html[data-app-theme="alt"] .badge.bg-secondary {
+    background-color: #8a6f4d !important;
+}
+
+html[data-app-theme="alt"] .settings-sidebar {
+    background: #f7efe5;
+}
+
+html[data-app-theme="alt"] .settings-menu-header.active,
+html[data-app-theme="alt"] .settings-submenu-item.active {
+    background: rgba(15, 118, 110, 0.12);
+    color: #0f766e;
+}
+
+html[data-app-theme="alt"] .icon-btn-header {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+}
+
+html[data-app-theme="alt"] .table thead.table-light {
+    background-color: #f4ece2 !important;
+}

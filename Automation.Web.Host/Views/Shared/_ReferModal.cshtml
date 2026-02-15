@@ -1,0 +1,347 @@
+@{
+    var formId = ViewBag.FormId as int? ?? 0;
+    var documentId = ViewBag.DocumentId as int?;
+}
+
+<!-- Modal برای ارجاع اسناد -->
+<div class="modal fade" id="referModal" tabindex="-1" aria-labelledby="referModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="referModalLabel">
+                    <i class="bi bi-share me-2"></i>ارجاع سند
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="referForm">
+                    <input type="hidden" name="formId" value="@formId" />
+                    <input type="hidden" name="documentId" value="@(documentId?.ToString() ?? "")" />
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="referActionType" class="form-label">نوع اقدام <span class="text-danger">*</span></label>
+                            <select class="form-select" id="referActionType" name="actionTypeId" required>
+                                <option value="">انتخاب نوع اقدام...</option>
+                            </select>
+                            <small class="form-text text-muted" id="actionTypeDescription"></small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="referDueDate" class="form-label">مهلت انجام</label>
+                            <input type="datetime-local" class="form-control" id="referDueDate" name="dueDate">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">ارجاع به <span class="text-danger">*</span></label>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-user" type="button">
+                                    <i class="bi bi-person me-1"></i>کاربر
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-role" type="button">
+                                    <i class="bi bi-person-badge me-1"></i>نقش
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-department" type="button">
+                                    <i class="bi bi-building me-1"></i>واحد سازمانی
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-group" type="button">
+                                    <i class="bi bi-people me-1"></i>گروه
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content border p-3">
+                            <!-- User Tab -->
+                            <div class="tab-pane fade show active" id="tab-user">
+                                <div class="mb-2">
+                                    <input type="text" class="form-control" id="searchUser" placeholder="جستجوی کاربر...">
+                                </div>
+                                <select class="form-select" id="referUserId" name="referredToUserIds" multiple size="8">
+                                    <!-- Users will be loaded here -->
+                                </select>
+                            </div>
+                            
+                            <!-- Role Tab -->
+                            <div class="tab-pane fade" id="tab-role">
+                                <div class="mb-2">
+                                    <input type="text" class="form-control" id="searchRole" placeholder="جستجوی نقش...">
+                                </div>
+                                <select class="form-select" id="referRoleId" name="referredToRoleIds" multiple size="8">
+                                    <!-- Roles will be loaded here -->
+                                </select>
+                            </div>
+                            
+                            <!-- Department Tab -->
+                            <div class="tab-pane fade" id="tab-department">
+                                <div id="departmentTree" class="tree-view">
+                                    <!-- Department tree will be loaded here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Group Tab -->
+                            <div class="tab-pane fade" id="tab-group">
+                                <div class="mb-2">
+                                    <input type="text" class="form-control" id="searchGroup" placeholder="جستجوی گروه...">
+                                </div>
+                                <select class="form-select" id="referGroupId" name="referredToGroupIds" multiple size="8">
+                                    <!-- Groups will be loaded here -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="referNotes" class="form-label">یادداشت / توضیحات</label>
+                        <textarea class="form-control" id="referNotes" name="notes" rows="4" placeholder="توضیحات مربوط به ارجاع را وارد کنید..."></textarea>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>توجه:</strong> بر اساس نوع اقدام انتخاب شده، سند ممکن است قفل یا باز شود.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" id="btn-submit-refer">
+                    <i class="bi bi-send me-1"></i>ارجاع
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        var formId = '@formId';
+        var documentId = '@(documentId?.ToString() ?? "")';
+        
+        // Load action types
+        loadActionTypes();
+        
+        // Load users, roles, departments, groups
+        loadUsers();
+        loadRoles();
+        loadDepartments();
+        loadGroups();
+        
+        // Search functionality
+        $('#searchUser').on('keyup', function() {
+            var search = $(this).val().toLowerCase();
+            $('#referUserId option').each(function() {
+                var text = $(this).text().toLowerCase();
+                $(this).toggle(text.indexOf(search) > -1);
+            });
+        });
+        
+        $('#searchRole').on('keyup', function() {
+            var search = $(this).val().toLowerCase();
+            $('#referRoleId option').each(function() {
+                var text = $(this).text().toLowerCase();
+                $(this).toggle(text.indexOf(search) > -1);
+            });
+        });
+        
+        $('#searchGroup').on('keyup', function() {
+            var search = $(this).val().toLowerCase();
+            $('#referGroupId option').each(function() {
+                var text = $(this).text().toLowerCase();
+                $(this).toggle(text.indexOf(search) > -1);
+            });
+        });
+        
+        // Action type change
+        $('#referActionType').on('change', function() {
+            var actionTypeId = $(this).val();
+            if (actionTypeId) {
+                loadActionTypeDescription(actionTypeId);
+            }
+        });
+        
+        $('#btn-submit-refer').on('click', function() {
+            submitReferral();
+        });
+        
+        function loadActionTypes() {
+            $.ajax({
+                url: '/api/action-types',
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.data) {
+                        var select = $('#referActionType');
+                        select.empty();
+                        select.append('<option value="">انتخاب نوع اقدام...</option>');
+                        response.data.forEach(function(actionType) {
+                            select.append(`<option value="${actionType.id}">${actionType.actionNameFa || actionType.actionNameEn}</option>`);
+                        });
+                    }
+                }
+            });
+        }
+        
+        function loadActionTypeDescription(actionTypeId) {
+            $.ajax({
+                url: `/api/action-types/${actionTypeId}`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.data) {
+                        var desc = response.data.description || '';
+                        var isEditable = response.data.isEditable ? 'سند قابل ویرایش خواهد بود' : 'سند قفل خواهد شد';
+                        $('#actionTypeDescription').text(desc + ' (' + isEditable + ')');
+                    }
+                }
+            });
+        }
+        
+        function loadUsers() {
+            $.ajax({
+                url: '/api/users',
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.data) {
+                        var select = $('#referUserId');
+                        select.empty();
+                        response.data.forEach(function(user) {
+                            select.append(`<option value="${user.id}">${user.fullName || user.userName} - ${user.departmentName || ''}</option>`);
+                        });
+                    }
+                }
+            });
+        }
+        
+        function loadRoles() {
+            $.ajax({
+                url: '/api/roles',
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.data) {
+                        var select = $('#referRoleId');
+                        select.empty();
+                        response.data.forEach(function(role) {
+                            select.append(`<option value="${role.id}">${role.roleNameFa || role.roleNameEn}</option>`);
+                        });
+                    }
+                }
+            });
+        }
+        
+        function loadDepartments() {
+            $.ajax({
+                url: '/api/departments/tree',
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.data) {
+                        buildDepartmentTree(response.data, $('#departmentTree'));
+                    }
+                }
+            });
+        }
+        
+        function buildDepartmentTree(departments, container) {
+            container.empty();
+            departments.forEach(function(dept) {
+                var checkbox = $(`
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="referredToDepartmentIds" value="${dept.id}" id="dept-${dept.id}">
+                        <label class="form-check-label" for="dept-${dept.id}">
+                            ${dept.departmentNameFa || dept.departmentNameEn}
+                        </label>
+                    </div>
+                `);
+                container.append(checkbox);
+                
+                if (dept.children && dept.children.length > 0) {
+                    var childContainer = $('<div class="ms-4"></div>');
+                    container.append(childContainer);
+                    buildDepartmentTree(dept.children, childContainer);
+                }
+            });
+        }
+        
+        function loadGroups() {
+            $.ajax({
+                url: '/api/groups',
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.data) {
+                        var select = $('#referGroupId');
+                        select.empty();
+                        response.data.forEach(function(group) {
+                            select.append(`<option value="${group.id}">${group.groupName}</option>`);
+                        });
+                    }
+                }
+            });
+        }
+        
+        function submitReferral() {
+            var actionTypeId = $('#referActionType').val();
+            if (!actionTypeId) {
+                toastr.warning('لطفا نوع اقدام را انتخاب کنید');
+                return;
+            }
+            
+            var referredToUserIds = $('#referUserId').val() || [];
+            var referredToRoleIds = $('#referRoleId').val() || [];
+            var referredToDepartmentIds = $('input[name="referredToDepartmentIds"]:checked').map(function() { return $(this).val(); }).get();
+            var referredToGroupIds = $('#referGroupId').val() || [];
+            
+            if (referredToUserIds.length === 0 && referredToRoleIds.length === 0 && 
+                referredToDepartmentIds.length === 0 && referredToGroupIds.length === 0) {
+                toastr.warning('لطفا حداقل یک گیرنده انتخاب کنید');
+                return;
+            }
+            
+            var data = {
+                formId: formId,
+                actionTypeId: actionTypeId,
+                referredToUserIds: referredToUserIds,
+                referredToRoleIds: referredToRoleIds,
+                referredToDepartmentIds: referredToDepartmentIds,
+                referredToGroupIds: referredToGroupIds,
+                notes: $('#referNotes').val(),
+                dueDate: $('#referDueDate').val() || null
+            };
+            
+            $.ajax({
+                url: `/api/documents/${documentId}/refer`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success('سند با موفقیت ارجاع شد');
+                        $('#referModal').modal('hide');
+                        $('#referForm')[0].reset();
+                        location.reload();
+                    } else {
+                        toastr.error(response.error || 'خطا در ارجاع سند');
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error('خطا در ارتباط با سرور');
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    .tree-view {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 10px;
+    }
+</style>
+
+

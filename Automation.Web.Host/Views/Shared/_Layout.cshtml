@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اتوماسیون اداری - سیستم یکپارچه</title>
+
+    <link href="~/fonts/vazir-font/font-face.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
+    <link href="~/fonts/fontawesome/css/all.min.css" rel="stylesheet" />
+    <link href="~/fonts/bootstrap-icons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/mobile-responsive.css" asp-append-version="true" />
+    <link id="alt-theme-css" rel="stylesheet" href="~/css/theme-alt.css" asp-append-version="true" disabled />
+
+    @using System.Security.Claims
+@await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+
+    <header class="top-navbar px-4 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+            <i class="fa-solid fa-border-all text-white fs-4 opacity-75" style="cursor: pointer;"></i>
+            <span class="text-white fw-bold fs-5">اتوماسیون اداری</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary bg-opacity-25 border border-primary text-primary-emphasis me-2" id="selectedBadge" style="display:none"></span>
+            <button class="icon-btn-header border-0" id="theme-toggle" title="تغییر تم">
+                <i class="fa-solid fa-circle-half-stroke"></i>
+            </button>
+            <div class="icon-btn-header"><i class="fa-regular fa-bell"></i></div>
+            <div class="icon-btn-header"><i class="fa-regular fa-comment-dots"></i></div>
+            @if (User.Identity.IsAuthenticated)
+{
+    <div class="dropdown">
+        <button class="btn btn-link text-decoration-none dropdown-toggle d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="https://i.pravatar.cc/150?img=@(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "68")" class="rounded-circle border border-2 border-secondary" width="40" height="40" alt="User">
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+            <li><h6 class="dropdown-header">@(User.FindFirstValue("FullName") ?? User.Identity.Name)</h6></li>
+            <li><small class="dropdown-item-text text-muted px-3">@(string.Join(", ", User.FindAll("Position").Select(c => c.Value)))</small></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="/Account/Profile"><i class="fas fa-user me-2"></i>پروفایل</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt me-2"></i>خروج</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+}
+else
+{
+    <a href="/Account/Login" class="btn btn-outline-light btn-sm">ورود</a>
+}
+        </div>
+    </header>
+
+    <nav class="ribbon-container px-4 d-flex overflow-auto">
+        <div class="ribbon-link active" onclick="switchSection('home', this)"><i class="fa-solid fa-house"></i><span>خانه</span></div>
+        <div class="ribbon-link" onclick="switchSection('varedeh', this)"><i class="fa-solid fa-inbox"></i><span>کارتابل وارده</span></div>
+        <div class="ribbon-link" onclick="switchSection('erjaee', this)"><i class="fa-solid fa-share-from-square"></i><span>کارتابل ارجاعی</span></div>
+        <div class="ribbon-link" onclick="switchSection('search', this)"><i class="fa-solid fa-magnifying-glass"></i><span>جستجو</span></div>
+        <@* div class="ribbon-link" data-bs-toggle="modal" data-bs-target="#incomingModal"><i class="fa-solid fa-file-circle-plus"></i><span>ایجاد مدرک</span></div> *@
+        <div class="ribbon-link" onclick="switchSection('newdocument', this)"><i class="fa-solid fa-file"></i><span>ایجاد مدرک</span></div>
+        <div class="ribbon-link" onclick="switchSection('dabirkhaneh', this)"><i class="fa-solid fa-building-columns"></i><span>دبیرخانه</span></div>
+        <div class="ribbon-link" onclick="switchSection('forms', this)"><i class="fa-solid fa-table-list"></i><span>فرمساز</span></div>
+        <div class="ribbon-link" onclick="switchSection('report', this)"><i class="fa-solid fa-chart-pie"></i><span>گزارش ساز</span></div>
+        <div class="ribbon-link" onclick="switchSection('setting', this)"><i class="fa-solid fa-gear"></i><span>تنظیمات</span></div>
+
+    </nav>
+
+
+    <main role="main" class="container-fluid px-4 py-3">
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

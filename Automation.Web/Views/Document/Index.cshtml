@@ -1,0 +1,390 @@
+@{
+    ViewData["Title"] = "مدیریت اسناد";
+}
+
+<div class="container-fluid">
+    <!-- Header with Search and Actions -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">مدیریت اسناد</h4>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" id="newDocumentBtn">
+                        <i class="fas fa-plus"></i> سند جدید
+                    </button>
+                    <button class="btn btn-success" id="importDocumentsBtn">
+                        <i class="fas fa-file-import"></i> وارد کردن
+                    </button>
+                    <button class="btn btn-info" id="exportDocumentsBtn">
+                        <i class="fas fa-file-export"></i> خروجی گرفتن
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" placeholder="جستجو در موضوعات و شماره‌ها..." id="searchKeyword">
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="documentTypeFilter">
+                                <option value="">همه انواع سند</option>
+                                <option value="INCOMING">وارده</option>
+                                <option value="OUTGOING">صادره</option>
+                                <option value="INTERNAL">داخلی</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="statusFilter">
+                                <option value="">همه وضعیت‌ها</option>
+                                <option value="DRAFT">پیش‌نویس</option>
+                                <option value="PENDING">در انتظار</option>
+                                <option value="APPROVED">تایید شده</option>
+                                <option value="REJECTED">رد شده</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" placeholder="تاریخ از" id="dateFrom">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" placeholder="تاریخ تا" id="dateTo">
+                        </div>
+                        <div class="col-md-1">
+                            <button class="btn btn-primary w-100" id="searchBtn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">لیست اسناد</h6>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-primary">کل: 142</span>
+                        <span class="badge bg-success">تایید شده: 89</span>
+                        <span class="badge bg-warning">در انتظار: 32</span>
+                        <span class="badge bg-danger">رد شده: 21</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 50px;">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="selectAll">
+                                        </div>
+                                    </th>
+                                    <th>شماره سند</th>
+                                    <th>موضوع</th>
+                                    <th>فرستنده</th>
+                                    <th>گیرنده</th>
+                                    <th>تاریخ</th>
+                                    <th>نوع</th>
+                                    <th>وضعیت</th>
+                                    <th style="width: 120px;">عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox">
+                                        </div>
+                                    </td>
+                                    <td>#DOC-2024-001</td>
+                                    <td>درخواست مرخصی سالانه</td>
+                                    <td>محمد رضایی</td>
+                                    <td>رئیس منابع انسانی</td>
+                                    <td>1402/10/05</td>
+                                    <td><span class="badge bg-info">داخلی</span></td>
+                                    <td><span class="badge bg-warning">در انتظار</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" title="مشاهده">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" title="ارجاع">
+                                                <i class="fas fa-share"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox">
+                                        </div>
+                                    </td>
+                                    <td>#LET-2024-015</td>
+                                    <td>پاسخ به نامه وزارت کار</td>
+                                    <td>دفتر اداری</td>
+                                    <td>وزارت کار و تعاون</td>
+                                    <td>1402/10/04</td>
+                                    <td><span class="badge bg-success">صادره</span></td>
+                                    <td><span class="badge bg-success">تایید شده</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" title="مشاهده">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" title="ارجاع">
+                                                <i class="fas fa-share"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox">
+                                        </div>
+                                    </td>
+                                    <td>#REQ-2024-023</td>
+                                    <td>درخواست خرید تجهیزات</td>
+                                    <td>بخش IT</td>
+                                    <td>مدیریت مالی</td>
+                                    <td>1402/10/03</td>
+                                    <td><span class="badge bg-danger">وارده</span></td>
+                                    <td><span class="badge bg-danger">رد شده</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" title="مشاهده">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" title="ارجاع">
+                                                <i class="fas fa-share"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox">
+                                        </div>
+                                    </td>
+                                    <td>#REP-2024-Q3</td>
+                                    <td>گزارش فعالیت‌های سه ماهه</td>
+                                    <td>واحد برنامه‌ریزی</td>
+                                    <td>هیئت مدیره</td>
+                                    <td>1402/10/02</td>
+                                    <td><span class="badge bg-info">داخلی</span></td>
+                                    <td><span class="badge bg-success">تایید شده</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" title="مشاهده">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" title="ارجاع">
+                                                <i class="fas fa-share"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox">
+                                        </div>
+                                    </td>
+                                    <td>#MOM-2024-08</td>
+                                    <td>صورتجلسه نشست هیئت مدیره</td>
+                                    <td>دبیر هیئت مدیره</td>
+                                    <td>اعضای هیئت مدیره</td>
+                                    <td>1402/10/01</td>
+                                    <td><span class="badge bg-info">داخلی</span></td>
+                                    <td><span class="badge bg-warning">در انتظار</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" title="مشاهده">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" title="ارجاع">
+                                                <i class="fas fa-share"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            نمایش 1 تا 5 از 142 سند
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1">قبلی</a>
+                                </li>
+                                <li class="page-item active">
+                                    <a class="page-link" href="#">1</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">2</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">3</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">بعدی</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Preview Modal -->
+    <div class="modal fade" id="documentPreviewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">پیش‌نمایش سند: #DOC-2024-001</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">اطلاعات سند</h6>
+                                </div>
+                                <div class="card-body">
+                                    <dl class="mb-0">
+                                        <dt>شماره سند:</dt>
+                                        <dd>#DOC-2024-001</dd>
+                                        
+                                        <dt>موضوع:</dt>
+                                        <dd>درخواست مرخصی سالانه</dd>
+                                        
+                                        <dt>تاریخ:</dt>
+                                        <dd>1402/10/05</dd>
+                                        
+                                        <dt>فرستنده:</dt>
+                                        <dd>محمد رضایی</dd>
+                                        
+                                        <dt>گیرنده:</dt>
+                                        <dd>رئیس منابع انسانی</dd>
+                                        
+                                        <dt>وضعیت:</dt>
+                                        <dd><span class="badge bg-warning">در انتظار</span></dd>
+                                    </dl>
+                                </div>
+                            </div>
+                            
+                            <div class="card mt-3">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">پیوست‌ها</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">
+                                            <i class="fas fa-file-pdf text-danger"></i> فرم مرخصی.pdf
+                                            <div class="small text-muted">1.2 MB</div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="fas fa-file-word text-primary"></i> درخواست مرخصی.docx
+                                            <div class="small text-muted">45 KB</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="border rounded p-3 bg-light" style="height: 500px;">
+                                <div class="text-center text-muted py-5">
+                                    <i class="fas fa-file-alt fa-5x mb-3"></i>
+                                    <p>نمایش محتوای سند در اینجا</p>
+                                    <button class="btn btn-outline-primary">
+                                        <i class="fas fa-download"></i> دانلود سند
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                    <button type="button" class="btn btn-success">
+                        <i class="fas fa-check"></i> تایید
+                    </button>
+                    <button type="button" class="btn btn-danger">
+                        <i class="fas fa-times"></i> رد
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Select all checkbox
+    $('#selectAll').change(function() {
+        $('tbody input[type="checkbox"]').prop('checked', this.checked);
+    });
+
+    // Document preview
+    $('.btn-outline-primary').click(function() {
+        $('#documentPreviewModal').modal('show');
+    });
+
+    // New document
+    $('#newDocumentBtn').click(function() {
+        alert('ایجاد سند جدید');
+    });
+
+    // Import documents
+    $('#importDocumentsBtn').click(function() {
+        alert('وارد کردن اسناد');
+    });
+
+    // Export documents
+    $('#exportDocumentsBtn').click(function() {
+        alert('خروجی گرفتن از اسناد');
+    });
+
+    // Search
+    $('#searchBtn').click(function() {
+        alert('جستجو انجام شد');
+    });
+
+    // Initialize date pickers (would normally use a date picker library)
+    $('#dateFrom, #dateTo').attr('type', 'date');
+});
+</script>
