@@ -13,7 +13,6 @@
     <ProjectReference Include="..\Automation.Core\Automation.Core.csproj" />
     <ProjectReference Include="..\Automation.Infrastructure\Automation.Infrastructure.csproj" />
     <ProjectReference Include="..\Automation.Module.FormBuilder\Automation.Module.FormBuilder.csproj" />
-    <ProjectReference Include="..\Automation.Module.Workflow\Automation.Module.Workflow.csproj" />
     <ProjectReference Include="..\Automation.Module.Secretariat\Automation.Module.Secretariat.csproj" />
   </ItemGroup>
 
