@@ -2040,7 +2040,6 @@ private void ConfigureFaxMessage(ModelBuilder modelBuilder)
             if (entry.State == EntityState.Added)
             {
                 entity.CreationDate = DateTime.UtcNow;
-                entity.CreatedAt = DateTime.UtcNow;
             }
 
             if (entry.State == EntityState.Modified)
