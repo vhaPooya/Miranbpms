@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Automation.Core.Entities;
 
 /// <summary>
@@ -61,11 +63,13 @@ public class DocumentReferral : BaseEntity
     /// <summary>
     /// کاربر مبدا (همان ReferredByUserId - سازگاری)
     /// </summary>
+    [NotMapped]
     public int FromUserId { get => ReferredByUserId; set => ReferredByUserId = value; }
 
     /// <summary>
     /// کاربر مقصد (همان ReferredToUserId - سازگاری)
     /// </summary>
+    [NotMapped]
     public int? ToUserId { get => ReferredToUserId; set => ReferredToUserId = value; }
 
     /// <summary>
@@ -76,6 +80,7 @@ public class DocumentReferral : BaseEntity
     /// <summary>
     /// تاریخ ارجاع (نام دیگر - سازگاری)
     /// </summary>
+    [NotMapped]
     public DateTime ReferralDate { get => ReferredDate; set => ReferredDate = value; }
     
     /// <summary>
