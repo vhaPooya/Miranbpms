@@ -171,6 +171,7 @@ public class AutomationDbContext : DbContext
         ConfigureWorkflowInstance(modelBuilder);
         ConfigureWorkflowInstanceVariable(modelBuilder);
         ConfigureWorkflowInstanceTransition(modelBuilder);
+        ConfigureWorkflowToken(modelBuilder);
 
         // Report Builder
         ConfigureReport(modelBuilder);
@@ -1750,20 +1751,20 @@ private void ConfigureFaxMessage(ModelBuilder modelBuilder)
             entity.Property(e => e.Condition).HasMaxLength(2000);
 
             entity.HasOne(e => e.Workflow)
-                .WithMany()
+                .WithMany(e => e.Connections)
                 .HasForeignKey(e => e.WorkflowId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(e => e.SourceNode)
                 .WithMany(e => e.OutgoingConnections)
                 .HasForeignKey(e => e.SourceNodeId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.NoAction)
                 .HasPrincipalKey(e => e.Id);
 
             entity.HasOne(e => e.TargetNode)
                 .WithMany(e => e.IncomingConnections)
                 .HasForeignKey(e => e.TargetNodeId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.NoAction)
                 .HasPrincipalKey(e => e.Id);
         });
     }
@@ -1796,13 +1797,13 @@ private void ConfigureFaxMessage(ModelBuilder modelBuilder)
             entity.Property(e => e.StartedAt).IsRequired();
             entity.Property(e => e.CompletedAt).IsRequired(false);
             entity.HasOne(e => e.Workflow)
-                .WithMany()
+                .WithMany(e => e.Instances)
                 .HasForeignKey(e => e.WorkflowId)
                 .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(e => e.WorkflowVersion)
                 .WithMany()
                 .HasForeignKey(e => e.WorkflowVersionId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
         });
     }
 
@@ -1820,7 +1821,7 @@ private void ConfigureFaxMessage(ModelBuilder modelBuilder)
             entity.HasOne(e => e.Variable)
                 .WithMany()
                 .HasForeignKey(e => e.VariableId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
         });
     }
 
@@ -1845,6 +1846,25 @@ private void ConfigureFaxMessage(ModelBuilder modelBuilder)
                 .WithMany()
                 .HasForeignKey(e => e.TargetNodeId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+    }
+
+    private void ConfigureWorkflowToken(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<WorkflowToken>(entity =>
+        {
+            entity.ToTable("WorkflowToken");
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(e => e.WorkflowInstance)
+                .WithMany(e => e.CurrentTokens)
+                .HasForeignKey(e => e.WorkflowInstanceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Node)
+                .WithMany()
+                .HasForeignKey(e => e.NodeId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
     }
 
