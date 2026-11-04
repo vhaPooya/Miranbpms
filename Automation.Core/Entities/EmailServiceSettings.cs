@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Automation.Core.Entities;
 
 /// <summary>
@@ -38,6 +40,7 @@ public class EmailServiceSettings : BaseEntity
     /// <summary>
     /// Alias for UseSsl (for compatibility)
     /// </summary>
+    [NotMapped]
     public bool EnableSsl { get => UseSsl; set => UseSsl = value; }
     
     /// <summary>
@@ -48,6 +51,7 @@ public class EmailServiceSettings : BaseEntity
     /// <summary>
     /// Alias for FromEmail (for compatibility)
     /// </summary>
+    [NotMapped]
     public string FromAddress { get => FromEmail; set => FromEmail = value; }
     
     /// <summary>
