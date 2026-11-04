@@ -35,9 +35,9 @@ public class WorkflowController : Controller
     public async Task<IActionResult> Visualize(int documentId)
     {
         var document = await _context.Set<Document>()
-            .Include(d => d.DocumentTrackings)
+            .Include(d => d.TrackingHistory)
                 .ThenInclude(t => t.User)
-            .Include(d => d.DocumentTrackings)
+            .Include(d => d.TrackingHistory)
                 .ThenInclude(t => t.Position)
             .FirstOrDefaultAsync(d => d.Id == documentId);
 
@@ -73,9 +73,9 @@ public class WorkflowController : Controller
     public async Task<IActionResult> Diagram(int documentId)
     {
         var document = await _context.Set<Document>()
-            .Include(d => d.DocumentTrackings)
+            .Include(d => d.TrackingHistory)
                 .ThenInclude(t => t.User)
-            .Include(d => d.DocumentTrackings)
+            .Include(d => d.TrackingHistory)
                 .ThenInclude(t => t.Position)
             .FirstOrDefaultAsync(d => d.Id == documentId);
 
