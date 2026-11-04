@@ -1799,7 +1799,7 @@ private void ConfigureFaxMessage(ModelBuilder modelBuilder)
             entity.HasOne(e => e.Workflow)
                 .WithMany(e => e.Instances)
                 .HasForeignKey(e => e.WorkflowId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
             entity.HasOne(e => e.WorkflowVersion)
                 .WithMany()
                 .HasForeignKey(e => e.WorkflowVersionId)
