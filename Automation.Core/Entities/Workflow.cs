@@ -217,7 +217,6 @@ public class WorkflowNode : BaseEntity
     /// شناسه تعریف فرآیند (همان WorkflowId - برای سازگاری با موتور BPMN)
     /// </summary>
     [NotMapped]
-    [NotMapped]
     public int WorkflowDefinitionId { get => WorkflowId; set => WorkflowId = value; }
 
     /// <summary>
@@ -457,6 +456,7 @@ public class WorkflowInstance : BaseEntity
     /// <summary>
     /// شناسه تعریف فرآیند (همان WorkflowId - برای سازگاری با موتور BPMN)
     /// </summary>
+    [NotMapped]
     public int WorkflowDefinitionId { get => WorkflowId; set => WorkflowId = value; }
 
     /// <summary>
