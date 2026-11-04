@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Automation.Core.Entities;
 
 /// <summary>
@@ -46,16 +48,19 @@ public class DocumentTracking : BaseEntity
     /// <summary>
     /// وضعیت (همان ActionType - سازگاری)
     /// </summary>
+    [NotMapped]
     public string Status { get => ActionType; set => ActionType = value; }
 
     /// <summary>
     /// عملیات انجام‌شده (همان ActionType - سازگاری)
     /// </summary>
+    [NotMapped]
     public string ActionPerformed { get => ActionType; set => ActionType = value; }
 
     /// <summary>
     /// تاریخ انجام (همان ActionDateTime - سازگاری)
     /// </summary>
+    [NotMapped]
     public DateTime PerformedDate { get => ActionDateTime; set => ActionDateTime = value; }
     
     /// <summary>
