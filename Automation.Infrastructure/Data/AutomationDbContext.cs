@@ -2045,7 +2045,6 @@ private void ConfigureFaxMessage(ModelBuilder modelBuilder)
             if (entry.State == EntityState.Modified)
             {
                 entity.EditDate = DateTime.UtcNow;
-                entity.UpdatedAt = DateTime.UtcNow;
             }
         }
     }
