@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Automation.Core.Entities;
 
 /// <summary>
@@ -123,11 +125,13 @@ public class User : BaseEntity
     /// <summary>
     /// تاریخ ایجاد (همان CreationDate - سازگاری)
     /// </summary>
+    [NotMapped]
     public DateTime Created { get => CreationDate; set => CreationDate = value; }
 
     /// <summary>
     /// تاریخ ویرایش (همان EditDate - سازگاری)
     /// </summary>
+    [NotMapped]
     public DateTime? Modified { get => EditDate; set => EditDate = value; }
 
     /// <summary>
