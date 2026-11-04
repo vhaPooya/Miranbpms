@@ -324,8 +324,8 @@ public class IdentityDbContext : DbContext
         foreach (var entry in ChangeTracker.Entries().Where(e => e.Entity is BaseEntity && (e.State == EntityState.Added || e.State == EntityState.Modified)))
         {
             var entity = (BaseEntity)entry.Entity;
-            if (entry.State == EntityState.Added) { entity.CreationDate = DateTime.UtcNow; entity.CreatedAt = DateTime.UtcNow; }
-            if (entry.State == EntityState.Modified) { entity.EditDate = DateTime.UtcNow; entity.UpdatedAt = DateTime.UtcNow; }
+            if (entry.State == EntityState.Added) { entity.CreationDate = DateTime.UtcNow; }
+            if (entry.State == EntityState.Modified) { entity.EditDate = DateTime.UtcNow; }
         }
     }
 }
