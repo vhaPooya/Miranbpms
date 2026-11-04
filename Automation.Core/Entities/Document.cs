@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Automation.Core.Entities;
 
 /// <summary>
@@ -34,6 +36,7 @@ public class Document : BaseEntity
     /// <summary>
     /// شناسه کاربر ایجادکننده (همان CreatedByUserId)
     /// </summary>
+    [NotMapped]
     public int CreatedById { get => CreatedByUserId; set => CreatedByUserId = value; }
 
     /// <summary>
@@ -49,6 +52,7 @@ public class Document : BaseEntity
     /// <summary>
     /// تاریخ ویرایش
     /// </summary>
+    [NotMapped]
     public DateTime? ModifiedDate { get => EditDate; set => EditDate = value; }
 
     /// <summary>
@@ -131,6 +135,7 @@ public class Document : BaseEntity
     /// <summary>
     /// تاریخ بایگانی (نام دیگر)
     /// </summary>
+    [NotMapped]
     public DateTime? ArchivedDate { get => ArchivedDateTime; set => ArchivedDateTime = value; }
 
     /// <summary>
@@ -168,6 +173,7 @@ public class Document : BaseEntity
     /// <summary>
     /// تاریخچه ردیابی (نام دیگر - سازگاری)
     /// </summary>
+    [NotMapped]
     public virtual ICollection<DocumentTracking> DocumentTrackings { get => TrackingHistory; set => TrackingHistory = value; }
     
     /// <summary>
