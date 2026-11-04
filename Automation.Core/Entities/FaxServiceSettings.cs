@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Automation.Core.Entities;
 
 /// <summary>
@@ -43,6 +45,7 @@ public class FaxServiceSettings : BaseEntity
     /// <summary>
     /// Alias for DefaultFaxNumber (for compatibility)
     /// </summary>
+    [NotMapped]
     public string? SenderFaxNumber { get => DefaultFaxNumber; set => DefaultFaxNumber = value; }
     
     /// <summary>

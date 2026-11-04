@@ -466,12 +466,12 @@ public class UserProvisioningService
         // فیلتر بر اساس تاریخ ایجاد
         if (criteria.CreatedAfter.HasValue)
         {
-            query = query.Where(u => u.Created >= criteria.CreatedAfter.Value);
+            query = query.Where(u => u.CreationDate >= criteria.CreatedAfter.Value);
         }
 
         if (criteria.CreatedBefore.HasValue)
         {
-            query = query.Where(u => u.Created <= criteria.CreatedBefore.Value);
+            query = query.Where(u => u.CreationDate <= criteria.CreatedBefore.Value);
         }
 
         // صفحه‌بندی

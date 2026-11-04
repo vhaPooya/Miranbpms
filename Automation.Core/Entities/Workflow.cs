@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Automation.Core.Entities;
 
@@ -215,6 +216,7 @@ public class WorkflowNode : BaseEntity
     /// <summary>
     /// شناسه تعریف فرآیند (همان WorkflowId - برای سازگاری با موتور BPMN)
     /// </summary>
+    [NotMapped]
     public int WorkflowDefinitionId { get => WorkflowId; set => WorkflowId = value; }
 
     /// <summary>
@@ -454,16 +456,19 @@ public class WorkflowInstance : BaseEntity
     /// <summary>
     /// شناسه تعریف فرآیند (همان WorkflowId - برای سازگاری با موتور BPMN)
     /// </summary>
+    [NotMapped]
     public int WorkflowDefinitionId { get => WorkflowId; set => WorkflowId = value; }
 
     /// <summary>
     /// تعریف فرآیند (همان Workflow - برای سازگاری با موتور BPMN)
     /// </summary>
+    [NotMapped]
     public virtual Workflow WorkflowDefinition { get => Workflow; set => Workflow = value; }
 
     /// <summary>
     /// کاربر شروع‌کننده (همان StartedByUserId - برای سازگاری با موتور BPMN)
     /// </summary>
+    [NotMapped]
     public int StarterUserId { get => StartedByUserId; set => StartedByUserId = value; }
 
     /// <summary>

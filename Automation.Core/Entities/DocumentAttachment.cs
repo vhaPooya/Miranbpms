@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Automation.Core.Entities;
 
 /// <summary>
@@ -50,21 +52,25 @@ public class DocumentAttachment : BaseEntity
     /// <summary>
     /// نوع محتوا (همان MimeType - سازگاری)
     /// </summary>
+    [NotMapped]
     public string? ContentType { get => MimeType; set => MimeType = value; }
 
     /// <summary>
     /// مسیر ذخیره (همان FilePath - سازگاری)
     /// </summary>
+    [NotMapped]
     public string? StoragePath { get => FilePath; set => FilePath = value; }
 
     /// <summary>
     /// شناسه کاربر آپلودکننده (همان UploadedByUserId - سازگاری)
     /// </summary>
+    [NotMapped]
     public int UploadedById { get => UploadedByUserId; set => UploadedByUserId = value; }
 
     /// <summary>
     /// تاریخ آپلود (همان UploadedDate - سازگاری)
     /// </summary>
+    [NotMapped]
     public DateTime UploadDate { get => UploadedDate; set => UploadedDate = value; }
     
     // برای مدرک داخلی

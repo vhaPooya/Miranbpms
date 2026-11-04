@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Automation.Core.Entities;
 
 /// <summary>
@@ -11,6 +13,7 @@ public class DocumentAssignment : BaseEntity
     public virtual User? AssigneeUser { get; set; }
     public int? AssigneeRoleId { get; set; }
     public virtual Role? AssigneeRole { get; set; }
+    [NotMapped]
     public int? AssignedToUserId { get => AssigneeUserId; set => AssigneeUserId = value; }
     public string AssignmentType { get; set; } = string.Empty;
     public string Status { get; set; } = "PENDING";
